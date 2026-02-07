@@ -407,19 +407,24 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // --- STACKED CARDS ANIMATION ---
     const stackCards = gsap.utils.toArray(".card-item");
-    if (stackCards.length > 0) {
+    const isMobile = window.innerWidth <= 768;
+
+    if (stackCards.length > 0 && !isMobile) {
         stackCards.forEach((card, index) => {
+            // Dynamic Z-Index
             card.style.zIndex = index + 1;
+
+            // Animate all but the last card
             if (index < stackCards.length - 1) {
                 gsap.to(card, {
-                    scale: 0.9,
+                    scale: 0.88,
                     filter: "blur(8px)",
-                    opacity: 0.4,
+                    opacity: 0.3,
                     scrollTrigger: {
                         trigger: card,
-                        start: "top 12%",
+                        start: "top 10%",
                         endTrigger: stackCards[index + 1],
-                        end: "top 12%",
+                        end: "top 10%",
                         scrub: true,
                         pin: true,
                         pinSpacing: false,
@@ -429,6 +434,21 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // Handle window resize for stacking
+    let resizeTimer;
+    window.addEventListener("resize", () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            const currentIsMobile = window.innerWidth <= 768;
+            if (typeof isMobile !== 'undefined' && currentIsMobile !== isMobile) {
+                if (typeof ScrollTrigger !== 'undefined') {
+                    ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+                }
+                location.reload();
+            }
+        }, 250);
+    });
 
     // --- FLOATING CTA BUTTON LOGIC ---
     const ctaSection = document.querySelector('.cta-section');
@@ -551,6 +571,215 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 }
             );
+        });
+    }
+    // --- SECTION DIVIDER ANIMATION ---
+    gsap.utils.toArray(".section-divider").forEach((divider) => {
+        gsap.to(divider, {
+            width: "80%",
+            duration: 1.2,
+            ease: "power2.out",
+            scrollTrigger: {
+                trigger: divider,
+                start: "top 90%",
+                toggleActions: "play none none none"
+            }
+        });
+    });
+
+    // --- WHAT WE DO SECTION ANIMATIONS ---
+    const whatWeDoSection = document.querySelector(".what-we-do");
+    if (whatWeDoSection && typeof gsap !== 'undefined') {
+        const tl = gsap.timeline({
+            scrollTrigger: {
+                trigger: ".what-we-do",
+                start: "top 75%"
+            }
+        });
+
+        tl.to(".what-eyebrow", {
+            opacity: 1,
+            y: 0,
+            duration: 0.6,
+            ease: "power2.out"
+        })
+            .to(".what-heading", {
+                opacity: 1,
+                duration: 0.6,
+                ease: "power2.out"
+            }, "-=0.3")
+            .to(".strike::after", {
+                scaleX: 1,
+                duration: 0.5,
+                ease: "power3.out",
+                stagger: 0.15
+            })
+            .to(".what-main", {
+                opacity: 1,
+                y: 0,
+                duration: 0.7,
+                ease: "power3.out"
+            }, "-=0.2")
+            .to(".what-divider", {
+                width: "60%",
+                duration: 0.8,
+                ease: "power2.out"
+            })
+            .to(".what-sub", {
+                opacity: 1,
+                y: 0,
+                duration: 0.6,
+                ease: "power2.out"
+            }, "-=0.3");
+    }
+    // --- PRICING SECTION LOGIC ---
+    const serviceButtons = document.querySelectorAll('.service-btn');
+    const tableMap = {
+        web: document.getElementById('web-table'),
+        redesign: document.getElementById('redesign-table'),
+        social: document.getElementById('social-table'),
+        seo: document.getElementById('seo-table'),
+        app: document.getElementById('app-table')
+    };
+
+    if (serviceButtons.length > 0) {
+        serviceButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                serviceButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                Object.values(tableMap).forEach(table => {
+                    if (table) table.classList.add('hidden');
+                });
+
+                const service = button.getAttribute('data-service');
+                const selectedTable = tableMap[service];
+                if (selectedTable) {
+                    selectedTable.classList.remove('hidden');
+                    gsap.fromTo(selectedTable,
+                        { opacity: 0, y: 20 },
+                        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+                    );
+                }
+            });
+        });
+    }
+
+    // --- PRICING PROCESS ANIMATIONS ---
+    const combinedSection = document.querySelector(".combined-section");
+    if (combinedSection && typeof gsap !== 'undefined') {
+        gsap.fromTo(combinedSection,
+            { opacity: 0, y: 40 },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: combinedSection,
+                    start: "top 80%"
+                }
+            }
+        );
+
+        gsap.utils.toArray(".step-item, .philosophy-item").forEach((item, index) => {
+            gsap.fromTo(item,
+                { opacity: 0, x: -20 },
+                {
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.6,
+                    ease: "power3.out",
+                    delay: index * 0.08,
+                    scrollTrigger: {
+                        trigger: item,
+                        start: "top 95%"
+                    }
+                }
+            );
+        });
+    }
+    // --- HOW WE WORK (AI PROCESS) ANIMATIONS ---
+    gsap.utils.toArray(".ai-process .step").forEach((step, index) => {
+        gsap.fromTo(step,
+            { opacity: 0, y: 50, x: -20 },
+            {
+                opacity: 1,
+                y: 0,
+                x: 0,
+                duration: 0.8,
+                ease: "power3.out",
+                scrollTrigger: {
+                    trigger: step,
+                    start: "top 85%",
+                    toggleActions: "play none none none"
+                },
+                delay: index * 0.1
+            }
+        );
+    });
+
+    // Connecting line animation
+    const processSteps = document.querySelector(".process-line");
+    if (processSteps) {
+        gsap.fromTo(".process-line",
+            { scaleY: 0, transformOrigin: "top" },
+            {
+                scaleY: 1,
+                duration: 1.5,
+                ease: "power2.out",
+                scrollTrigger: {
+                    trigger: ".process-steps",
+                    start: "top 80%",
+                    toggleActions: "play none none none"
+                }
+            }
+        );
+    }
+
+    // --- IMPACT SECTION ANIMATIONS ---
+    const impactCards = document.querySelector(".impact-grid");
+    if (impactCards) {
+        gsap.fromTo(".impact-card",
+            { opacity: 0, scale: 0.92, filter: "blur(6px)" },
+            {
+                opacity: 1,
+                scale: 1,
+                filter: "blur(0px)",
+                duration: 0.9,
+                ease: "power3.out",
+                stagger: 0.12,
+                scrollTrigger: {
+                    trigger: ".impact-grid",
+                    start: "top 80%"
+                }
+            }
+        );
+    }
+    // --- AUDIENCE SECTION ANIMATIONS ---
+    const audienceSection = document.querySelector(".audience-section");
+    if (audienceSection) {
+        gsap.to(".audience-pill", {
+            opacity: 1,
+            x: 0,
+            duration: 0.8,
+            ease: "power3.out",
+            stagger: 0.12,
+            scrollTrigger: {
+                trigger: ".audience-pills",
+                start: "top 80%"
+            }
+        });
+
+        gsap.to(".audience-highlight", {
+            opacity: 1,
+            x: 0,
+            duration: 1,
+            ease: "power3.out",
+            scrollTrigger: {
+                trigger: ".audience-highlight",
+                start: "top 85%"
+            }
         });
     }
 });
