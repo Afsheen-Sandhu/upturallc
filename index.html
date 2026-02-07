@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upcura - Web Development & SEO Services</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: #dcd7d0;
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px 70px;
+            background-color: #dcd7d0;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a1a1a;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 6px;
+        }
+
+        .logo-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #1a1a1a;
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #ff5722;
+        }
+
+        .get-started-btn {
+            background-color: #ff5722;
+            color: white;
+            padding: 14px 32px;
+            border-radius: 30px;
+            border: none;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .get-started-btn:hover {
+            background-color: #e64a19;
+            transform: translateY(-2px);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            padding: 100px 70px 80px 70px;
+            min-height: calc(100vh - 80px);
+            align-items: end;
+            gap: 40px;
+        }
+
+        .hero-left {
+            display: flex;
+            align-items: flex-end;
+            padding-bottom: 10px;
+        }
+
+        .book-call {
+            display: inline-flex;
+            align-items: center;
+            color: #ff5722;
+            font-size: 14px;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: 0.5px;
+            position: relative;
+            padding-right: 20px;
+            gap: 8px;
+        }
+
+        .book-call::before {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: #ff5722;
+            transition: width 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .book-call:hover::before {
+            width: calc(100% - 20px);
+        }
+
+        .book-call-text {
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+            height: 14px;
+            line-height: 14px;
+        }
+
+        .book-call-text span {
+            display: block;
+            transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+            font-size: 14px;
+            line-height: 14px;
+        }
+
+        .book-call:hover .book-call-text span {
+            transform: translateY(-100%);
+        }
+
+        .book-call-arrow {
+            width: 12px;
+            height: 12px;
+            flex-shrink: 0;
+            transition: transform 0.3s ease;
+        }
+
+        .book-call:hover .book-call-arrow {
+            transform: translate(3px, -3px);
+        }
+
+        .book-call-arrow svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .hero-right {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+        }
+
+        .hero-title {
+            font-size: 80px;
+            font-weight: 900;
+            line-height: 0.95;
+            color: #000;
+            letter-spacing: -3px;
+        }
+
+        .hero-title .dot {
+            color: #ff5722;
+        }
+
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            padding: 10px;
+        }
+
+        .mobile-menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background-color: #333;
+            transition: all 0.3s ease;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1200px) {
+            .hero-title {
+                font-size: 64px;
+            }
+
+            .hero {
+                padding: 80px 50px;
+            }
+
+            nav {
+                padding: 25px 50px;
+            }
+        }
+
+        @media (max-width: 1024px) {
+            .hero-title {
+                font-size: 56px;
+            }
+
+            .hero {
+                grid-template-columns: 1fr;
+                text-align: left;
+                padding: 60px 40px;
+            }
+
+            .hero-left {
+                margin-bottom: 60px;
+            }
+
+            nav {
+                padding: 20px 40px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                right: -100%;
+                flex-direction: column;
+                background-color: #fff;
+                padding: 30px;
+                border-radius: 10px;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+                transition: right 0.3s ease;
+                gap: 20px;
+                z-index: 100;
+            }
+
+            .nav-links.active {
+                right: 20px;
+            }
+
+            .hero-title {
+                font-size: 44px;
+                letter-spacing: -2px;
+            }
+
+            nav {
+                padding: 20px;
+            }
+
+            .hero {
+                padding: 50px 25px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-title {
+                font-size: 36px;
+                letter-spacing: -1.5px;
+            }
+
+            .get-started-btn {
+                padding: 12px 24px;
+                font-size: 14px;
+            }
+
+            .logo {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">
+                <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M10 25L20 15L30 25" stroke="#ff5722" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                    <path d="M15 30L20 25L25 30" stroke="#ff5722" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            Upcura
+        </div>
+        
+        <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+        <ul class="nav-links" id="navLinks">
+            <li><a href="#about">About</a></li>
+            <li><a href="#solutions">Solutions</a></li>
+            <li><a href="#ai-consulting">AI Consulting</a></li>
+            <li><a href="#work">Work</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><button class="get-started-btn" onclick="handleGetStarted()">Get Started</button></li>
+        </ul>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-left">
+            <a href="#book" class="book-call">
+                <span class="book-call-text">
+                    <span>BOOK A CALL</span>
+                    <span>BOOK A CALL</span>
+                </span>
+                <span class="book-call-arrow">
+                    <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#ff5722" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </span>
+            </a>
+        </div>
+        
+        <div class="hero-right">
+            <h1 class="hero-title">
+                EXPERT WEB<br>
+                DEVELOPMENT &<br>
+                SEO SERVICES THAT<br>
+                DRIVE BUSINESS<br>
+                GROWTH<span class="dot">.</span>
+            </h1>
+        </div>
+    </section>
+
+    <script>
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            const navLinks = document.getElementById('navLinks');
+            navLinks.classList.toggle('active');
+        }
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', function(event) {
+            const navLinks = document.getElementById('navLinks');
+            const menuToggle = document.querySelector('.mobile-menu-toggle');
+            
+            if (!navLinks.contains(event.target) && !menuToggle.contains(event.target)) {
+                navLinks.classList.remove('active');
+            }
+        });
+
+        // Get Started button handler
+        function handleGetStarted() {
+            alert('Get Started clicked! You can replace this with your own functionality.');
+            // Add your own functionality here
+        }
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
