@@ -1,0 +1,392 @@
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@600;700;800&display=swap" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+
+<style>
+/* Global Reset */
+.custom-navbar-wrapper * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif !important;
+}
+
+html, body {
+  overflow-x: hidden !important;
+  width: 100%;
+}
+
+.custom-navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background: #EEE9E3;
+  z-index: 9999;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+}
+
+.nav-container {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.logo-img {
+  height: 48px;
+  width: auto;
+  display: block;
+  z-index: 10001;
+  transition: transform 0.3s ease;
+}
+
+.logo-img:hover {
+  transform: scale(1.05);
+}
+
+/* Desktop Links */
+.nav-links {
+  display: flex;
+  list-style: none;
+  gap: 10px;
+}
+
+.nav-item {
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.nav-link {
+  position: relative;
+  padding: 11px 22px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #000;
+  text-decoration: none;
+  border: 1.5px solid rgba(0,0,0,0.12); 
+  border-radius: 50px;
+  overflow: hidden;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  letter-spacing: 0.01em;
+  display: block;
+}
+
+.nav-fill {
+  position: absolute;
+  top: 0; 
+  left: 0; 
+  width: 100%; 
+  height: 100%;
+  background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
+  transform: translateY(101%);
+  z-index: -1;
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Hover State */
+.nav-link:hover {
+  color: #fff !important;
+  border-color: #FF3C00 !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(255, 60, 0, 0.2);
+}
+
+.nav-link:hover .nav-fill {
+  transform: translateY(0%) !important;
+}
+
+/* Active State */
+.nav-link.active {
+  background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
+  color: #fff !important;
+  border-color: #FF3C00 !important;
+  box-shadow: 0 4px 12px rgba(255, 60, 0, 0.25);
+}
+
+.nav-link.active .nav-fill {
+  transform: translateY(0%);
+}
+
+/* CTA Button */
+.cta-button {
+  padding: 12px 28px;
+  background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
+  color: #fff !important;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 15px;
+  text-decoration: none;
+  letter-spacing: 0.01em;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(255, 60, 0, 0.2);
+  border: 1.5px solid #FF3C00;
+}
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 60, 0, 0.35);
+  background: linear-gradient(135deg, #E63600 0%, #E64A19 100%);
+}
+
+/* Hamburger */
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  z-index: 10001;
+  width: 40px;
+  height: 40px;
+  transition: transform 0.3s ease;
+}
+
+.hamburger:hover {
+  transform: scale(1.1);
+}
+
+.hamburger-line {
+  width: 28px;
+  height: 3px;
+  background-color: #000 !important;
+  border-radius: 10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Cross Animation */
+.hamburger.active .hamburger-line:nth-child(1) { 
+  transform: translateY(9px) rotate(45deg);
+  background-color: #FF3C00 !important;
+}
+.hamburger.active .hamburger-line:nth-child(2) { 
+  opacity: 0; 
+}
+.hamburger.active .hamburger-line:nth-child(3) { 
+  transform: translateY(-9px) rotate(-45deg);
+  background-color: #FF3C00 !important;
+}
+
+/* Mobile Dropdown */
+.mobile-dropdown {
+  position: fixed;
+  top: 76px;
+  left: 0;
+  width: 100%;
+  background: #EEE9E3;
+  z-index: 9998;
+  padding: 24px 24px 28px;
+  border-bottom: 2px solid #FF3C00;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+  display: none;
+  opacity: 0;
+  transform: translateY(-20px);
+}
+
+.mobile-links {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mobile-item {
+  opacity: 0;
+  transform: translateX(-10px);
+}
+
+.mobile-link {
+  font-size: 17px;
+  font-weight: 700;
+  color: #000;
+  text-decoration: none;
+  display: block;
+  padding: 12px 16px;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  letter-spacing: 0.01em;
+  border: 1.5px solid transparent;
+}
+
+.mobile-link:hover,
+.mobile-link.active {
+  background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
+  color: #fff !important;
+  transform: translateX(4px);
+  border-color: #FF3C00;
+}
+
+/* Responsive */
+@media (max-width: 991px) {
+  .nav-links, .nav-container > .cta-button { display: none; }
+  .hamburger { display: flex; }
+  .nav-container { padding: 0 20px; }
+}
+
+@media (max-width: 320px) {
+  .logo-img { height: 38px; }
+  .mobile-link { font-size: 16px; padding: 10px 14px; }
+}
+</style>
+
+<div class="custom-navbar-wrapper">
+  <nav class="custom-navbar">
+    <div class="nav-container">
+      <a href="/" class="nav-logo">
+        <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png" class="logo-img" alt="Logo">
+      </a>
+
+      <ul class="nav-links">
+        <li class="nav-item"><a href="/about" class="nav-link">About<div class="nav-fill"></div></a></li>
+        <li class="nav-item"><a href="/service" class="nav-link">Solutions<div class="nav-fill"></div></a></li>
+        <li class="nav-item"><a href="/aiconsultancy" class="nav-link">AI Consulting<div class="nav-fill"></div></a></li>
+        <li class="nav-item"><a href="/work" class="nav-link">Work<div class="nav-fill"></div></a></li>
+        <li class="nav-item"><a href="/contact" class="nav-link">Contact<div class="nav-fill"></div></a></li>
+      </ul>
+
+      <a href="/contact" class="cta-button">Get Started</a>
+
+      <button class="hamburger" id="nav-toggle">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="mobile-dropdown" id="mobile-menu">
+    <ul class="mobile-links">
+      <li class="mobile-item"><a href="/about" class="mobile-link">About</a></li>
+      <li class="mobile-item"><a href="/service" class="mobile-link">Solutions</a></li>
+      <li class="mobile-item"><a href="/aiconsultancy" class="mobile-link">AI Consulting</a></li>
+      <li class="mobile-item"><a href="/work" class="mobile-link">Work</a></li>
+      <li class="mobile-item"><a href="/contact" class="mobile-link">Contact</a></li>
+      <li class="mobile-item" style="padding-top:8px;">
+        <a href="/get-started" class="cta-button" style="display:block; text-align:center;">Get Started</a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const toggle = document.getElementById('nav-toggle');
+  const menu = document.getElementById('mobile-menu');
+  let menuOpen = false;
+
+  // 1. Set Active Link Based on Current Page
+  const currentPath = window.location.pathname;
+  
+  // Desktop links
+  document.querySelectorAll('.nav-link').forEach(link => {
+    if (link.getAttribute('href') === currentPath) {
+      link.classList.add('active');
+    }
+  });
+  
+  // Mobile links
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    if (link.getAttribute('href') === currentPath) {
+      link.classList.add('active');
+    }
+  });
+
+  // 2. Entrance Animation
+  gsap.to(".nav-item", {
+    opacity: 1, 
+    y: 0, 
+    stagger: 0.08, 
+    duration: 0.7, 
+    ease: "power3.out",
+    delay: 0.2
+  });
+
+  // 3. Desktop Hover (only for non-active links)
+  document.querySelectorAll(".nav-link").forEach(link => {
+    const fill = link.querySelector(".nav-fill");
+    
+    link.addEventListener("mouseenter", () => {
+      if (!link.classList.contains('active')) {
+        gsap.to(fill, { 
+          y: "0%", 
+          duration: 0.4, 
+          ease: "power2.out"
+        });
+      }
+    });
+    
+    link.addEventListener("mouseleave", () => {
+      if (!link.classList.contains('active')) {
+        gsap.to(fill, { 
+          y: "101%", 
+          duration: 0.3, 
+          ease: "power2.in"
+        });
+      }
+    });
+  });
+
+  // 4. Mobile Dropdown Toggle
+  toggle.addEventListener('click', () => {
+    if (!menuOpen) {
+      // OPEN
+      toggle.classList.add('active');
+      menu.style.display = 'block';
+      gsap.to(menu, { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.4, 
+        ease: "power3.out" 
+      });
+      gsap.to(".mobile-item", { 
+        opacity: 1, 
+        x: 0, 
+        stagger: 0.06, 
+        duration: 0.3, 
+        delay: 0.1 
+      });
+      menuOpen = true;
+    } else {
+      // CLOSE
+      toggle.classList.remove('active');
+      gsap.to(menu, { 
+        opacity: 0, 
+        y: -20, 
+        duration: 0.3, 
+        ease: "power3.in", 
+        onComplete: () => { menu.style.display = 'none'; } 
+      });
+      gsap.set(".mobile-item", { opacity: 0, x: -10 });
+      menuOpen = false;
+    }
+  });
+
+  // 5. Close menu on link click
+  document.querySelectorAll('.mobile-link, .mobile-dropdown .cta-button').forEach(link => {
+    link.addEventListener('click', () => {
+      if (menuOpen) {
+        toggle.click();
+      }
+    });
+  });
+
+  // 6. Close menu on outside click
+  document.addEventListener('click', (e) => {
+    if (menuOpen && 
+        !menu.contains(e.target) && 
+        !toggle.contains(e.target)) {
+      toggle.click();
+    }
+  });
+});
+</script>
