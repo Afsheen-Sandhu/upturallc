@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uptura - Web Development, SEO & AI Solutions</title>
+    <title>About Us - Uptura</title>
     <meta name="description"
-        content="Uptura is a premier digital agency specializing in custom web development, SEO data-driven strategies, and cutting-edge AI consultancy. Transform your business with us.">
+        content="Learn more about Uptura's mission to build smarter businesses with AI and digital innovation.">
     <meta name="keywords"
         content="web development, SEO services, AI consultancy, digital agency, Uptura, custom software, digital marketing">
 
@@ -28,998 +28,17 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
 
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #EEE9E3;
-            overflow-x: hidden;
-        }
-
-        /* Navbar Styles from navbar.html */
-        .custom-navbar-wrapper * {
-            font-family: 'Inter', sans-serif !important;
-        }
-
-        .custom-navbar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background: #EEE9E3;
-            z-index: 9999;
-            padding: 14px 0;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
-        }
-
-        .nav-container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 40px;
-            /* Match global container padding */
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .logo-img {
-            height: 48px;
-            width: auto;
-            display: block;
-            z-index: 10001;
-            transition: transform 0.3s ease;
-        }
-
-        .logo-img:hover {
-            transform: scale(1.05);
-        }
-
-        .nav-links {
-            display: flex;
-            list-style: none;
-            gap: 10px;
-        }
-
-        .nav-item {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        .nav-link {
-            position: relative;
-            padding: 11px 22px;
-            font-size: 15px;
-            font-weight: 700;
-            color: #000;
-            text-decoration: none;
-            border: 1.5px solid rgba(0, 0, 0, 0.12);
-            border-radius: 50px;
-            overflow: hidden;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease, transform 0.3s ease;
-            letter-spacing: 0.01em;
-            display: block;
-        }
-
-        .nav-fill {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-            transform: translateY(101%);
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .nav-link:hover {
-            color: #fff !important;
-            border-color: #FF3C00 !important;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(255, 60, 0, 0.2);
-        }
-
-        .nav-link.active {
-            background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-            color: #fff !important;
-            border-color: #FF3C00 !important;
-            box-shadow: 0 4px 12px rgba(255, 60, 0, 0.25);
-        }
-
-        .nav-link.active .nav-fill {
-            transform: translateY(0%);
-        }
-
-        .cta-button {
-            padding: 12px 28px;
-            background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-            color: #fff !important;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 15px;
-            text-decoration: none;
-            letter-spacing: 0.01em;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 4px 12px rgba(255, 60, 0, 0.2);
-            border: 1.5px solid #FF3C00;
-        }
-
-        .cta-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 60, 0, 0.35);
-            background: linear-gradient(135deg, #E63600 0%, #E64A19 100%);
-        }
-
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-            background: none;
-            border: none;
-            z-index: 10001;
-            width: 40px;
-            height: 40px;
-            transition: transform 0.3s ease;
-        }
-
-        .hamburger:hover {
-            transform: scale(1.1);
-        }
-
-        .hamburger-line {
-            width: 28px;
-            height: 3px;
-            background-color: #000 !important;
-            border-radius: 10px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        .hamburger.active .hamburger-line:nth-child(1) {
-            transform: translateY(9px) rotate(45deg);
-            background-color: #FF3C00 !important;
-        }
-
-        .hamburger.active .hamburger-line:nth-child(2) {
-            opacity: 0;
-        }
-
-        .hamburger.active .hamburger-line:nth-child(3) {
-            transform: translateY(-9px) rotate(-45deg);
-            background-color: #FF3C00 !important;
-        }
-
-        .mobile-dropdown {
-            position: fixed;
-            top: 76px;
-            left: 0;
-            width: 100%;
-            background: #EEE9E3;
-            z-index: 9998;
-            padding: 24px 24px 28px;
-            border-bottom: 2px solid #FF3C00;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
-            display: none;
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-
-        .mobile-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-        }
-
-        .mobile-item {
-            opacity: 0;
-            transform: translateX(-10px);
-        }
-
-        .mobile-link {
-            font-size: 17px;
-            font-weight: 700;
-            color: #000;
-            text-decoration: none;
-            display: block;
-            padding: 12px 16px;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            letter-spacing: 0.01em;
-            border: 1.5px solid transparent;
-        }
-
-        .mobile-link:hover,
-        .mobile-link.active {
-            background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-            color: #fff !important;
-            transform: translateX(4px);
-            border-color: #FF3C00;
-        }
-
-        /* Layout System */
-        .container {
-            width: 100%;
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 0 40px;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 24px;
-            }
-        }
-
-        /* Hero Section */
-        .hero {
-            position: relative;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            /* Center vertically */
-            padding-bottom: 100px;
-            padding-top: 150px;
-            /* Space for fixed navbar */
-            overflow: hidden;
-        }
-
-        .hero-inner {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr;
-            /* Text takes more space */
-            gap: 60px;
-            align-items: center;
-            /* Align centers */
-            width: 100%;
-        }
-
-        .hero-left {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: flex-start;
-            margin-bottom: 0;
-            /* Reset */
-        }
-
-        /* About Badge Style */
-        .about-badge {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 800;
-            font-size: 15px;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            margin-bottom: 30px;
-            color: #000;
-        }
-
-        .badge-dot {
-            width: 12px;
-            height: 12px;
-            background: #FF3C00;
-            border-radius: 50%;
-        }
-
-        .hero-title {
-            font-size: 90px;
-            /* Slightly larger */
-            font-weight: 900;
-            line-height: 0.95;
-            color: #000;
-            letter-spacing: -3px;
-            position: relative;
-            top: 0;
-            /* Reset */
-            margin-left: 0;
-            /* Reset */
-            text-transform: capitalize;
-            /* As per design */
-        }
-
-        .hero-title .dot {
-            color: #FF3C00;
-        }
-
-        .hero-subtext {
-            margin-top: 40px;
-            font-size: 1.1rem;
-            line-height: 1.6;
-            color: rgba(0, 0, 0, 0.6);
-            max-width: 400px;
-        }
-
-        .hero-right {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            /* Center the image */
-        }
-
-        .hero-right img,
-        .hero-right lottie-player {
-            max-width: 100%;
-            height: auto;
-        }
-
-
-        /* Responsive Design */
-        @media (max-width: 1200px) {
-            .hero-title {
-                font-size: 70px;
-            }
-        }
-
-        @media (max-width: 1024px) {
-            .hero-inner {
-                grid-template-columns: 1fr;
-                /* Stack on smaller screens */
-                text-align: left;
-                gap: 40px;
-            }
-
-            .hero-right {
-                justify-content: flex-start;
-            }
-
-            .hero-title {
-                font-size: 60px;
-            }
-
-            .hero {
-                align-items: flex-start;
-                padding-top: 140px;
-            }
-        }
-
-        @media (max-width: 991px) {
-
-            .nav-links,
-            .nav-container>.cta-button {
-                display: none;
-            }
-
-            .hamburger {
-                display: flex;
-            }
-
-            .nav-container {
-                padding: 0 20px;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .hero-title {
-                font-size: 48px;
-                letter-spacing: -2px;
-            }
-
-            .hero {
-                padding-top: 120px;
-                padding-bottom: 60px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .logo-img {
-                height: 38px;
-            }
-
-            .hero-title {
-                font-size: 40px;
-            }
-        }
-
-        /* Footer Styles */
-        footer {
-            background-color: #1a1a1a;
-            color: #fff;
-            padding: 100px 0 40px;
-        }
-
-        .footer-grid {
-            display: grid;
-            grid-template-columns: 1.5fr 1fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 80px;
-        }
-
-        .footer-logo {
-            filter: brightness(0) invert(1);
-            margin-bottom: 25px;
-            display: block;
-        }
-
-        .footer-desc {
-            color: rgba(255, 255, 255, 0.6);
-            line-height: 1.6;
-            font-size: 15px;
-            max-width: 300px;
-        }
-
-        .footer-col h4 {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 25px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .footer-links {
-            list-style: none;
-        }
-
-        .footer-links li {
-            margin-bottom: 15px;
-        }
-
-        .footer-links a {
-            color: rgba(255, 255, 255, 0.6);
-            text-decoration: none;
-            transition: color 0.3s ease;
-            font-size: 15px;
-        }
-
-        .footer-links a:hover {
-            color: #FF3C00;
-        }
-
-        .footer-bottom {
-            padding-top: 40px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 14px;
-        }
-
-        @media (max-width: 1024px) {
-            .footer-grid {
-                grid-template-columns: 1fr 1fr;
-                gap: 40px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .footer-grid {
-                grid-template-columns: 1fr;
-            }
-
-            footer {
-                padding: 60px 0 30px;
-            }
-        }
-
-        /* Testimonials Section */
-        .ai-testimonials {
-            background: #EEE9E3;
-            padding: 100px 40px;
-            border-top: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        .ai-title {
-            text-align: center;
-            font-size: 3.5rem;
-            color: #000;
-            margin-bottom: 60px;
-            line-height: 1.1;
-            letter-spacing: -0.03em;
-            font-weight: 800;
-        }
-
-        .testimonial-carousel {
-            max-width: 1100px;
-            margin: auto;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        .testimonial-viewport {
-            overflow: hidden;
-            width: 100%;
-        }
-
-        .testimonial-track {
-            display: flex;
-        }
-
-        .testimonial-slide {
-            min-width: 100%;
-            background: #fff;
-            padding: 60px;
-            border-radius: 32px;
-            box-shadow: 0 15px 40px rgba(255, 60, 0, 0.05);
-        }
-
-        .testimonial-category {
-            font-size: 0.95rem;
-            font-weight: 700;
-            color: #FF3C00;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-        }
-
-        .testimonial-stars {
-            font-size: 1.2rem;
-            margin-bottom: 20px;
-        }
-
-        .testimonial-slide h3 {
-            font-size: 1.8rem;
-            font-weight: 700;
-            color: #000;
-            line-height: 1.4;
-            letter-spacing: -0.01em;
-            margin-bottom: 20px;
-        }
-
-        .testimonial-slide p {
-            color: rgba(0, 0, 0, 0.6);
-            font-size: 1.1rem;
-            line-height: 1.7;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .testimonial-author {
-            color: #000;
-            font-weight: 700;
-            margin-bottom: 25px;
-            display: block;
-            font-size: 1.1rem;
-        }
-
-        .testimonial-audio-btn {
-            background: #FF3C00;
-            color: #fff;
-            border: none;
-            padding: 14px 30px;
-            border-radius: 999px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 700;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .testimonial-audio-btn:hover {
-            background: #000;
-            transform: translateY(-2px);
-        }
-
-        .testimonial-dots {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 40px;
-        }
-
-        .testimonial-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            background: rgba(0, 0, 0, 0.1);
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .testimonial-dot.active {
-            background: #FF3C00;
-            width: 25px;
-            border-radius: 5px;
-        }
-
-        @media (max-width: 768px) {
-            .ai-testimonials {
-                padding: 40px 10px;
-            }
-
-            .ai-title {
-                font-size: 2.5rem;
-                margin-bottom: 40px;
-            }
-
-            .testimonial-slide {
-                padding: 24px 20px;
-                border-radius: 16px;
-                margin: 0 auto;
-                max-width: 100%;
-                width: 100%;
-            }
-
-            .testimonial-slide h3 {
-                font-size: 1.25rem;
-                margin-bottom: 12px;
-                line-height: 1.3;
-            }
-
-            .testimonial-slide p {
-                font-size: 0.95rem;
-                line-height: 1.45;
-                margin-bottom: 16px;
-            }
-
-            .testimonial-author {
-                font-size: 0.85rem;
-                margin-bottom: 16px;
-            }
-
-            .testimonial-stars {
-                margin-bottom: 12px;
-                font-size: 1rem;
-            }
-
-            .testimonial-audio-btn {
-                padding: 10px 20px;
-                font-size: 13px;
-            }
-        }
-
-        /* Works Section */
-        .works-section {
-            background-color: #EEE9E3;
-            padding: 120px 0;
-            overflow: hidden;
-        }
-
-        .works-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 140px;
-            align-items: start;
-        }
-
-        .works-col {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .works-left {
-            margin-top: 100px;
-        }
-
-        .works-right {
-            margin-bottom: 100px;
-        }
-
-        .works-badge {
-            font-size: 14px;
-            font-weight: 700;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: #000;
-            text-transform: uppercase;
-        }
-
-        .works-badge .badge-dot {
-            width: 8px;
-            height: 8px;
-            background-color: #FF3C00;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .works-image-wrap {
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.12);
-            position: relative;
-            background: #fff;
-            height: 60vh;
-            /* Scaled down as requested */
-        }
-
-        .works-image-wrap img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            display: block;
-            transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
-        }
-
-        .works-image-wrap:hover img {
-            transform: scale(1.03);
-        }
-
-        .works-text-part {
-            position: relative;
-        }
-
-        .works-text-part h2 {
-            font-size: 64px;
-            line-height: 1.05;
-            font-weight: 800;
-            color: #000;
-            letter-spacing: -3px;
-            margin: 0;
-        }
-
-        /* CTA Section */
-        .cta-section {
-            padding: 100px 0;
-            background-color: #EEE9E3;
-            text-align: center;
-            position: relative;
-            cursor: default;
-            /* Fallback */
-            overflow: hidden;
-        }
-
-        .cta-content {
-            position: relative;
-            z-index: 2;
-            /* cursor: none; Removed so system cursor stays visible above button */
-        }
-
-        .cta-title {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 20px 0 10px;
-            letter-spacing: -1px;
-            line-height: 1.1;
-        }
-
-        .cta-subtitle {
-            font-size: 3rem;
-            font-weight: 800;
-            margin: 0;
-            letter-spacing: -1px;
-        }
-
-        @media (max-width: 768px) {
-
-            .cta-title,
-            .cta-subtitle {
-                font-size: 1.8rem;
-                letter-spacing: -0.5px;
-            }
-
-            .floating-btn {
-                /* Hide floating button on mobile if it obstructs view, or scale it down further */
-                /* Keeping it as is but maybe ensuring it doesn't cover text might be needed */
-                /* For now just font adjustment */
-            }
-        }
-
-        .floating-btn {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 110px;
-            height: 44px;
-            background-color: #FF3C00;
-            color: white;
-            border-radius: 30px;
-            /* Pill shape */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 0.75rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%) scale(0);
-            opacity: 0;
-            box-shadow: 0 8px 16px rgba(255, 60, 0, 0.25);
-        }
-
-        .cta-content:hover~.floating-btn,
-        .cta-content:active~.floating-btn {
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        /* Hover interaction handled by JS essentially, but CSS alternative */
-        .cta-section.is-hovering .floating-btn {
-            background-color: #fff;
-            color: #FF3C00;
-        }
-
-        .works-left .works-text-part {
-            margin-top: 80px;
-        }
-
-        .works-right .works-image-wrap {
-            margin-top: 80px;
-        }
-
-        @media (max-width: 1200px) {
-            .works-grid {
-                gap: 80px;
-            }
-
-            .works-text-part h2 {
-                font-size: 48px;
-            }
-        }
-
-        @media (max-width: 991px) {
-            .works-grid {
-                grid-template-columns: 1fr;
-                gap: 80px;
-            }
-
-            .works-left,
-            .works-right {
-                margin: 0;
-            }
-
-            .works-left .works-text-part,
-            .works-right .works-image-wrap {
-                margin-top: 40px;
-            }
-
-            .works-text-part h2 {
-                font-size: 42px;
-            }
-
-            .works-section {
-                padding: 80px 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .works-text-part h2 {
-                font-size: 32px;
-                letter-spacing: -1.5px;
-            }
-        }
-
-        /* Stacked Advantages Section */
-        .stack-section {
-            padding: 100px 0 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #EEE9E3;
-        }
-
-        .card-container {
-            position: relative;
-            width: 100%;
-            max-width: 800px;
-            display: flex;
-            flex-direction: column;
-            gap: 2vh;
-            padding-bottom: 100px;
-        }
-
-        .card-item {
-            width: 100%;
-            height: 480px;
-            background: #fdfaf7;
-            border: 2px solid #FF3C00;
-            border-radius: 32px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 60px;
-            box-sizing: border-box;
-            text-align: center;
-            position: relative;
-            will-change: transform, filter;
-        }
-
-        .icon-box {
-            width: 60px;
-            height: 60px;
-            margin-bottom: 30px;
-            color: #FF3C00;
-        }
-
-        .icon-box svg {
-            fill: currentColor;
-            width: 100%;
-            height: 100%;
-        }
-
-        .card-item p {
-            font-size: 1.15rem;
-            color: #444;
-            line-height: 1.6;
-            max-width: 550px;
-            margin-bottom: 20px;
-        }
-
-        .card-item h2 {
-            font-size: 2.5rem;
-            color: #000;
-            margin: 0;
-            padding: 0;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            text-transform: uppercase;
-        }
-
-        @media (max-width: 767px) {
-            .card-item {
-                height: 450px;
-                padding: 30px;
-            }
-
-            .card-item h2 {
-                font-size: 1.6rem;
-                letter-spacing: 0.1em;
-            }
-
-            .card-item p {
-                font-size: 1rem;
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Navigation -->
-    <div class="custom-navbar-wrapper">
-        <nav class="custom-navbar">
-            <div class="nav-container">
-                <a href="/" class="nav-logo">
-                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
-                        class="logo-img" alt="Logo">
-                </a>
-
-                <ul class="nav-links">
-                    <li class="nav-item"><a href="#about" class="nav-link">About<div class="nav-fill"></div></a></li>
-                    <li class="nav-item"><a href="#solutions" class="nav-link">Solutions<div class="nav-fill"></div></a>
-                    </li>
-                    <li class="nav-item"><a href="#ai-consulting" class="nav-link">AI Consulting<div class="nav-fill">
-                            </div></a></li>
-                    <li class="nav-item"><a href="#work" class="nav-link">Work<div class="nav-fill"></div></a></li>
-                    <li class="nav-item"><a href="#contact" class="nav-link">Contact<div class="nav-fill"></div></a>
-                    </li>
-                </ul>
-
-                <a href="#contact" class="cta-button">Get Started</a>
-
-                <button class="hamburger" id="nav-toggle">
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                    <span class="hamburger-line"></span>
-                </button>
-            </div>
-        </nav>
-
-        <div class="mobile-dropdown" id="mobile-menu">
-            <ul class="mobile-links">
-                <li class="mobile-item"><a href="#about" class="mobile-link">About</a></li>
-                <li class="mobile-item"><a href="#solutions" class="mobile-link">Solutions</a></li>
-                <li class="mobile-item"><a href="#ai-consulting" class="mobile-link">AI Consulting</a></li>
-                <li class="mobile-item"><a href="#work" class="mobile-link">Work</a></li>
-                <li class="mobile-item"><a href="#contact" class="mobile-link">Contact</a></li>
-                <li class="mobile-item" style="padding-top:8px;">
-                    <a href="#contact" class="cta-button" style="display:block; text-align:center;">Get Started</a>
-                </li>
-            </ul>
-        </div>
-    </div>
+    <!-- Navigation Placeholder -->
+    <div id="navbar-placeholder" class="custom-navbar-wrapper"></div>
 
     <main>
         <!-- Hero Section -->
-        <section class="hero">
+        <section class="hero about-hero">
             <div class="container">
                 <div class="hero-inner">
                     <div class="hero-left">
@@ -1032,12 +51,27 @@
                             AI & Digital<br>
                             Innovation
                         </h1>
+                        <a href="index.html#book" class="book-call" style="margin-top: 60px; gap: 12px;">
+                            <span class="book-call-text">
+                                <span>BOOK A CALL</span>
+                                <span>BOOK A CALL</span>
+                            </span>
+                            <span class="book-call-arrow">
+                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#ff5722" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </a>
                     </div>
 
                     <div class="hero-right">
                         <div style="display: flex; flex-direction: column; align-items: flex-start;">
-                            <img src="images/about-20image.webp" alt="About Us Illustration"
-                                style="max-width: 100%; height: auto; margin-bottom: 30px;">
+                            <lottie-player
+                                src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696e675bf416ec5c93b35fdf_9911a27978ce49acb6c6778ee76cf6b8.json"
+                                background="transparent" speed="1"
+                                style="width: 100%; height: auto; margin-bottom: 30px;" loop autoplay>
+                            </lottie-player>
                             <p class="hero-subtext"
                                 style="font-size: 1rem; line-height: 1.5; color: #555; max-width: 350px;">
                                 Our services help you create digital products and solve your problems objectively,
@@ -1052,67 +86,38 @@
         <!-- Section Divider -->
         <div class="section-divider"></div>
 
-        <!-- Marquee Section -->
-        <section class="marquee-section">
-            <div class="marquee-wrapper">
-                <!-- First set of items -->
-                <div class="marquee-content">
-                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
-                    </div>
-                </div>
-                <!-- Duplicated set for seamless loop -->
-                <div class="marquee-content">
-                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
-                    </div>
-                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- About Section -->
-        <section class="about-section" id="about">
+        <!-- What We Do Section -->
+        <section class="what-we-do-section">
             <div class="container">
-                <div class="about-grid">
-                    <div class="about-left">
-                        <div class="about-badge">
-                            <span class="badge-dot"></span> ABOUT US
-                        </div>
-                        <h2 class="headline-container" id="uptura-headline">
-                            Uptura delivers for
-                            <span class="orange-pop-wrap" id="loop-target">
-                                <span id="count-number" data-target="790">790</span>+
-                            </span>
-                            clients<br>
-                            worldwide.
-                        </h2>
-                    </div>
-                    <div class="about-right">
+                <div class="what-we-do-grid">
+                    <div class="what-we-do-left">
                         <lottie-player
-                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696e675bf416ec5c93b35fdf_9911a27978ce49acb6c6778ee76cf6b8.json"
-                            background="transparent" speed="1" style="width: 100%; max-width: 500px; height: auto;" loop
-                            autoplay>
+                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695ff7476edb6b51c6ef2bcd_63834eb7c03546b9920a62dc1ff05990.json"
+                            background="transparent" speed="1" style="width: 100%; height: auto;" loop autoplay>
                         </lottie-player>
                     </div>
+                    <div class="what-we-do-right">
+                        <div class="about-badge" style="margin-bottom: 20px;">
+                            <span class="badge-dot" style="background-color: #FF3C00;"></span> WHAT WE DO?
+                        </div>
+                        <h2 class="what-we-do-text">
+                            At <span class="highlight">Uptura</span>, we help businesses grow smarter, faster, and more
+                            efficiently by combining <span class="bold">AI consultancy</span> with <span
+                                class="bold">high-impact digital services.</span>
+                        </h2>
+                        <p class="what-we-do-subtext">
+                            With over <span class="bold">6 years of hands-on experience</span>, we’ve worked with
+                            startups, growing companies, and established brands to design systems.
+                        </p>
+                    </div>
                 </div>
             </div>
         </section>
 
-        <!-- Tricker Section -->
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Logo Marquee Section -->
         <section class="section tricker home">
             <div class="tricker-wrapper">
                 <!-- First set of logos -->
@@ -1166,352 +171,264 @@
             </div>
         </section>
 
-        <!-- Services & Accordion Section -->
-        <section class="services-section" id="solutions">
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Vision Section -->
+        <section class="vision-section">
             <div class="container">
-                <div class="services-grid">
-                    <div class="services-left">
-                        <lottie-player
-                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696a770dd3cf2e9e995b6916_955c4b7cf6534e0cb560a1e8e52bbb34.json"
-                            background="transparent" speed="1" style="width: 100%; max-width: 550px; height: auto;" loop
-                            autoplay>
-                        </lottie-player>
-                    </div>
-                    <div class="services-right">
-                        <div class="about-badge">
-                            <span class="badge-dot"></span> OUR DIGITAL SOLUTIONS
-                        </div>
-                        <div class="accordion">
-                            <div class="accordion-item active">
-                                <div class="accordion-header">
-                                    <h3 class="accordion-title">Custom Web Development</h3>
-                                </div>
-                                <div class="accordion-content" style="height: auto; opacity: 1;">
-                                    <p class="accordion-text">Tailored web development that meets your business goals,
-                                        ensuring your website is responsive, scalable, and user-friendly.</p>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3 class="accordion-title">Web Design</h3>
-                                </div>
-                                <div class="accordion-content">
-                                    <p class="accordion-text">Creating visually stunning and intuitive interfaces that
-                                        engage users and elevate your brand's digital identity through research-backed
-                                        design.</p>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3 class="accordion-title">SEO Services</h3>
-                                </div>
-                                <div class="accordion-content">
-                                    <p class="accordion-text">Strategic optimization to increase your search engine
-                                        visibility, drive organic traffic, and ensure your business reaches its target
-                                        audience effectively.</p>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3 class="accordion-title">Mobile App Development</h3>
-                                </div>
-                                <div class="accordion-content">
-                                    <p class="accordion-text">Building high-performance native and cross-platform mobile
-                                        applications that provide seamless user experiences across all devices and
-                                        platforms.</p>
-                                </div>
-                            </div>
-                            <div class="accordion-item">
-                                <div class="accordion-header">
-                                    <h3 class="accordion-title">AI Consultancy</h3>
-                                </div>
-                                <div class="accordion-content">
-                                    <p class="accordion-text">Leveraging cutting-edge artificial intelligence to
-                                        optimize
-                                        your business processes, automate workflows, and provide data-driven insights
-                                        for
-                                        growth.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="#contact" class="explore-services">
-                            <span class="book-call-text">
-                                <span>EXPLORE OUR SERVICES</span>
-                                <span>EXPLORE OUR SERVICES</span>
-                            </span>
-                            <span class="book-call-arrow">
-                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#FF3C00" stroke-width="2"
-                                        stroke-linecap="round" stroke-linejoin="round" />
-                                </svg>
-                            </span>
-                        </a>
-                    </div>
+                <div class="vision-badge">
+                    <span class="badge-dot"></span> OUR VISION
                 </div>
-            </div>
-        </section>
-
-        <!-- Growth Ticker Section -->
-        <section class="growth-ticker">
-            <div class="growth-wrapper">
-                <!-- Set 1 -->
-                <div class="marquee-content">
-                    <div class="growth-item">Work Smarter <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Stronger <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Build Faster <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Scale Beyond <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Grow Together <div class="growth-dot"></div>
-                    </div>
-                </div>
-                <!-- Set 2 -->
-                <div class="marquee-content">
-                    <div class="growth-item">Work Smarter <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Stronger <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Build Faster <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Scale Beyond <div class="growth-dot"></div>
-                    </div>
-                    <div class="growth-item">Grow Together <div class="growth-dot"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-        <!-- Testimonials Section -->
-        <section class="ai-testimonials">
-            <div class="container">
-                <h2 class="ai-title">Client Testimonials</h2>
-
-                <div class="testimonial-carousel">
-                    <div class="testimonial-viewport">
-                        <div class="testimonial-track">
-                            <!-- Slide 1 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">🌐 Web Development</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>The website feels faster and more professional.</h3>
-                                <p>We needed a custom website that actually represented our brand. The final result was
-                                    clean, fast, and easy to manage. Our customers noticed the difference immediately.
-                                </p>
-                                <span class="testimonial-author">— Founder, Service-Based Business</span>
-                                <button class="testimonial-audio-btn" data-audio="a1">▶ Play Audio</button>
-                                <audio id="a1"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27dcdb5319aee232c2d_Test%201%20on%20hompage.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 2 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">🌐 Web Development</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>Exactly what we needed, without overcomplicating things.</h3>
-                                <p>They understood our requirements clearly and built a site that works perfectly
-                                    across devices. The process was smooth from start to finish.</p>
-                                <span class="testimonial-author">— Operations Manager, SME</span>
-                                <button class="testimonial-audio-btn" data-audio="a2">▶ Play Audio</button>
-                                <audio id="a2"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d5c5f7359cf2910bd_test%202%20on%20homepage.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 3 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">🔍 SEO Services</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>Organic traffic started growing steadily.</h3>
-                                <p>SEO takes time, but their approach was realistic and transparent. Within a few
-                                    months, we saw consistent growth in rankings and inbound inquiries.</p>
-                                <span class="testimonial-author">— Business Owner, Local Company</span>
-                                <button class="testimonial-audio-btn" data-audio="a3">▶ Play Audio</button>
-                                <audio id="a3"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d2a368dd983dad350_test%203%20on%20homepage.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 4 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">🔍 SEO Services</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>We finally understand where our leads come from.</h3>
-                                <p>Their SEO work helped us rank for keywords that actually convert. Reporting was
-                                    clear, and the results spoke for themselves.</p>
-                                <span class="testimonial-author">— Marketing Lead, B2B Firm</span>
-                                <button class="testimonial-audio-btn" data-audio="a4">▶ Play Audio</button>
-                                <audio id="a4"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d2744704a3919131d_test%20homepage%20seo%20(1).mp3"></audio>
-                            </div>
-
-                            <!-- Slide 5 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">📱 App Development</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>They turned our idea into a working app.</h3>
-                                <p>We came in with a concept and left with a fully functional app on both Android and
-                                    iOS. Communication was clear, and delivery was on time.</p>
-                                <span class="testimonial-author">— Startup Founder</span>
-                                <button class="testimonial-audio-btn" data-audio="a5">▶ Play Audio</button>
-                                <audio id="a5"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27da4ece1d9ba9d99ae_test%204%20on%20homepage.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 6 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">📱 App Development</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>Smooth performance and great user experience.</h3>
-                                <p>The app runs smoothly and users find it easy to navigate. Bugs were handled
-                                    quickly, and updates were implemented without hassle.</p>
-                                <span class="testimonial-author">— Product Manager, Tech Startup</span>
-                                <button class="testimonial-audio-btn" data-audio="a6">▶ Play Audio</button>
-                                <audio id="a6"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd8793489ad8363f912c0_Testimonial%20smooth%20hompage.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 7 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">📣 Social Media Marketing</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>Our engagement improved noticeably.</h3>
-                                <p>They helped us bring consistency to our social media and improved our content
-                                    strategy. Engagement and reach increased within the first month.</p>
-                                <span class="testimonial-author">— Brand Manager, E-commerce Store</span>
-                                <button class="testimonial-audio-btn" data-audio="a7">▶ Play Audio</button>
-                                <audio id="a7"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d9f312987e6a22b21_test%20engagement.mp3"></audio>
-                            </div>
-
-                            <!-- Slide 8 -->
-                            <div class="testimonial-slide">
-                                <div class="testimonial-category">📣 Social Media Marketing</div>
-                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
-                                <h3>We started getting real inquiries from social media.</h3>
-                                <p>Before this, social media felt like a waste of time. Now it's actually generating
-                                    leads and brand awareness.</p>
-                                <span class="testimonial-author">— Owner, Service-Based Business</span>
-                                <button class="testimonial-audio-btn" data-audio="a8">▶ Play Audio</button>
-                                <audio id="a8"
-                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27dbf7853907bb64a04_test%20last.mp3"></audio>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="testimonial-dots"></div>
-            </div>
-        </section>
-
-
-
-        <!-- Stacked Advantages Section -->
-        <section class="stack-section">
-            <div class="container" style="display: flex; flex-direction: column; align-items: center;">
-                <div class="stack-intro" style="text-align: center; margin-bottom: 60px;">
-                    <div class="badge-dot"
-                        style="margin: 0 auto 25px; width: 12px; height: 12px; background-color: #FF3C00; border-radius: 50%;">
-                    </div>
-                    <h2 class="ai-title" style="margin-bottom: 30px;">Ready to unlock<br>powerful digital advantages?
-                    </h2>
-
+                <h2 class="vision-title">
+                    To become a trusted global partner for AI-driven and digital transformation, helping businesses
+                    operate smarter, scale faster, and stay competitive in an evolving digital world.
+                </h2>
+                <div class="vision-lottie">
                     <lottie-player
-                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69628c872bc073def4a62ce0_f569530cb5aa4112929a919836581438.json"
-                        background="transparent" speed="1" style="width: 250px; height: 250px; margin: 0 auto;" loop
-                        autoplay>
+                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696a7851ae97c9acc07fa1e4_ef389b008dbe4cf5ac22769de9f07dc3.json"
+                        background="transparent" speed="1"
+                        style="width: 100%; max-width: 800px; height: auto; margin: 0 auto;" loop autoplay>
                     </lottie-player>
                 </div>
+            </div>
+        </section>
 
-                <div class="card-container">
-                    <div class="card-item">
-                        <p>Synchronize your team in real-time with shared workspaces that eliminate friction and keep
-                            everyone
-                            on the same page.</p>
-                        <div class="icon-box"><svg viewBox="0 0 24 24">
-                                <path
-                                    d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" />
-                            </svg></div>
-                        <h2>Effortless Collaboration</h2>
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Marquee Section -->
+        <section class="marquee-section">
+            <div class="marquee-wrapper">
+                <!-- First set of items -->
+                <div class="marquee-content">
+                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
                     </div>
-
-                    <div class="card-item">
-                        <p>Move from concept to completion with automated workflows designed to handle the heavy lifting
-                            while you focus on the vision.</p>
-                        <div class="icon-box"><svg viewBox="0 0 24 24">
-                                <path
-                                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
-                            </svg></div>
-                        <h2>Streamlined Execution</h2>
+                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
                     </div>
-
-                    <div class="card-item">
-                        <p>Gain access to a hand-picked group of top-tier designers and strategists dedicated to
-                            bringing
-                            your brand to life.</p>
-                        <div class="icon-box"><svg viewBox="0 0 24 24">
-                                <path
-                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg></div>
-                        <h2>Elite Creative Squad</h2>
+                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
                     </div>
-
-                    <div class="card-item">
-                        <p>Why wait months? Our high-velocity production model delivers premium results in record time
-                            without cutting corners.</p>
-                        <div class="icon-box"><svg viewBox="0 0 24 24">
-                                <path d="M13 3l-4 7h3v8l4-7h-3l4-7z" />
-                            </svg></div>
-                        <h2>Rapid Delivery Cycles</h2>
+                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
                     </div>
-
-                    <div class="card-item">
-                        <p>Scalable pricing that aligns with your goals. No hidden fees, just transparent value that
-                            grows
-                            alongside your business.</p>
-                        <div class="icon-box"><svg viewBox="0 0 24 24">
-                                <path
-                                    d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
-                            </svg></div>
-                        <h2>Adaptive Pricing Models</h2>
+                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
+                    </div>
+                </div>
+                <!-- Duplicated set for seamless loop -->
+                <div class="marquee-content">
+                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Centered Lottie Divider -->
-        <section class="lottie-cta"
-            style="padding: 80px 0; background-color: #EEE9E3; display: flex; justify-content: center; align-items: center; border-top: 1px solid rgba(0,0,0,0.05);">
-            <div class="container" style="display: flex; justify-content: center;">
-                <lottie-player
-                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697646a4e64a222537358e7d_5e348676431a4786a8feb19eb1ef90fb.json"
-                    background="transparent" speed="1" style="width: 350px; height: 350px;" loop autoplay>
-                </lottie-player>
-            </div>
-        </section>
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
 
-        <!-- Featured Works Section -->
-        <section class="works-section" id="work">
-            <div class="container">
-                <div class="works-grid">
-                    <!-- Column 1 -->
-                    <div class="works-col works-left">
-                        <div class="works-image-wrap">
-                            <img src="images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png"
-                                alt="Skincare E-commerce Platform">
+        <!-- Services Grid Section -->
+        <section class="services-grid-section">
+            <div class="services-container">
+                <div class="services-grid">
+
+                    <!-- CARD 1: Custom Website Development -->
+                    <div class="service-card">
+                        <div class="card-header">
+                            <div class="card-icon"></div>
+                            <h3 class="card-title">Custom Website Development</h3>
                         </div>
-                        <div class="works-text-part">
-                            <h2>- tangible results that help our clients reach their goals.</h2>
+                        <p class="card-subtitle">Your website is your digital headquarters</p>
+                        <ul class="features-list">
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Custom websites tailored to your business goals</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Fast, secure, and scalable architectures</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Conversion-focused layouts</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Mobile-responsive experiences</span>
+                            </li>
+                        </ul>
+                        <div class="card-result">
+                            <p class="result-text">Websites that don't just look good — they convert.</p>
                         </div>
                     </div>
 
-                    <!-- Column 2 -->
-                    <div class="works-col works-right">
-                        <div class="works-text-part">
-                            <div class="works-badge"><span class="badge-dot"></span> FEATURED WORKS</div>
-                            <h2>We strive to deliver measurable -</h2>
+                    <!-- CARD 2: Mobile App Development -->
+                    <div class="service-card">
+                        <div class="card-header">
+                            <div class="card-icon"></div>
+                            <h3 class="card-title">Mobile App Development (Android & iOS)</h3>
                         </div>
-                        <div class="works-image-wrap">
-                            <img src="images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png"
-                                alt="Luxury Architecture Showcase">
+                        <p class="card-subtitle">Turn your idea into a powerful mobile experience.</p>
+                        <ul class="features-list">
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Native & cross-platform apps</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Android & iOS applications</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Secure, scalable backends</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Smooth UI/UX flows</span>
+                            </li>
+                        </ul>
+                        <div class="card-result">
+                            <p class="result-text">Apps users love and businesses can scale with.</p>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: Social Media Marketing -->
+                    <div class="service-card">
+                        <div class="card-header">
+                            <div class="card-icon"></div>
+                            <h3 class="card-title">Social Media Marketing</h3>
+                        </div>
+                        <p class="card-subtitle">We help brands turn attention into revenue.</p>
+                        <ul class="features-list">
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Content strategy & planning</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Paid ad campaigns</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Audience targeting & growth</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Performance tracking</span>
+                            </li>
+                        </ul>
+                        <div class="card-result">
+                            <p class="result-text">Strong brand presence + measurable results.</p>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: Search Engine Optimization -->
+                    <div class="service-card">
+                        <div class="card-header">
+                            <div class="card-icon"></div>
+                            <h3 class="card-title">Search Engine Optimization (SEO)</h3>
+                        </div>
+                        <p class="card-subtitle">If customers can't find you, you don't exist.</p>
+                        <ul class="features-list">
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>On-page & technical SEO</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Keyword research & strategy</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Content optimization</span>
+                            </li>
+                            <li class="feature-item">
+                                <span class="feature-dot"></span>
+                                <span>Local & global SEO</span>
+                            </li>
+                        </ul>
+                        <div class="card-result">
+                            <p class="result-text">Higher rankings, consistent traffic, long-term ROI.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Mission Lottie -->
+        <div class="mission-lottie-container">
+            <lottie-player
+                src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697646bf6c8cf00dca5c698e_f018671074534edb8da923cac75619cb.json"
+                background="transparent" speed="1" style="width: 100%; max-width: 800px; height: auto; margin: 0 auto;"
+                loop autoplay>
+            </lottie-player>
+        </div>
+
+        <!-- OUR MISSION Badge -->
+        <div class="container" style="text-align: center; margin-bottom: 40px;">
+            <div class="about-badge" style="display: inline-flex; justify-content: center;">
+                <span class="badge-dot" style="background-color: #FF3C00;"></span> OUR MISSION
+            </div>
+        </div>
+
+        <!-- AI Process Section (Our Mission Content) -->
+        <section class="ai-process">
+            <div class="container">
+                <div class="process-steps">
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-rocket"></i></div>
+                        <div class="step-content">
+                            <h3>Our Goal</h3>
+                            <p>To empower businesses with intelligent AI and digital innovation.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-cogs"></i></div>
+                        <div class="step-content">
+                            <h3>Workflow Optimization</h3>
+                            <p>We help organizations optimize workflows and modernize operations.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-chart-line"></i></div>
+                        <div class="step-content">
+                            <h3>Performance at Scale</h3>
+                            <p>Our solutions are designed to improve performance and efficiency at scale.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-lightbulb"></i></div>
+                        <div class="step-content">
+                            <h3>Simplicity First</h3>
+                            <p>We believe technology should simplify work, not complicate it.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-gem"></i></div>
+                        <div class="step-content">
+                            <h3>Strategic Excellence</h3>
+                            <p>Every project is built with strategy, precision, and long-term value in mind.</p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div class="step-icon"><i class="fa-solid fa-seedling"></i></div>
+                        <div class="step-content">
+                            <h3>Sustainable Growth</h3>
+                            <p>Our goal is to deliver solutions that drive sustainable growth.</p>
                         </div>
                     </div>
                 </div>
@@ -1533,715 +450,13 @@
                 <div class="floating-btn">Book a Call</div>
             </a>
         </section>
+
     </main>
 
-    <!-- Footer -->
-    <style>
-        /* Footer Card Styles */
-        .footer-wrapper {
-            background-color: #EEE9E3;
-            padding: 80px 20px;
-            display: flex;
-            justify-content: center;
-        }
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
 
-        .footer-card {
-            background-color: #ffffff;
-            border-radius: 40px;
-            padding: 60px 80px;
-            width: 100%;
-            max-width: 1400px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 50px;
-        }
-
-        .footer-top {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid #e0e0e0;
-            padding-bottom: 50px;
-        }
-
-        .footer-left-top {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            height: 100%;
-            min-height: 180px;
-        }
-
-        .copyright-text {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #000;
-            margin-bottom: 20px;
-        }
-
-        .footer-cta-btn {
-            background-color: #FF3C00;
-            color: #fff;
-            padding: 15px 35px;
-            border-radius: 30px;
-            text-decoration: none;
-            font-weight: 600;
-            display: inline-block;
-            transition: transform 0.2s;
-        }
-
-        .footer-cta-btn:hover {
-            transform: scale(1.05);
-        }
-
-        .footer-center {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .footer-illustration {
-            width: 150px;
-            height: auto;
-        }
-
-        .footer-contact-info {
-            text-align: left;
-            font-size: 1rem;
-            line-height: 1.6;
-            color: #000;
-        }
-
-        .contact-item {
-            margin-bottom: 15px;
-        }
-
-        .contact-item strong {
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .footer-divider {
-            height: 1px;
-            background-color: #e0e0e0;
-            width: 100%;
-            margin: 0;
-        }
-
-        .footer-bottom-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-end;
-            padding-top: 10px;
-        }
-
-        .footer-logo-large {
-            width: 200px;
-            height: auto;
-        }
-
-        .footer-right-bottom {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 20px;
-        }
-
-        .office-hours {
-            text-align: right;
-        }
-
-        .hours-label {
-            font-size: 0.9rem;
-            color: #666;
-            display: block;
-            margin-bottom: 5px;
-        }
-
-        .hours-time {
-            font-size: 1.4rem;
-            font-weight: 500;
-            color: #000;
-        }
-
-        .social-icons {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-icon-btn {
-            width: 40px;
-            height: 40px;
-            background-color: #FF3C00;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: #fff;
-            font-size: 1.2rem;
-            text-decoration: none;
-            transition: transform 0.2s;
-        }
-
-        .social-icon-btn:hover {
-            transform: scale(1.1);
-        }
-
-        @media (max-width: 991px) {
-            .footer-card {
-                padding: 40px;
-            }
-
-            .footer-top {
-                flex-direction: column;
-                gap: 40px;
-                text-align: center;
-                align-items: center;
-            }
-
-            .footer-left-top {
-                align-items: center;
-                min-height: auto;
-                gap: 20px;
-            }
-
-            .footer-contact-info {
-                text-align: center;
-            }
-
-            .footer-bottom-row {
-                flex-direction: column;
-                align-items: center;
-                gap: 40px;
-            }
-
-            .footer-right-bottom {
-                align-items: center;
-            }
-
-            .office-hours {
-                text-align: center;
-            }
-        }
-    </style>
-
-    <!-- Footer -->
-    <footer class="footer-wrapper">
-        <div class="footer-card">
-            <!-- Top Section -->
-            <div class="footer-top">
-                <div class="footer-left-top">
-                    <div class="copyright-text">&copy;Uptura 2026</div>
-                    <a href="#contact" class="footer-cta-btn">Get Started Today</a>
-                </div>
-
-                <div class="footer-center"
-                    style="position: relative; top: -40px; flex-grow: 1; display: flex; justify-content: center;">
-                    <!-- Lottie Animation controlled by scroll -->
-                    <lottie-player id="footer-girl-lottie"
-                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69751c9d0dd3332335b33cd6_e3b964a4662b4050afb378335642cba7.json"
-                        background="transparent" speed="1" style="width: 100%; max-width: 500px; height: 180px;"
-                        preserveAspectRatio="xMidYMid meet">
-                    </lottie-player>
-                </div>
-
-                <div class="footer-contact-info">
-                    <div class="contact-item">+140 6235 6305</div>
-                    <div class="contact-item">info@uptura.net</div>
-                    <div class="contact-item">
-                        Tebs Street<br>
-                        1001 S. Main Street STE<br>
-                        500 Kalispell, MT 59901
-                    </div>
-                </div>
-            </div>
-
-            <!-- Divider NOT needed as border-bottom covers it, but visual separation in code -->
-
-            <!-- Bottom Section -->
-            <div class="footer-bottom-row">
-                <div class="footer-logo-container">
-                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
-                        alt="Uptura" class="footer-logo-large">
-                </div>
-
-                <div class="footer-right-bottom">
-                    <div class="office-hours">
-                        <span class="hours-label">Mo—Fr</span>
-                        <div class="hours-time">9am—6pm</div>
-                    </div>
-                    <div class="social-icons">
-                        <!-- Using simple SVG icons for visuals -->
-                        <a href="#" class="social-icon-btn" aria-label="Facebook">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-                            </svg>
-                        </a>
-                        <a href="#" class="social-icon-btn" aria-label="WhatsApp">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z">
-                                </path>
-                            </svg>
-                        </a>
-                        <a href="#" class="social-icon-btn" aria-label="LinkedIn">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <path
-                                    d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z">
-                                </path>
-                                <rect x="2" y="9" width="4" height="12"></rect>
-                                <circle cx="4" cy="4" r="2"></circle>
-                            </svg>
-                        </a>
-                        <a href="#" class="social-icon-btn" aria-label="Instagram">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-                                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-                                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const toggle = document.getElementById('nav-toggle');
-            const menu = document.getElementById('mobile-menu');
-            let menuOpen = false;
-
-            // 1. Entrance Animation
-            gsap.to(".nav-item", {
-                opacity: 1,
-                y: 0,
-                stagger: 0.08,
-                duration: 0.7,
-                ease: "power3.out",
-                delay: 0.2
-            });
-
-            // 2. Desktop Hover (only for non-active links)
-            document.querySelectorAll(".nav-link").forEach(link => {
-                const fill = link.querySelector(".nav-fill");
-
-                link.addEventListener("mouseenter", () => {
-                    if (!link.classList.contains('active')) {
-                        gsap.to(fill, {
-                            y: "0%",
-                            duration: 0.4,
-                            ease: "power2.out"
-                        });
-                    }
-                });
-
-                link.addEventListener("mouseleave", () => {
-                    if (!link.classList.contains('active')) {
-                        gsap.to(fill, {
-                            y: "101%",
-                            duration: 0.3,
-                            ease: "power2.in"
-                        });
-                    }
-                });
-            });
-
-            // 3. Mobile Dropdown Toggle
-            toggle.addEventListener('click', () => {
-                if (!menuOpen) {
-                    toggle.classList.add('active');
-                    menu.style.display = 'block';
-                    gsap.to(menu, {
-                        opacity: 1,
-                        y: 0,
-                        duration: 0.4,
-                        ease: "power3.out"
-                    });
-                    gsap.to(".mobile-item", {
-                        opacity: 1,
-                        x: 0,
-                        stagger: 0.06,
-                        duration: 0.3,
-                        delay: 0.1
-                    });
-                    menuOpen = true;
-                } else {
-                    toggle.classList.remove('active');
-                    gsap.to(menu, {
-                        opacity: 0,
-                        y: -20,
-                        duration: 0.3,
-                        ease: "power3.in",
-                        onComplete: () => { menu.style.display = 'none'; }
-                    });
-                    gsap.set(".mobile-item", { opacity: 0, x: -10 });
-                    menuOpen = false;
-                }
-            });
-
-            // 4. Close menu on link click
-            document.querySelectorAll('.mobile-link, .mobile-dropdown .cta-button').forEach(link => {
-                link.addEventListener('click', () => {
-                    if (menuOpen) {
-                        toggle.click();
-                    }
-                });
-            });
-
-            // 5. Close menu on outside click
-            document.addEventListener('click', (e) => {
-                if (menuOpen &&
-                    !menu.contains(e.target) &&
-                    !toggle.contains(e.target)) {
-                    toggle.click();
-                }
-            });
-
-            // Smooth scrolling for anchor links
-            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-                anchor.addEventListener('click', function (e) {
-                    e.preventDefault();
-                    const target = document.querySelector(this.getAttribute('href'));
-                    if (target) {
-                        target.scrollIntoView({
-                            behavior: 'smooth',
-                            block: 'start'
-                        });
-                    }
-                });
-            });
-
-            // --- About Us Section Animations ---
-            const headline = document.getElementById('uptura-headline');
-            const number = document.getElementById('count-number');
-            const popBox = document.getElementById('loop-target');
-            const targetVal = parseInt(number.getAttribute('data-target'));
-
-            // 1. Entrance Reveal
-            gsap.to(headline, {
-                opacity: 1,
-                y: 0,
-                duration: 1.2,
-                ease: "power4.out",
-                scrollTrigger: {
-                    trigger: headline,
-                    start: "top 85%"
-                }
-            });
-
-            // 2. Number Counting
-            gsap.fromTo(number,
-                { innerText: 0 },
-                {
-                    innerText: targetVal,
-                    duration: 2.5,
-                    snap: { innerText: 1 },
-                    ease: "power2.out",
-                    scrollTrigger: {
-                        trigger: headline,
-                        start: "top 85%",
-                        once: true
-                    }
-                }
-            );
-
-            // 3. Infinite Looping Pop
-            gsap.to(popBox, {
-                scale: 1.1,
-                duration: 1,
-                ease: "power1.inOut",
-                repeat: -1,
-                yoyo: true
-            });
-
-            // --- Accordion Logic ---
-            const accordionItems = document.querySelectorAll('.accordion-item');
-
-            accordionItems.forEach(item => {
-                const header = item.querySelector('.accordion-header');
-                const content = item.querySelector('.accordion-content');
-
-                header.addEventListener('click', () => {
-                    const isActive = item.classList.contains('active');
-
-                    // Close all other items
-                    accordionItems.forEach(otherItem => {
-                        if (otherItem !== item && otherItem.classList.contains('active')) {
-                            otherItem.classList.remove('active');
-                            const otherContent = otherItem.querySelector('.accordion-content');
-                            gsap.to(otherContent, {
-                                height: 0,
-                                opacity: 0,
-                                duration: 0.4,
-                                ease: "power2.out"
-                            });
-                        }
-                    });
-
-                    // Toggle current item
-                    if (!isActive) {
-                        item.classList.add('active');
-                        gsap.to(content, {
-                            height: "auto",
-                            opacity: 1,
-                            duration: 0.4,
-                            ease: "power2.out"
-                        });
-                    } else {
-                        item.classList.remove('active');
-                        gsap.to(content, {
-                            height: 0,
-                            opacity: 0,
-                            duration: 0.3,
-                            ease: "power2.in"
-                        });
-                    }
-                });
-            });
-
-            // --- Testimonials Carousel Logic ---
-            const track = document.querySelector(".testimonial-track");
-            const testimonialSlides = document.querySelectorAll(".testimonial-slide");
-            const dotsContainer = document.querySelector(".testimonial-dots");
-
-            let testimonialIndex = 0;
-
-            // Create dot indicators
-            testimonialSlides.forEach((_, i) => {
-                const dot = document.createElement("div");
-                dot.classList.add("testimonial-dot");
-                if (i === 0) dot.classList.add("active");
-                dot.addEventListener("click", () => goToTestimonial(i));
-                dotsContainer.appendChild(dot);
-            });
-
-            const testimonialDots = document.querySelectorAll(".testimonial-dot");
-
-            function updateTestimonialDots() {
-                testimonialDots.forEach(d => d.classList.remove("active"));
-                testimonialDots[testimonialIndex].classList.add("active");
-            }
-
-            function goToTestimonial(i) {
-                testimonialIndex = i;
-                gsap.to(track, {
-                    x: -testimonialIndex * 100 + "%",
-                    duration: 0.8,
-                    ease: "power3.inOut"
-                });
-                updateTestimonialDots();
-            }
-
-            // Audio playback (only one plays at a time)
-            document.querySelectorAll(".testimonial-audio-btn").forEach(btn => {
-                btn.addEventListener("click", () => {
-                    const audio = document.getElementById(btn.dataset.audio);
-                    document.querySelectorAll("audio").forEach(a => {
-                        if (a !== audio) {
-                            a.pause();
-                            a.currentTime = 0;
-                            // Reset other buttons text
-                            const otherBtn = document.querySelector(`[data-audio="${a.id}"]`);
-                            if (otherBtn) otherBtn.textContent = "▶ Play Audio";
-                        }
-                    });
-
-                    if (audio.paused) {
-                        audio.play();
-                        btn.textContent = "⏸ Pause Audio";
-                    } else {
-                        audio.pause();
-                        btn.textContent = "▶ Play Audio";
-                    }
-                });
-            });
-
-            // Reset button text when audio ends
-            document.querySelectorAll("audio").forEach(audio => {
-                audio.addEventListener("ended", () => {
-                    const btn = document.querySelector(`[data-audio="${audio.id}"]`);
-                    if (btn) btn.textContent = "▶ Play Audio";
-                });
-            });
-
-            // Auto-advance carousel
-            let testimonialHovered = false;
-            let audioPlaying = false;
-            let testimonialAutoplay;
-
-            function startTestimonialAutoplay() {
-                testimonialAutoplay = setInterval(() => {
-                    if (!testimonialHovered && !audioPlaying) {
-                        if (testimonialIndex < testimonialSlides.length - 1) {
-                            goToTestimonial(testimonialIndex + 1);
-                        } else {
-                            goToTestimonial(0);
-                        }
-                    }
-                }, 5000);
-            }
-
-            const carouselElement = document.querySelector(".testimonial-carousel");
-            carouselElement.addEventListener("mouseenter", () => { testimonialHovered = true; });
-            carouselElement.addEventListener("mouseleave", () => { testimonialHovered = false; });
-
-            document.querySelectorAll("audio").forEach(audio => {
-                audio.addEventListener("play", () => { audioPlaying = true; });
-                audio.addEventListener("pause", () => { audioPlaying = false; });
-                audio.addEventListener("ended", () => { audioPlaying = false; });
-            });
-
-            startTestimonialAutoplay();
-
-            // Swipe support
-            let testimonialStartX = 0;
-            let testimonialEndX = 0;
-
-            carouselElement.addEventListener('touchstart', (e) => {
-                testimonialStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-
-            carouselElement.addEventListener('touchend', (e) => {
-                testimonialEndX = e.changedTouches[0].screenX;
-                if (testimonialEndX < testimonialStartX - 50) {
-                    if (testimonialIndex < testimonialSlides.length - 1) goToTestimonial(testimonialIndex + 1);
-                }
-                if (testimonialEndX > testimonialStartX + 50) {
-                    if (testimonialIndex > 0) goToTestimonial(testimonialIndex - 1);
-                }
-            }, { passive: true });
-
-            // --- Stacked Cards Animation ---
-            const stackCards = gsap.utils.toArray(".card-item");
-
-            stackCards.forEach((card, index) => {
-                // Set Z-Index so cards stack correctly
-                card.style.zIndex = index + 1;
-
-                // Animate all cards EXCEPT the last one as they get covered
-                if (index < stackCards.length - 1) {
-                    gsap.to(card, {
-                        scale: 0.9,
-                        filter: "blur(8px)",
-                        opacity: 0.4,
-                        scrollTrigger: {
-                            trigger: card,
-                            start: "top 12%", // When card hits top area
-                            endTrigger: stackCards[index + 1], // Ends when the next card covers it
-                            end: "top 12%",
-                            scrub: true,
-                            pin: true,
-                            pinSpacing: false,
-                            invalidateOnRefresh: true
-                        }
-                    });
-                }
-            });
-
-            // --- Floating CTA Button Logic ---
-            const ctaSection = document.querySelector('.cta-section');
-            const floatingBtn = document.querySelector('.floating-btn');
-
-            if (ctaSection && floatingBtn) {
-                // Initial set
-                gsap.set(floatingBtn, { xPercent: -50, yPercent: -50, scale: 0 });
-
-                let mouseX = 0, mouseY = 0;
-                let isBtnHovered = false;
-
-                // Ticker function to check overlap
-                const checkOverlap = () => {
-                    const btnX = gsap.getProperty(floatingBtn, "x");
-                    const btnY = gsap.getProperty(floatingBtn, "y");
-
-                    // Calculate distance between mouse and button center
-                    const dx = mouseX - btnX;
-                    const dy = mouseY - btnY;
-                    const dist = Math.sqrt(dx * dx + dy * dy);
-
-                    // Threshold (approx 40px radius)
-                    if (dist < 40) {
-                        if (!isBtnHovered) {
-                            isBtnHovered = true;
-                            gsap.to(floatingBtn, { backgroundColor: "#ffffff", color: "#FF3C00", duration: 0.3 });
-                        }
-                    } else {
-                        if (isBtnHovered) {
-                            isBtnHovered = false;
-                            gsap.to(floatingBtn, { backgroundColor: "#FF3C00", color: "#ffffff", duration: 0.3 });
-                        }
-                    }
-                };
-
-                ctaSection.addEventListener("mouseenter", () => {
-                    gsap.to(floatingBtn, { scale: 1, duration: 0.8, ease: "power2.out" });
-                    gsap.ticker.add(checkOverlap);
-                });
-
-                ctaSection.addEventListener("mouseleave", () => {
-                    gsap.to(floatingBtn, { scale: 0, duration: 0.3, ease: "power2.in" });
-                    gsap.ticker.remove(checkOverlap);
-                    // Reset color
-                    gsap.to(floatingBtn, { backgroundColor: "#FF3C00", color: "#ffffff", duration: 0.3 });
-                    isBtnHovered = false;
-                });
-
-                ctaSection.addEventListener("mousemove", (e) => {
-                    mouseX = e.clientX;
-                    mouseY = e.clientY;
-
-                    // Slow follow movement
-                    gsap.to(floatingBtn, {
-                        x: mouseX,
-                        y: mouseY,
-                        duration: 1.2, // Slow lag
-                        ease: "power2.out"
-                    });
-                });
-            }
-
-            // --- Footer Girl Scroll Animation ---
-            // Wait for Lottie component to be ready or handle raw lottie loading if preferred
-            const footerLottie = document.getElementById('footer-girl-lottie');
-
-            // The 'ready' event is fired by <lottie-player> when the animation data is loaded
-            if (footerLottie) {
-                footerLottie.addEventListener('ready', () => {
-                    const lottieInstance = footerLottie.getLottie();
-
-                    // Ensure GSAP ScrollTrigger is available
-                    if (typeof ScrollTrigger !== 'undefined' && lottieInstance) {
-                        // Use a proxy object to tween the frame count smoothly
-                        let playhead = { frame: 0 };
-
-                        // Target 60% of the animation to balance "completeness" vs "speed"
-                        // This prevents it from rushing but shows more than just the start
-                        const targetEndFrame = (lottieInstance.totalFrames || 100) * 0.6;
-
-                        gsap.to(playhead, {
-                            frame: targetEndFrame,
-                            ease: "none", // Linear map to scroll position (scrub handles the smoothing)
-                            scrollTrigger: {
-                                trigger: ".footer-wrapper",
-                                start: "top bottom",    // when footer top hits bottom of viewport
-                                end: "bottom bottom",   // when footer bottom hits bottom of viewport
-                                scrub: 1.5              // 1.5s lag for smooth fluid motion
-                            },
-                            onUpdate: () => {
-                                lottieInstance.goToAndStop(playhead.frame, true);
-                            }
-                        });
-                    }
-                });
-            }
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 
 </html>
