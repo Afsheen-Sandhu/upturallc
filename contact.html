@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Uptura | Get in Touch for Custom Web & AI Solutions</title>
+    <meta name="description"
+        content="Ready to transform your business? Contact Uptura for expert web development, AI consultancy, and digital strategy. Let's collaborate.">
+    <meta name="keywords"
+        content="contact uptura, hire web developers, ai consultancy contact, digital agency inquiry, custom software quote">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://uptura.com/contact.html">
+    <meta property="og:title" content="Contact Us - Uptura">
+    <meta property="og:description"
+        content="Ready to transform your business? Contact Uptura for expert web development, AI consultancy, and digital strategy.">
+    <meta property="og:image"
+        content="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png">
+    <link rel="canonical" href="https://uptura.com/contact.html">
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body,
+        html {
+            height: 100%;
+            margin: 0;
+            background-color: #EEE9E3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .contact-page-wrapper {
+            display: flex;
+            width: calc(100% - 80px);
+            /* Matches 40px padding on each side of navbar */
+            max-width: 1320px;
+            /* 1400px container - 80px padding */
+            margin: 160px auto 60px;
+            /* Increased top margin for more gap */
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            /* Subtle shadow to define edges */
+            background-color: #EEE9E3;
+            /* Match theme */
+            min-height: calc(100vh - 150px);
+            /* Ensure reasonable height */
+        }
+
+        @media (max-width: 768px) {
+            .contact-page-wrapper {
+                margin: 100px 15px 30px;
+                /* Reduced side margins for mobile */
+                width: auto;
+                /* Allow full width minus margins */
+                flex-direction: column;
+            }
+        }
+
+        /* Left Sidebar */
+        /* Left Sidebar */
+        .contact-sidebar {
+            width: 30%;
+            /* Less wide */
+            background-color: #ffffff;
+            padding: 60px 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            z-index: 10;
+            border-top-right-radius: 24px;
+            /* Rounded right side */
+            border-bottom-right-radius: 24px;
+            overflow: hidden;
+            /* Ensure confetti stays inside */
+            cursor: none;
+            /* Hide default cursor */
+        }
+
+        #sidebar-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .sidebar-top,
+        .back-home {
+            position: relative;
+            z-index: 2;
+            /* Ensure content is above canvas */
+        }
+
+        .sidebar-logo img {
+            width: 80px;
+            /* Reduced from 120px */
+            height: auto;
+        }
+
+        .social-icon-btn svg {
+            width: 20px;
+            height: 20px;
+            color: #1a1a1a;
+            /* Ensure icons are visible */
+            display: block;
+        }
+
+        .social-icons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .sidebar-content {
+            margin-top: 80px;
+            flex-grow: 1;
+        }
+
+        .sidebar-title {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 20px;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .sidebar-text {
+            font-size: 1.1rem;
+            color: #6B6763;
+            line-height: 1.6;
+            max-width: 300px;
+        }
+
+        .decorative-circle {
+            width: 60px;
+            height: 60px;
+            background-color: #A93844;
+            /* Burgundy/Red color from image */
+            border-radius: 50%;
+            margin-top: 60px;
+        }
+
+        .back-home-container {
+            margin-top: auto;
+            position: relative;
+        }
+
+        /* Reusing book-call styles but adjusting for sidebar context */
+        .sidebar-home-btn {
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+            gap: 12px;
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .sidebar-home-text {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 20px;
+            /* Adjust based on font size */
+        }
+
+        .sidebar-home-text span {
+            display: block;
+            font-size: 14px;
+            font-weight: 700;
+            line-height: 20px;
+            color: #1a1a1a;
+            transition: transform 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            white-space: nowrap;
+            /* Prevent wrapping which hides words */
+        }
+
+        .sidebar-home-btn:hover .sidebar-home-text span {
+            transform: translateY(-20px);
+        }
+
+        .sidebar-home-arrow {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            transition: transform 0.3s ease, background 0.3s ease;
+        }
+
+        .sidebar-home-btn:hover .sidebar-home-arrow {
+            transform: rotate(45deg);
+            background: #f5f5f5;
+        }
+
+        .hover-me-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #FF3C00;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 5;
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(255, 60, 0, 0.3);
+        }
+
+        .hover-me-text::before {
+            content: "Hover me! ✨";
+        }
+
+        /* Triangle for popup */
+        .hover-me-text::after {
+            content: '';
+            position: absolute;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-width: 6px 6px 0;
+            border-style: solid;
+            border-color: #FF3C00 transparent transparent transparent;
+        }
+
+        .contact-sidebar:hover .hover-me-text {
+            opacity: 0;
+            transform: translate(-50%, -60%);
+        }
+
+        @media (max-width: 1024px) {
+            .hover-me-text::before {
+                content: "Tap me! ✨";
+            }
+        }
+
+        /* Right Content Area */
+        .contact-content {
+            width: 70%;
+            /* Adjust for sidebar change */
+            padding: 80px 100px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .contact-heading {
+            font-size: 4rem;
+            font-weight: 800;
+            line-height: 1;
+            color: #1a1a1a;
+            margin-bottom: 60px;
+            letter-spacing: -0.04em;
+            max-width: 800px;
+        }
+
+        .contact-heading span {
+            color: #6B6763;
+        }
+
+        /* Form Styles */
+        .contact-form {
+            max-width: 700px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.5);
+            /* Semi-transparent white to match look */
+            border: 2px solid #1a1a1a;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: 'Inter', sans-serif;
+            color: #1a1a1a;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder,
+        .form-textarea::placeholder {
+            color: #6B6763;
+            font-weight: 500;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            background: #fff;
+            border-color: #FF3C00;
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .submit-btn {
+            background-color: #FF3C00;
+            color: #fff;
+            border: none;
+            padding: 16px 48px;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            align-self: flex-end;
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            min-width: 160px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .submit-spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 60, 0, 0.2);
+        }
+
+        .contact-illustration {
+            margin-top: 40px;
+            width: 100%;
+            max-width: 300px;
+            align-self: flex-start;
+        }
+
+        @media (max-width: 1024px) {
+            .contact-page-wrapper {
+                flex-direction: column;
+                overflow-y: auto;
+            }
+
+            .contact-sidebar {
+                width: 100%;
+                padding: 40px;
+                min-height: auto;
+            }
+
+            .contact-content {
+                width: 100%;
+                padding: 40px;
+            }
+
+            .contact-heading {
+                font-size: 3rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+
+            .contact-sidebar,
+            .contact-content {
+                padding: 30px 24px;
+                /* Reduced padding for mobile */
+            }
+
+            .contact-heading {
+                font-size: 2.5rem;
+                /* Smaller heading */
+            }
+
+            .contact-illustration lottie-player {
+                height: 200px !important;
+            }
+
+            .form-input::placeholder,
+            .form-textarea::placeholder {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation Placeholder -->
+    <div id="navbar-placeholder" class="custom-navbar-wrapper"></div>
+
+    <div class="contact-page-wrapper">
+        <!-- Left Sidebar -->
+        <div class="contact-sidebar">
+            <div class="sidebar-top">
+                <a href="index.html" class="sidebar-logo">
+                    <!-- Using CDN logo for reliability -->
+                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                        alt="Uptura">
+                </a>
+                <div class="sidebar-content">
+                    <h2 class="sidebar-title">Book an introduction call</h2>
+                    <p class="sidebar-text">During this call we do a quick intro and discuss your project and its
+                        specific needs.</p>
+                    <div style="margin-top: 40px;">
+                        <!-- Canvas will be here -->
+                    </div>
+                </div>
+            </div>
+            <canvas id="sidebar-canvas"></canvas>
+
+            <div class="hover-me-text"></div>
+
+            <div class="back-home-container">
+                <a href="index.html" class="sidebar-home-btn">
+                    <span class="sidebar-home-text">
+                        <span>BACK TO HOME</span>
+                        <span>BACK TO HOME</span>
+                    </span>
+                    <span class="sidebar-home-arrow">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#1a1a1a" stroke-width="2" stroke-linecap="round"
+                                stroke-linejoin="round" />
+                        </svg>
+                    </span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Right Content -->
+        <div class="contact-content">
+            <h1 class="contact-heading">Wanna to start to <br><span style="color: #6B6763;">collaborate?</span></h1>
+
+            <form class="contact-form" id="contactForm">
+                <div class="form-group">
+                    <label class="form-label">Name</label>
+                    <input type="text" id="name" class="form-input" placeholder="Enter your Name" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" id="email" class="form-input" placeholder="Enter your Email" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Phone</label>
+                    <input type="tel" id="phone" class="form-input" placeholder="Enter your phone number">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Company Name</label>
+                    <input type="text" id="company" class="form-input" placeholder="Enter your Company Name">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Is there any other information you'd like to share with us?</label>
+                    <textarea id="message" class="form-textarea" placeholder="Tell us your thoughts"></textarea>
+                </div>
+
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <div class="submit-spinner"></div>
+                    <span class="btn-text">Submit</span>
+                </button>
+            </form>
+
+            <div class="contact-illustration">
+                <lottie-player
+                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6962533fc2c9dd31ca443b61_16ad847094484d2cbcdcfbed32ad1a45.json"
+                    background="transparent" speed="1" style="width: 250px; height: 250px;" loop autoplay>
+                </lottie-player>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Placeholder -->
+    <div id="footer-placeholder"></div>
+
+    <script src="script.js"></script>
+    <script>
+        // Interactive Sidebar Confetti
+        const canvas = document.getElementById('sidebar-canvas');
+        const ctx = canvas.getContext('2d');
+        const sidebar = document.querySelector('.contact-sidebar');
+
+        let width, height;
+        let particles = [];
+
+        // Resize canvas to match sidebar
+        function resize() {
+            const rect = sidebar.getBoundingClientRect();
+            width = canvas.width = rect.width;
+            height = canvas.height = rect.height;
+        }
+
+        window.addEventListener('resize', resize);
+        // Initial resize after a short delay to ensure layout is settled
+        setTimeout(resize, 100);
+
+        class Particle {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 8 + 2; // Random size 2-10px
+                this.speedX = Math.random() * 2 - 1;
+                this.speedY = Math.random() * 2 + 1; // Falling down
+                this.color = this.getRandomColor();
+                this.life = 100; // Lives for 100 frames
+            }
+
+            getRandomColor() {
+                const colors = ['#FF3C00', '#1a1a1a', '#e0e0e0', '#FF5722'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.life--;
+                this.size *= 0.96; // Shrink over time
+            }
+
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.globalAlpha = this.life / 100;
+                ctx.beginPath();
+                if (Math.random() > 0.5) {
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); // Circle
+                } else {
+                    ctx.fillRect(this.x, this.y, this.size, this.size); // Square
+                }
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        // Helper to spawn particles
+        function spawnParticles(x, y, count = 3) {
+            for (let i = 0; i < count; i++) {
+                particles.push(new Particle(x, y));
+            }
+        }
+
+        // Spawn particles on mouse move over sidebar
+        sidebar.addEventListener('mousemove', (e) => {
+            const rect = sidebar.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            spawnParticles(x, y);
+        });
+
+        // Spawn particles on touch/click
+        sidebar.addEventListener('click', (e) => {
+            const rect = sidebar.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            spawnParticles(x, y, 10); // More particles on click
+
+            // Hide the text on interaction
+            const textElement = document.querySelector('.hover-me-text');
+            if (textElement) {
+                textElement.style.opacity = '0';
+                textElement.style.transform = 'translate(-50%, -60%)';
+            }
+        });
+
+        // Form Submission Logic
+        const form = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('.btn-text');
+        const spinner = submitBtn.querySelector('.submit-spinner');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            // 1. Get Values
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const company = document.getElementById('company').value;
+            const message = document.getElementById('message').value;
+
+            // 2. Loading State
+            submitBtn.disabled = true;
+            btnText.textContent = "Submitting...";
+            spinner.style.display = "block";
+
+            // 3. Construct Mailto Link
+            const subject = `New Contact Request from ${name}`;
+            const body = `Name: ${name}%0D%0AEmail: ${email}%0D%0APhone: ${phone}%0D%0ACompany: ${company}%0D%0A%0D%0AMessage:%0D%0A${message}`;
+            const mailtoLink = `mailto:info@uptura.net?subject=${encodeURIComponent(subject)}&body=${body}`; // Body already partially encoded with %0D%0A
+
+            // 4. Simulate Delay & Send
+            setTimeout(() => {
+                // Success State
+                spinner.style.display = "none";
+                btnText.textContent = "Sent ✔";
+                submitBtn.style.backgroundColor = "#4CAF50"; // Green for success
+
+                // Open Email Client
+                window.location.href = mailtoLink;
+
+                // Reset after a delay
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    btnText.textContent = "Submit";
+                    submitBtn.style.backgroundColor = "#FF3C00";
+                    form.reset();
+                }, 3000);
+            }, 1500);
+        });
+
+        // Animation Loop
+        function animate() {
+            ctx.clearRect(0, 0, width, height);
+
+            for (let i = 0; i < particles.length; i++) {
+                particles[i].update();
+                particles[i].draw();
+
+                if (particles[i].life <= 0 || particles[i].size <= 0.2) {
+                    particles.splice(i, 1);
+                    i--;
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+
+</html>
