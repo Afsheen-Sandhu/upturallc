@@ -111,9 +111,12 @@ document.addEventListener("DOMContentLoaded", function () {
             })
             .then(html => {
                 const placeholder = document.getElementById(placeholderId);
-                if (placeholder) {
+                if (placeholder && placeholder.innerHTML.trim() === "") {
                     placeholder.innerHTML = html;
                     if (callback) callback();
+                } else if (placeholder && callback) {
+                    // Even if hardcoded, we might need to trigger the callback for animations
+                    callback();
                 }
             })
             .catch(error => console.error(error));

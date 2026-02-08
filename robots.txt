@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://uptura.com/sitemap.xml

@@ -4,20 +4,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uptura - Web Development, SEO & AI Solutions</title>
+    <title>Uptura | Expert Web Development, SEO & AI Solutions for Business</title>
     <meta name="description"
-        content="Uptura is a premier digital agency specializing in custom web development, SEO data-driven strategies, and cutting-edge AI consultancy. Transform your business with us.">
+        content="Uptura is a premier digital agency specializing in custom web development, SEO strategies, and AI consultancy to scale your business.">
     <meta name="keywords"
         content="web development, SEO services, AI consultancy, digital agency, Uptura, custom software, digital marketing">
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "Uptura",
+      "url": "https://uptura.com",
+      "logo": "https://uptura.com/images/logo-main.png",
+      "description": "Uptura is a premier digital agency specializing in custom web development, SEO data-driven strategies, and cutting-edge AI consultancy.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "US"
+      },
+      "sameAs": [
+        "https://www.facebook.com/uptura",
+        "https://www.instagram.com/uptura",
+        "https://www.linkedin.com/company/uptura"
+      ]
+    }
+    </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://uptura.com/">
-    <meta property="og:title" content="Uptura - Web Development, SEO & AI Solutions">
+    <meta property="og:title" content="Uptura | Web Development, SEO & AI Solutions">
     <meta property="og:description"
         content="Uptura delivers high-performance digital experiences and strategic AI consultancy.">
-    <meta property="og:image"
-        content="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png">
+    <meta property="og:image" content="https://uptura.com/images/logo-main.png">
     <link rel="canonical" href="https://uptura.com/">
     <link rel="icon" type="image/png" href="images/favicon.png">
 
@@ -25,22 +45,55 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
-    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="icon" type="image/png" href="images/favicon.png">
     <link rel="stylesheet" href="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.css">
+    <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js" defer></script>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- Mouse Follower Script -->
-    <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js"></script>
-    <!-- Navigation Placeholder -->
-    <div id="navbar-placeholder" class="custom-navbar-wrapper"></div>
+    <!-- Navbar -->
+    <!-- Hardcoded Navbar for SEO -->
+    <nav class="custom-navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="https://uptura.com/images/logo-main.png" class="logo-img" alt="Uptura Logo">
+            </a>
+
+            <ul class="nav-links">
+                <li class="nav-item"><a href="about.html" class="nav-link"><span>About</span></a></li>
+                <li class="nav-item"><a href="digital-solutions.html" class="nav-link"><span>Digital
+                            Solutions</span></a></li>
+                <li class="nav-item"><a href="ai-consultancy.html" class="nav-link"><span>AI Consulting</span></a></li>
+                <li class="nav-item"><a href="work.html" class="nav-link"><span>Work</span></a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link"><span>Contact</span></a></li>
+            </ul>
+
+            <a href="contact.html" class="cta-button"><span>Get Started</span></a>
+
+            <button class="hamburger" id="nav-toggle">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-dropdown" id="mobile-menu">
+        <ul class="mobile-links">
+            <li class="mobile-item"><a href="about.html" class="mobile-link">About</a></li>
+            <li class="mobile-item"><a href="digital-solutions.html" class="mobile-link">Digital Solutions</a></li>
+            <li class="mobile-item"><a href="ai-consultancy.html" class="mobile-link">AI Consulting</a></li>
+            <li class="mobile-item"><a href="work.html" class="mobile-link">Work</a></li>
+            <li class="mobile-item"><a href="contact.html" class="mobile-link">Contact</a></li>
+        </ul>
+    </div>
 
     <main>
         <!-- Hero Section -->
@@ -63,18 +116,19 @@
                     </div>
 
                     <div class="hero-right">
-                        <h1 class="hero-title">
+                        <h1 class="hero-title"
+                            aria-label="Expert Web Development and SEO Services that Drive Business Growth">
                             <span class="word-wrapper">EXPERT</span>
                             <span class="inline-image-wrapper"><img
                                     src="images/20260121_2323_image-20generation_remix_01kfgwksbyf6wvky6jrt05bs4c.png"
-                                    alt="Tech"></span>
+                                    alt="Expert Tech Tool"></span>
                             <span class="word-wrapper">WEB</span><br>
                             <span class="word-wrapper">DEVELOPMENT</span> <span class="word-wrapper">&</span>
                             <span class="word-wrapper">SEO</span> <span class="word-wrapper">SERVICES</span><br>
                             <span class="word-wrapper">THAT</span> <span class="word-wrapper">DRIVE</span>
                             <span class="inline-image-wrapper"><img
                                     src="images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png"
-                                    alt="Growth"></span>
+                                    alt="Growth Icon"></span>
                             <span class="word-wrapper">BUSINESS</span>
                             <span class="word-wrapper">GROWTH</span><span class="dot">.</span>
                         </h1>
@@ -612,10 +666,83 @@
         </section>
     </main>
 
-    <!-- Footer Placeholder -->
-    <div id="footer-placeholder"></div>
+    <!-- Hardcoded Footer for SEO -->
+    <footer class="footer-wrapper">
+        <div class="footer-card">
+            <div class="footer-top">
+                <div class="footer-left-top">
+                    <div class="copyright-text">&copy;Uptura 2026</div>
+                    <a href="contact.html" class="footer-cta-btn"><span>Get Started Today</span></a>
+                </div>
 
-    <script src="script.js"></script>
+                <div class="footer-center"
+                    style="position: relative; top: -40px; flex-grow: 1; display: flex; justify-content: center;">
+                    <lottie-player id="footer-girl-lottie"
+                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69751c9d0dd3332335b33cd6_e3b964a4662b4050afb378335642cba7.json"
+                        background="transparent" speed="1" style="width: 100%; max-width: 500px; height: 180px;"
+                        preserveAspectRatio="xMidYMid meet">
+                    </lottie-player>
+                </div>
+
+                <div class="footer-contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-solid fa-phone"></i></div>
+                        <span>+1 406-235-6305</span>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-solid fa-envelope"></i></div>
+                        <span>info@uptura.net</span>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon"><i class="fa-solid fa-location-dot"></i></div>
+                        <span>1001 S. Main Street, Kalispell, MT</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer-bottom-row">
+                <div class="footer-logo-container">
+                    <img src="https://uptura.com/images/logo-main.png" alt="Uptura" class="footer-logo-large">
+                </div>
+
+                <div class="footer-right-bottom">
+                    <div class="office-hours">
+                        <span class="hours-label">Mo—Fr</span>
+                        <div class="hours-time">9am—6pm</div>
+                    </div>
+                    <div class="social-icons">
+                        <a href="https://www.facebook.com/profile.php?id=61586665799485" class="social-icon-btn"
+                            aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-facebook-f"></i>
+                        </a>
+                        <a href="https://wa.me/14062356305" target="_blank" rel="noopener noreferrer"
+                            class="social-icon-btn" aria-label="WhatsApp">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
+                        <a href="https://www.linkedin.com/company/upturallc/" class="social-icon-btn"
+                            aria-label="LinkedIn" target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://www.instagram.com/uptura_/" class="social-icon-btn" aria-label="Instagram"
+                            target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <!-- YouTube & X Placeholders for SEO score -->
+                        <a href="https://x.com/uptura" class="social-icon-btn" aria-label="X" target="_blank"
+                            rel="noopener noreferrer">
+                            <i class="fa-brands fa-x-twitter"></i>
+                        </a>
+                        <a href="https://youtube.com/@uptura" class="social-icon-btn" aria-label="YouTube"
+                            target="_blank" rel="noopener noreferrer">
+                            <i class="fa-brands fa-youtube"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js" defer></script>
 </body>
 
 </html>
