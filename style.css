@@ -108,7 +108,8 @@ html.lenis body {
 
 .nav-link {
     position: relative;
-    padding: 8px 15px;
+    padding: 12px 18px;
+    /* Increased for better tap target */
     font-size: 15px;
     /* Increased for better visibility */
     font-weight: 700;
@@ -118,6 +119,17 @@ html.lenis body {
     letter-spacing: 0.02em;
     text-transform: uppercase;
     display: inline-block;
+}
+
+.social-icon-btn {
+    width: 44px;
+    /* Minimum recommended tap target size */
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: all 0.3s ease;
 }
 
 .nav-link span {
