@@ -4,7 +4,11 @@ document.addEventListener("DOMContentLoaded", function () {
         container: document.body,
         speed: 0.6,
         skewing: 1,
-        size: 20, // Increased default size
+        size: 15,
+        interactiveSelf: true,
+        stateDetection: {
+            '-pointer': 'a,button',
+        }
     });
 
     // --- LENIS SMOOTH SCROLL ---
@@ -203,8 +207,18 @@ document.addEventListener("DOMContentLoaded", function () {
     loadComponent('navbar.html', 'navbar-placeholder', () => {
         const toggle = document.getElementById('nav-toggle');
         const menu = document.getElementById('mobile-menu');
+        const navbar = document.querySelector('.custom-navbar');
         const currentPath = window.location.pathname;
         let menuOpen = false;
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                navbar.classList.add('scrolled');
+            } else {
+                navbar.classList.remove('scrolled');
+            }
+        });
 
         // Set Active Link
         // Handle root "/" vs "/index.html"

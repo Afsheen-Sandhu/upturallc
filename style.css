@@ -34,6 +34,35 @@ html.lenis body {
 }
 
 /* Navbar Styles */
+/* Mouse Follower Styling - Ensure visibility over everything */
+.mf-cursor {
+    z-index: 100000 !important;
+}
+
+.mf-cursor:before {
+    background: #FF3C00 !important;
+}
+
+.mf-cursor.-pointer {
+    width: 60px !important;
+    height: 60px !important;
+    margin-top: -30px !important;
+    margin-left: -30px !important;
+    background: rgba(255, 60, 0, 0.1) !important;
+    border: 1px solid #FF3C00;
+    border-radius: 50% !important;
+    /* Ensure it stays a circle */
+}
+
+.mf-cursor.-pointer:before {
+    display: none;
+}
+
+/* Ensure no square artifact during transition */
+.mf-cursor.-active {
+    border-radius: 50% !important;
+}
+
 .custom-navbar-wrapper * {
     font-family: 'Inter', sans-serif !important;
 }
@@ -43,11 +72,21 @@ html.lenis body {
     top: 0;
     left: 0;
     width: 100%;
-    background: #EEE9E3;
+    background: rgba(238, 233, 227, 0.9);
+    /* Subtle transparency */
+    backdrop-filter: blur(12px);
+    /* Modern frosted look */
+    -webkit-backdrop-filter: blur(12px);
     z-index: 9999;
-    padding: 14px 0;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+    padding: 20px 0;
+    transition: all 0.4s ease;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.custom-navbar.scrolled {
+    padding: 12px 0;
+    background: rgba(238, 233, 227, 0.98);
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
 }
 
 .nav-container {
@@ -61,11 +100,12 @@ html.lenis body {
 }
 
 .logo-img {
-    height: 48px;
+    height: 40px;
+    /* More elegant size */
     width: auto;
     display: block;
     z-index: 10001;
-    transition: transform 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .logo-img:hover {
@@ -75,78 +115,66 @@ html.lenis body {
 .nav-links {
     display: flex;
     list-style: none;
-    gap: 10px;
+    gap: 15px;
+    margin-left: auto;
+    margin-right: 40px;
 }
 
 .nav-item {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-10px);
 }
 
 .nav-link {
     position: relative;
-    padding: 11px 22px;
-    font-size: 15px;
-    font-weight: 700;
-    color: #000;
+    padding: 8px 12px;
+    font-size: 13px;
+    /* Slightly smaller for elegance */
+    font-weight: 600;
+    color: #1a1a1a;
     text-decoration: none;
-    border: 1.5px solid rgba(0, 0, 0, 0.12);
-    border-radius: 50px;
-    overflow: hidden;
-    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    letter-spacing: 0.01em;
+    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+    /* More spacing for premium feel */
+    text-transform: uppercase;
     display: inline-block;
 }
 
 .nav-link span {
     position: relative;
     z-index: 2;
-    transition: color 0.4s cubic-bezier(0.23, 1, 0.32, 1);
-    display: block;
 }
 
-.nav-fill {
+/* Modern underline reveal */
+.nav-link::after {
+    content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-    transform: translateY(105%);
-    z-index: 1;
-    pointer-events: none;
-    transition: transform 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-    border-radius: 50px;
+    bottom: 0;
+    left: 12px;
+    right: 12px;
+    height: 2px;
+    background: #FF3C00;
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .nav-link:hover {
-    border-color: #FF3C00 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(255, 60, 0, 0.25);
+    color: #FF3C00;
 }
 
-.nav-link:hover span {
-    color: #fff;
-    transform: translateY(-1px);
-    /* Slight lift for text */
-}
-
-.nav-link:hover .nav-fill {
-    transform: translateY(0%);
+.nav-link:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
 }
 
 .nav-link.active {
-    background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-    border-color: #FF3C00 !important;
-    box-shadow: 0 4px 12px rgba(255, 60, 0, 0.25);
+    color: #FF3C00;
 }
 
-.nav-link.active span {
-    color: #fff !important;
-}
-
-.nav-link.active .nav-fill {
-    transform: translateY(0%);
+.nav-link.active::after {
+    transform: scaleX(1);
+    background: #FF3C00;
 }
 
 .footer-cta-btn {
@@ -255,31 +283,38 @@ html.lenis body {
     color: #FF3C00 !important;
 }
 
+/* Hamburger Fixes */
 .hamburger {
     display: none;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     cursor: pointer;
-    background: none;
+    background: #000;
     border: none;
     z-index: 10001;
-    width: 40px;
-    height: 40px;
-    transition: transform 0.3s ease;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    transition: all 0.3s ease;
 }
 
 .hamburger:hover {
-    transform: scale(1.1);
+    background: #FF3C00;
+    transform: scale(1.05);
 }
 
 .hamburger-line {
-    width: 28px;
-    height: 3px;
-    background-color: #000 !important;
+    width: 18px;
+    height: 1.5px;
+    background-color: #fff !important;
     border-radius: 10px;
     transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger.active .hamburger-line {
+    background: #fff !important;
 }
 
 .hamburger.active .hamburger-line:nth-child(1) {
@@ -298,24 +333,38 @@ html.lenis body {
 
 .mobile-dropdown {
     position: fixed;
-    top: 76px;
+    top: 0;
     left: 0;
     width: 100%;
+    height: 100vh;
     background: #EEE9E3;
-    z-index: 9998;
-    padding: 24px 24px 28px;
-    border-bottom: 2px solid #FF3C00;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+    z-index: 9990;
+    padding: 120px 40px 40px;
     display: none;
     opacity: 0;
-    transform: translateY(-20px);
 }
 
 .mobile-links {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 25px;
+    align-items: center;
+}
+
+.mobile-link {
+    font-size: 32px;
+    font-weight: 800;
+    color: #000;
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    transition: all 0.3s ease;
+}
+
+.mobile-link:hover,
+.mobile-link.active {
+    color: #FF3C00;
 }
 
 .mobile-item {
@@ -881,10 +930,7 @@ html.lenis body {
     /* Required for transform */
 }
 
-/* Mouse Follower Styling */
-.mf-cursor:before {
-    background: #FF3C00 !important;
-}
+
 
 /* Updated for GSAP Animation */
 .word-wrapper {
