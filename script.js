@@ -1,14 +1,60 @@
 document.addEventListener("DOMContentLoaded", function () {
-    // --- MOUSE FOLLOWER (CUBERTO) ---
     const cursor = new MouseFollower({
         container: document.body,
-        speed: 0.6,
+        speed: 0.7,
         skewing: 1,
         size: 15,
-        interactiveSelf: true,
-        stateDetection: {
-            '-pointer': 'a,button',
-        }
+        interactiveSelf: false, // Prevents library from adding its own hover states if not wanted
+    });
+
+    // --- FLUID MAGNETIC BUTTONS ---
+    const magneticBtns = document.querySelectorAll('.book-call, .cta-button, .hamburger, .explore-services, .footer-cta-btn');
+
+    magneticBtns.forEach(btn => {
+        const text = btn.querySelector('span'); // Get the internal text for parallax
+
+        btn.addEventListener('mousemove', function (e) {
+            const rect = btn.getBoundingClientRect();
+            const x = e.clientX - rect.left - rect.width / 2;
+            const y = e.clientY - rect.top - rect.height / 2;
+
+            // Move the button itself
+            gsap.to(btn, {
+                x: x * 0.35,
+                y: y * 0.35,
+                duration: 0.4,
+                ease: "power3.out"
+            });
+
+            // Move the internal text at a different speed for "fluid" feel
+            if (text) {
+                gsap.to(text, {
+                    x: x * 0.15,
+                    y: y * 0.15,
+                    duration: 0.4,
+                    ease: "power3.out"
+                });
+            }
+        });
+
+        btn.addEventListener('mouseleave', function () {
+            // Snap the button back with a fluid elastic effect
+            gsap.to(btn, {
+                x: 0,
+                y: 0,
+                duration: 0.8,
+                ease: "elastic.out(1, 0.4)"
+            });
+
+            if (text) {
+                gsap.to(text, {
+                    x: 0,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "elastic.out(1, 0.4)"
+                });
+            }
+        });
     });
 
     // --- LENIS SMOOTH SCROLL ---

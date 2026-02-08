@@ -20,6 +20,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.css">
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js"></script>
 
     <!-- Google Font for CTA -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -470,10 +473,10 @@
             <span class="badge-dot"></span> HOW AI HELPS BUSINESSES
         </div>
 
-        <section class="stack-section">
-            <div class="card-container">
+        <section class="ai-solutions-stack">
+            <div class="ai-solutions-container">
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path d="M12 2l-5.5 9h11L12 2zm0 20l5.5-9h-11L12 22z" />
@@ -491,7 +494,7 @@
                     </div>
                 </div>
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path
@@ -510,7 +513,7 @@
                     </div>
                 </div>
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path
@@ -529,7 +532,7 @@
                     </div>
                 </div>
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path d="M13 3l-4 7h3v8l4-7h-3l4-7z" />
@@ -547,7 +550,7 @@
                     </div>
                 </div>
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path
@@ -566,7 +569,7 @@
                     </div>
                 </div>
 
-                <div class="card-item">
+                <div class="ai-solution-card">
                     <div>
                         <div class="icon-box"><svg viewBox="0 0 24 24">
                                 <path
@@ -595,7 +598,7 @@
                 --card-bg: #ffffff;
             }
 
-            .stack-section {
+            .ai-solutions-stack {
                 padding: 10vh 5% 10vh 5%;
                 display: flex;
                 flex-direction: column;
@@ -603,7 +606,7 @@
                 margin-bottom: 0;
             }
 
-            .card-container {
+            .ai-solutions-container {
                 position: relative;
                 width: 100%;
                 max-width: 800px;
@@ -611,7 +614,7 @@
                 padding-bottom: 0;
             }
 
-            .card-item {
+            .ai-solution-card {
                 width: 100%;
                 min-height: 500px;
                 background: var(--card-bg);
@@ -629,7 +632,7 @@
             }
 
             /* Remove margin from the last card */
-            .card-item:last-child {
+            .ai-solution-card:last-child {
                 margin-bottom: 0;
             }
 
@@ -646,7 +649,7 @@
                 height: 100%;
             }
 
-            .card-item h2 {
+            .ai-solution-card h2 {
                 font-size: 2.5rem;
                 color: #000;
                 margin: 0 0 15px 0;
@@ -701,18 +704,18 @@
 
             /* Responsive Fix for small screens */
             @media (max-width: 768px) {
-                .stack-section {
+                .ai-solutions-stack {
                     padding: 5vh 4% 5vh 4%;
                 }
 
-                .card-item {
+                .ai-solution-card {
                     padding: 40px 30px;
                     min-height: 450px;
                     margin-bottom: 5vh;
                     /* Reduced gap on mobile */
                 }
 
-                .card-item h2 {
+                .ai-solution-card h2 {
                     font-size: 2rem;
                 }
 
@@ -722,12 +725,12 @@
             }
 
             @media (max-width: 479px) {
-                .card-item {
+                .ai-solution-card {
                     padding: 30px;
                     min-height: 400px;
                 }
 
-                .card-item h2 {
+                .ai-solution-card h2 {
                     font-size: 1.8rem;
                 }
             }
@@ -739,7 +742,7 @@
             // Check if screen is mobile (768px or less)
             const isMobile = window.innerWidth <= 768;
 
-            const cards = gsap.utils.toArray(".card-item");
+            const cards = gsap.utils.toArray(".ai-solution-card");
 
             // Only apply stacking animation on desktop
             if (!isMobile) {
