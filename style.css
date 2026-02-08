@@ -1240,31 +1240,61 @@ html.lenis body {
     .footer-left-top {
         width: 100%;
         min-height: auto;
-        gap: 20px;
+        gap: 15px;
         align-items: center;
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
     }
 
     .footer-top {
         flex-direction: column;
         align-items: center;
         text-align: center;
+        gap: 35px;
     }
 
     .footer-center {
         top: 0 !important;
-        margin: 20px 0;
+        margin: 10px 0;
     }
 
     .footer-contact-info {
-        width: 100%;
-        align-items: center;
-        text-align: center;
+        width: fit-content;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+        padding: 0 10px;
     }
 
     .contact-item {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        width: 100%;
+        text-align: left;
+    }
+
+    .contact-item:last-child {
+        align-items: flex-start;
+    }
+
+    .contact-item span {
+        font-size: 0.95rem;
+        line-height: 1.4;
+        font-weight: 600;
+        color: #000;
+    }
+
+    .contact-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 0.95rem;
+        flex-shrink: 0;
+        display: flex;
         justify-content: center;
+        align-items: center;
     }
 
     .inline-image-wrapper {
@@ -1274,41 +1304,84 @@ html.lenis body {
 
 @media (max-width: 480px) {
     .hero-title {
-        font-size: 40px;
-        letter-spacing: -1.5px;
+        font-size: 32px;
+        letter-spacing: -1px;
     }
 
     .logo-img {
-        height: 38px;
+        height: 34px;
+    }
+
+    .footer-card {
+        padding: 40px 20px;
+        gap: 40px;
+        border-radius: 24px;
+    }
+
+    .footer-contact-info {
+        gap: 14px;
+    }
+
+    .contact-item span {
+        font-size: 0.9rem;
+    }
+
+    .contact-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 0.85rem;
+    }
+
+    .footer-logo-large {
+        width: 180px;
+    }
+
+    .social-icon-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1.1rem;
+    }
+
+    .hours-time {
+        font-size: 1.25rem;
     }
 }
 
 /* Footer Styles */
 .footer-wrapper {
+    position: relative;
+    overflow: hidden;
     background-color: #EEE9E3;
-    padding: 80px 20px;
+    padding: 100px 20px;
     display: flex;
     justify-content: center;
 }
 
 .footer-card {
+    position: relative;
+    z-index: 1;
     background-color: #ffffff;
     border-radius: 40px;
-    padding: 60px 80px;
+    padding: 70px 80px;
     width: 100%;
     max-width: 1400px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 15px 45px rgba(0, 0, 0, 0.06);
     display: flex;
     flex-direction: column;
-    gap: 50px;
+    gap: 60px;
+}
+
+#footer-confetti {
+    z-index: 99 !important;
+    pointer-events: none;
 }
 
 .footer-top {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    border-bottom: 1px solid #e0e0e0;
-    padding-bottom: 50px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    padding-bottom: 60px;
 }
 
 .footer-left-top {
@@ -1323,22 +1396,24 @@ html.lenis body {
     font-size: 1rem;
     font-weight: 600;
     color: #000;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
 }
 
 .footer-cta-btn {
-    background-color: #FF3C00;
+    background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
     color: #fff;
-    padding: 15px 35px;
-    border-radius: 30px;
+    padding: 18px 40px;
+    border-radius: 50px;
     text-decoration: none;
-    font-weight: 600;
+    font-weight: 700;
     display: inline-block;
-    transition: transform 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(255, 60, 0, 0.2);
 }
 
 .footer-cta-btn:hover {
-    transform: scale(1.05);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(255, 60, 0, 0.3);
 }
 
 .footer-center {
@@ -1347,64 +1422,135 @@ html.lenis body {
     align-items: center;
 }
 
-.footer-illustration {
-    width: 150px;
-    height: auto;
-}
-
 .footer-contact-info {
     text-align: left;
-    font-size: 1rem;
-    line-height: 1.6;
-    color: #000;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
 }
 
 .contact-item {
-    margin-bottom: 20px;
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: 20px;
+    transition: all 0.3s ease;
 }
 
 .contact-icon {
-    width: 40px;
-    height: 40px;
+    width: 48px;
+    height: 48px;
     background-color: #FF3C00;
     border-radius: 50%;
     display: flex;
     justify-content: center;
     align-items: center;
     color: #fff;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
     flex-shrink: 0;
+    transition: all 0.3s ease;
+}
+
+.contact-icon i {
+    color: #ffffff;
+    transition: color 0.3s ease;
+}
+
+.contact-item span {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: #000;
+    line-height: 1.5;
+    letter-spacing: -0.01em;
+}
+
+.contact-item:hover .contact-icon {
+    background-color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.contact-item:hover .contact-icon i {
+    color: #FF3C00;
 }
 
 .contact-item:last-child {
     align-items: flex-start;
 }
 
-.contact-item strong {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.footer-divider {
-    height: 1px;
-    background-color: #e0e0e0;
-    width: 100%;
-    margin: 0;
-}
-
 .footer-bottom-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    padding-top: 10px;
 }
 
 .footer-logo-large {
-    width: 200px;
+    width: 220px;
     height: auto;
+    transition: transform 0.3s ease;
+}
+
+.footer-logo-large:hover {
+    transform: scale(1.02);
+}
+
+.footer-right-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 25px;
+}
+
+.office-hours {
+    text-align: right;
+}
+
+.hours-label {
+    font-size: 0.95rem;
+    color: #666;
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+}
+
+.hours-time {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #000;
+    letter-spacing: -0.02em;
+}
+
+.social-icons {
+    display: flex;
+    gap: 12px;
+}
+
+.social-icons .social-icon-btn {
+    width: 44px;
+    height: 44px;
+    background-color: #FF3C00;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff !important;
+    font-size: 1.2rem;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.social-icons .social-icon-btn i {
+    color: #ffffff !important;
+    transition: color 0.3s ease;
+}
+
+.social-icons .social-icon-btn:hover {
+    background-color: #ffffff !important;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.social-icons .social-icon-btn:hover i {
+    color: #FF3C00 !important;
 }
 
 .footer-right-bottom {
@@ -1456,7 +1602,8 @@ html.lenis body {
 
 @media (max-width: 991px) {
     .footer-card {
-        padding: 40px;
+        padding: 50px 30px;
+        border-radius: 30px;
     }
 
     .footer-top {
@@ -1474,12 +1621,13 @@ html.lenis body {
 
     .footer-contact-info {
         text-align: center;
+        align-items: center;
     }
 
     .footer-bottom-row {
         flex-direction: column;
         align-items: center;
-        gap: 40px;
+        gap: 30px;
     }
 
     .footer-right-bottom {
@@ -1488,6 +1636,10 @@ html.lenis body {
 
     .office-hours {
         text-align: center;
+    }
+
+    .hours-time {
+        font-size: 1.4rem;
     }
 }
 
@@ -3695,78 +3847,4 @@ html.lenis body {
     }
 }
 
-
-/* Footer Social Icons - Ensure White */
-/* Footer Social Icons - Ensure White */
-.footer-wrapper .social-icon-btn {
-    color: #ffffff !important;
-    text-decoration: none;
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.footer-wrapper .social-icon-btn i {
-    color: #ffffff !important;
-    transition: color 0.3s ease;
-}
-
-.footer-wrapper .social-icon-btn:hover i {
-    color: #FF3C00 !important;
-}
-
-.footer-wrapper .social-icon-btn:hover {
-    background-color: #ffffff !important;
-    transform: translateY(-2px);
-}
-
-/* Contact Info Icons Hover Effect */
-.contact-icon {
-    width: 40px;
-    height: 40px;
-    background-color: #FF3C00;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    color: #fff;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    transition: all 0.3s ease;
-}
-
-.contact-icon i {
-    color: #ffffff;
-    transition: color 0.3s ease;
-}
-
-.contact-item:hover .contact-icon {
-    background-color: #ffffff;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.contact-item:hover .contact-icon i {
-    color: #FF3C00;
-}
-
-/* Footer Positioning Fix for Confetti */
-.footer-wrapper {
-    position: relative;
-    overflow: hidden;
-    background-color: #EEE9E3;
-}
-
-.footer-card {
-    position: relative;
-    z-index: 1;
-    background: #ffffff;
-}
-
-#footer-confetti {
-    z-index: 99 !important;
-    /* Ensure confetti is on top of the card */
-    pointer-events: none;
-    /* Allow clicks to pass through */
-}
+/* End of File */
