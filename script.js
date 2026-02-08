@@ -104,20 +104,23 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Function to load HTML into a placeholder
     const loadComponent = (url, placeholderId, callback) => {
+        const placeholder = document.getElementById(placeholderId);
+        if (!placeholder) return;
+
+        // If the placeholder is already hardcoded (not empty), just trigger callback
+        if (placeholder.innerHTML.trim() !== "") {
+            if (callback) callback();
+            return;
+        }
+
         fetch(url)
             .then(response => {
                 if (!response.ok) throw new Error(`Failed to load ${url}`);
                 return response.text();
             })
             .then(html => {
-                const placeholder = document.getElementById(placeholderId);
-                if (placeholder && placeholder.innerHTML.trim() === "") {
-                    placeholder.innerHTML = html;
-                    if (callback) callback();
-                } else if (placeholder && callback) {
-                    // Even if hardcoded, we might need to trigger the callback for animations
-                    callback();
-                }
+                placeholder.innerHTML = html;
+                if (callback) callback();
             })
             .catch(error => console.error(error));
     };
