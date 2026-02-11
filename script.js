@@ -632,23 +632,62 @@ document.addEventListener("DOMContentLoaded", function () {
             carouselElement.addEventListener("mouseenter", () => { testimonialHovered = true; });
             carouselElement.addEventListener("mouseleave", () => { testimonialHovered = false; });
 
-            // Swipe support
+            // Swipe & Drag support
             let testimonialStartX = 0;
-            let testimonialEndX = 0;
+            let testimonialIsDragging = false;
 
+            // Touch events
             carouselElement.addEventListener('touchstart', (e) => {
                 testimonialStartX = e.changedTouches[0].screenX;
             }, { passive: true });
 
             carouselElement.addEventListener('touchend', (e) => {
-                testimonialEndX = e.changedTouches[0].screenX;
-                if (testimonialEndX < testimonialStartX - 50) {
-                    if (testimonialIndex < testimonialSlides.length - 1) goToTestimonial(testimonialIndex + 1);
-                }
-                if (testimonialEndX > testimonialStartX + 50) {
-                    if (testimonialIndex > 0) goToTestimonial(testimonialIndex - 1);
-                }
+                const testimonialEndX = e.changedTouches[0].screenX;
+                handleSwipe(testimonialStartX, testimonialEndX);
             }, { passive: true });
+
+            // Mouse events
+            carouselElement.addEventListener('mousedown', (e) => {
+                testimonialStartX = e.clientX;
+                testimonialIsDragging = true;
+                carouselElement.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (!testimonialIsDragging) return;
+                const testimonialEndX = e.clientX;
+                handleSwipe(testimonialStartX, testimonialEndX);
+                testimonialIsDragging = false;
+                carouselElement.style.cursor = 'grab';
+            });
+
+            carouselElement.addEventListener('mouseleave', () => {
+                if (testimonialIsDragging) {
+                    testimonialIsDragging = false;
+                    carouselElement.style.cursor = 'grab';
+                }
+            });
+
+            function handleSwipe(start, end) {
+                const diff = start - end;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        // Dragged left -> Next
+                        if (testimonialIndex < testimonialSlides.length - 1) {
+                            goToTestimonial(testimonialIndex + 1);
+                        } else {
+                            goToTestimonial(0); // Optional: loop
+                        }
+                    } else {
+                        // Dragged right -> Prev
+                        if (testimonialIndex > 0) {
+                            goToTestimonial(testimonialIndex - 1);
+                        } else {
+                            goToTestimonial(testimonialSlides.length - 1); // Optional: loop
+                        }
+                    }
+                }
+            }
         }
 
         document.querySelectorAll("audio").forEach(audio => {

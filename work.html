@@ -377,6 +377,7 @@
         }
 
         // Testimonial Logic
+        let currentTestimonial = 0;
         const testimonials = [
             {
                 quote: "“Uptura turned our vague ideas into a razor-sharp digital reality. Their strategic approach to branding completely revitalized our market position.”",
@@ -405,6 +406,9 @@
                 }
             });
 
+            // Update current index for drag logic
+            currentTestimonial = index;
+
             // Animate Text Change (Fade Out -> Change -> Fade In)
             const quoteEl = document.getElementById('main-quote');
             const authorEl = document.getElementById('main-author');
@@ -419,6 +423,60 @@
                 roleEl.textContent = testimonials[index].role;
                 quoteEl.style.opacity = 1;
             }, 300);
+        }
+
+        // Drag & Swipe Logic for Testimonials
+        let tStartX = 0;
+        let tIsDragging = false;
+        const tSection = document.querySelector('.work-testimonials');
+
+        if (tSection) {
+            const handleTSwipe = (start, end) => {
+                const diff = start - end;
+                if (Math.abs(diff) > 50) {
+                    if (diff > 0) {
+                        // Dragged left -> Next
+                        const next = (currentTestimonial + 1) % testimonials.length;
+                        updateTestimonial(next);
+                    } else {
+                        // Dragged right -> Prev
+                        const prev = (currentTestimonial - 1 + testimonials.length) % testimonials.length;
+                        updateTestimonial(prev);
+                    }
+                }
+            };
+
+            // Touch events
+            tSection.addEventListener('touchstart', (e) => {
+                tStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            tSection.addEventListener('touchend', (e) => {
+                const tEndX = e.changedTouches[0].screenX;
+                handleTSwipe(tStartX, tEndX);
+            }, { passive: true });
+
+            // Mouse events
+            tSection.addEventListener('mousedown', (e) => {
+                tStartX = e.clientX;
+                tIsDragging = true;
+                tSection.style.cursor = 'grabbing';
+            });
+
+            window.addEventListener('mouseup', (e) => {
+                if (!tIsDragging) return;
+                const tEndX = e.clientX;
+                handleTSwipe(tStartX, tEndX);
+                tIsDragging = false;
+                tSection.style.cursor = 'grab';
+            });
+
+            tSection.addEventListener('mouseleave', () => {
+                if (tIsDragging) {
+                    tIsDragging = false;
+                    tSection.style.cursor = 'grab';
+                }
+            });
         }
 
         // Load Footer (assuming there might be a footer.html or similar in future, currently using placeholder)
@@ -677,6 +735,11 @@
             padding: 80px 20px 160px;
             background: #EEE9E3;
             text-align: center;
+            cursor: grab;
+        }
+
+        .work-testimonials:active {
+            cursor: grabbing;
         }
 
         .testimonial-content {

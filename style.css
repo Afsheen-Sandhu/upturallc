@@ -1718,11 +1718,21 @@ html.lenis body {
     position: relative;
     display: flex;
     align-items: center;
+    cursor: grab;
+}
+
+.testimonial-carousel:active {
+    cursor: grabbing;
 }
 
 .testimonial-viewport {
     overflow: hidden;
     width: 100%;
+    cursor: grab;
+}
+
+.testimonial-viewport:active {
+    cursor: grabbing;
 }
 
 .testimonial-track {
