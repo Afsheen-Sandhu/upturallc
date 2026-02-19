@@ -49,6 +49,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
     <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="icon" type="image/png" href="images/favicon.png">
@@ -196,11 +197,38 @@
                         </h2>
                     </div>
                     <div class="about-right">
-                        <lottie-player
-                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696e675bf416ec5c93b35fdf_9911a27978ce49acb6c6778ee76cf6b8.json"
-                            background="transparent" speed="1" style="width: 100%; max-width: 500px; height: auto;" loop
-                            autoplay>
-                        </lottie-player>
+                        <div class="swiper testimonialSwiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <video src="videos/vid1.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video autoplay loop muted playsinline>
+                                        <source src="videos/vid2.mp4" type="video/mp4">
+                                        <source src="videos/vid2.MOV" type="video/quicktime">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video src="videos/vid3.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video src="videos/vid4.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -740,6 +768,7 @@
         </div>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
     <script src="script.js" defer></script>
 </body>
 

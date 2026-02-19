@@ -1054,4 +1054,96 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
+
+    // --- TESTIMONIAL VIDEO SWIPER (CARDS EFFECT) ---
+    if (document.querySelector('.testimonialSwiper')) {
+        const swiper = new Swiper(".testimonialSwiper", {
+            effect: "cards",
+            grabCursor: true,
+            perSlideOffset: 12,
+            perSlideRotate: 4,
+            rotate: true,
+            slideShadows: true,
+            autoplay: {
+                delay: 4000,
+                disableOnInteraction: false,
+            },
+            loop: true,
+        });
+
+        const swiperContainer = document.querySelector('.testimonialSwiper');
+        let isHovered = false;
+
+        const updateAutoplay = () => {
+            const isAnyUnmuted = Array.from(document.querySelectorAll('.testimonialSwiper video')).some(v => !v.muted);
+            if (isHovered || isAnyUnmuted) {
+                swiper.autoplay.stop();
+            } else {
+                swiper.autoplay.start();
+            }
+        };
+
+        swiperContainer.addEventListener('mouseenter', () => {
+            isHovered = true;
+            updateAutoplay();
+        });
+
+        swiperContainer.addEventListener('mouseleave', () => {
+            isHovered = false;
+            updateAutoplay();
+        });
+
+        // Handle Mute/Unmute
+        const muteBtns = document.querySelectorAll('.video-mute-btn');
+        muteBtns.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const video = btn.closest('.swiper-slide').querySelector('video');
+                const icon = btn.querySelector('i');
+
+                if (video.muted) {
+                    // Mute all others first to be safe
+                    document.querySelectorAll('.testimonialSwiper video').forEach(v => {
+                        v.muted = true;
+                        const otherIcon = v.parentElement.querySelector('.video-mute-btn i');
+                        if (otherIcon) otherIcon.className = 'fa-solid fa-volume-xmark';
+                    });
+
+                    video.muted = false;
+                    icon.className = 'fa-solid fa-volume-high';
+                    gsap.fromTo(btn, { scale: 1 }, { scale: 1.2, duration: 0.2, yoyo: true, repeat: 1 });
+                } else {
+                    video.muted = true;
+                    icon.className = 'fa-solid fa-volume-xmark';
+                }
+                updateAutoplay();
+            });
+        });
+
+        // Auto-mute on slide change and resume autoplay check
+        swiper.on('slideChange', () => {
+            document.querySelectorAll('.testimonialSwiper video').forEach(v => {
+                v.muted = true;
+                const btnIcon = v.parentElement.querySelector('.video-mute-btn i');
+                if (btnIcon) btnIcon.className = 'fa-solid fa-volume-xmark';
+            });
+            updateAutoplay();
+        });
+
+        // Auto-mute when scrolling out of view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (!entry.isIntersecting) {
+                    document.querySelectorAll('.testimonialSwiper video').forEach(v => {
+                        v.muted = true;
+                        const icon = v.parentElement.querySelector('.video-mute-btn i');
+                        if (icon) icon.className = 'fa-solid fa-volume-xmark';
+                    });
+                    updateAutoplay();
+                }
+            });
+        }, { threshold: 0 });
+
+        observer.observe(swiperContainer);
+    }
 });
