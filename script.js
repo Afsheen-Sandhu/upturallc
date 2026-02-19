@@ -1146,4 +1146,91 @@ document.addEventListener("DOMContentLoaded", function () {
 
         observer.observe(swiperContainer);
     }
+
+    // --- PREMIUM CHATBOT LOGIC ---
+    function initPremiumChatbot() {
+        const chatbotHTML = `
+            <div class="chatbot-widget">
+                <div class="chatbot-toggle" id="chatbot-toggle">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div class="chatbot-window" id="chatbot-window">
+                    <div class="chatbot-header">
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <i class="fa-solid fa-robot"></i>
+                            <h3>Uptura AI Assistant</h3>
+                        </div>
+                        <i class="fa-solid fa-xmark" id="chatbot-close" style="cursor:pointer;"></i>
+                    </div>
+                    <div class="chatbot-messages" id="chatbot-messages">
+                        <div class="message bot">Hello! I'm the Uptura AI. How can I help you today?</div>
+                    </div>
+                    <div class="chatbot-input-area">
+                        <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message...">
+                        <button class="chatbot-send" id="chatbot-send">
+                            <i class="fa-solid fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+
+        const toggle = document.getElementById('chatbot-toggle');
+        const window = document.getElementById('chatbot-window');
+        const close = document.getElementById('chatbot-close');
+        const input = document.getElementById('chatbot-input');
+        const send = document.getElementById('chatbot-send');
+        const messages = document.getElementById('chatbot-messages');
+
+        const addMessage = (text, sender) => {
+            const msg = document.createElement('div');
+            msg.className = `message ${sender}`;
+            msg.innerText = text;
+            messages.appendChild(msg);
+            messages.scrollTop = messages.scrollHeight;
+        };
+
+        // OPENAI CONFIG (Vercel Serverless)
+        const getAIResponse = async (userText) => {
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: userText })
+                });
+
+                const data = await response.json();
+                return data.reply;
+            } catch (error) {
+                console.error("Fetch Error:", error);
+                return "Connection error. Make sure you are running 'vercel dev'!";
+            }
+        };
+
+        const handleSend = async () => {
+            const text = input.value.trim();
+            if (!text) return;
+
+            addMessage(text, 'user');
+            input.value = '';
+
+            // Loading state
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'message bot';
+            loadingMsg.innerText = '...';
+            messages.appendChild(loadingMsg);
+
+            const aiResponse = await getAIResponse(text);
+            messages.removeChild(loadingMsg);
+            addMessage(aiResponse, 'bot');
+        };
+
+        toggle.addEventListener('click', () => window.classList.toggle('active'));
+        close.addEventListener('click', () => window.classList.remove('active'));
+        send.addEventListener('click', handleSend);
+        input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
+    }
+
+    initPremiumChatbot();
 });
