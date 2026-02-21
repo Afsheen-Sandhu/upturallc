@@ -1060,6 +1060,7 @@ document.addEventListener("DOMContentLoaded", function () {
         const swiper = new Swiper(".testimonialSwiper", {
             effect: "cards",
             grabCursor: true,
+            slidesPerView: 1,
             perSlideOffset: 12,
             perSlideRotate: 4,
             rotate: true,
