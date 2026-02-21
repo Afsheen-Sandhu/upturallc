@@ -1158,12 +1158,12 @@ document.addEventListener("DOMContentLoaded", function () {
                     <div class="chatbot-header">
                         <div style="display:flex; align-items:center; gap:10px;">
                             <i class="fa-solid fa-robot"></i>
-                            <h3>Uptura AI Assistant</h3>
+                            <h3>TuraBot</h3>
                         </div>
                         <i class="fa-solid fa-xmark" id="chatbot-close" style="cursor:pointer;"></i>
                     </div>
                     <div class="chatbot-messages" id="chatbot-messages">
-                        <div class="message bot">Hello! I'm the Uptura AI. How can I help you today?</div>
+                        <div class="message bot">Hello! I'm TuraBot. How can I help you today?</div>
                     </div>
                     <div class="chatbot-input-area">
                         <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message...">
