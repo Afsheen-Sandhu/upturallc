@@ -32,6 +32,33 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js"></script>
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e); t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '919718663794319');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=919718663794319&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
 </head>
 <style>
     body,
@@ -580,7 +607,46 @@
     <div id="footer-placeholder"></div>
 
     <script src="script.js"></script>
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
+            authDomain: "uptura-leads.firebaseapp.com",
+            projectId: "uptura-leads",
+            storageBucket: "uptura-leads.firebasestorage.app",
+            messagingSenderId: "146306181969",
+            appId: "1:146306181969:web:c91b776edc33f652c2c170",
+            measurementId: "G-ELHWMEHZ9W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        function getQueryParam(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name) || null;
+        }
+
+        const trackingData = {
+            fbclid: getQueryParam('fbclid'),
+            utm_source: getQueryParam('utm_source'),
+            utm_medium: getQueryParam('utm_medium'),
+            utm_campaign: getQueryParam('utm_campaign'),
+        };
+
+        async function saveLeadToFirebase(lead) {
+            try {
+                await addDoc(collection(db, "leads"), {
+                    ...lead,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error("Error saving lead to Firebase:", error);
+            }
+        }
+
         // Interactive Sidebar Confetti
         const canvas = document.getElementById('sidebar-canvas');
         const ctx = canvas.getContext('2d');
@@ -673,7 +739,7 @@
         const btnText = submitBtn.querySelector('.btn-text');
         const spinner = submitBtn.querySelector('.submit-spinner');
 
-        form.addEventListener('submit', (e) => {
+        form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             // 1. Get Values
@@ -683,25 +749,50 @@
             const company = document.getElementById('company').value;
             const message = document.getElementById('message').value;
 
+            const lead = {
+                name,
+                email,
+                phone,
+                company,
+                message,
+                fbclid: trackingData.fbclid,
+                utm_source: trackingData.utm_source,
+                utm_medium: trackingData.utm_medium,
+                utm_campaign: trackingData.utm_campaign,
+                pageUrl: window.location.href,
+                userAgent: navigator.userAgent,
+            };
+
             // 2. Loading State
             submitBtn.disabled = true;
             btnText.textContent = "Submitting...";
             spinner.style.display = "block";
 
-            // 3. Construct Mailto Link
-            const subject = `New Contact Request from ${name}`;
-            const body = `Name: ${name}%0D%0AEmail: ${email}%0D%0APhone: ${phone}%0D%0ACompany: ${company}%0D%0A%0D%0AMessage:%0D%0A${message}`;
-            const mailtoLink = `mailto:info@uptura.net?subject=${encodeURIComponent(subject)}&body=${body}`; // Body already partially encoded with %0D%0A
+            // 2a. Track Meta Pixel Lead event
+            try {
+                if (window.fbq) {
+                    fbq('track', 'Lead', {
+                        content_name: 'Contact Form',
+                        email: email,
+                        fbclid: trackingData.fbclid,
+                        utm_source: trackingData.utm_source,
+                        utm_medium: trackingData.utm_medium,
+                        utm_campaign: trackingData.utm_campaign,
+                    });
+                }
+            } catch (pixelError) {
+                console.error("Meta Pixel tracking error:", pixelError);
+            }
 
-            // 4. Simulate Delay & Send
+            // 2b. Save to Firebase (non-blocking for user)
+            saveLeadToFirebase(lead);
+
+            // 3. Simulate Delay & Finish
             setTimeout(() => {
                 // Success State
                 spinner.style.display = "none";
                 btnText.textContent = "Sent ✔";
                 submitBtn.style.backgroundColor = "#4CAF50"; // Green for success
-
-                // Open Email Client
-                window.location.href = mailtoLink;
 
                 // Reset after a delay
                 setTimeout(() => {
@@ -709,8 +800,8 @@
                     btnText.textContent = "Submit";
                     submitBtn.style.backgroundColor = "#FF3C00";
                     form.reset();
-                }, 3000);
-            }, 1500);
+                }, 2500);
+            }, 800);
         });
 
         // Animation Loop
