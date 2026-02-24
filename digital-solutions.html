@@ -831,37 +831,47 @@
                 --card-bg: #ffffff;
             }
 
+            .digital-solutions-container {
+                position: relative;
+                width: 100%;
+                max-width: 800px;
+                margin-bottom: 0;
+                padding-bottom: 15vh;
+                /* Initial padding */
+            }
+
+            /* Added scroll runway for the last card to reach sticky top */
             .digital-solutions-stack {
-                padding: 10vh 5% 10vh 5%;
+                padding: 10vh 5% 80vh 5%;
+                /* Large bottom padding is the fix */
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 margin-bottom: 0;
             }
 
-            .digital-solutions-container {
-                position: relative;
-                width: 100%;
-                max-width: 800px;
-                margin-bottom: 0;
-                padding-bottom: 0;
-            }
-
             .digital-solution-card {
                 width: 100%;
-                min-height: 500px;
-                background: var(--card-bg);
-                border: 2px solid var(--brand-color);
-                border-radius: 28px;
+                min-height: 550px;
+                background: #ffffff !important;
+                border: 1px solid rgba(0, 0, 0, 0.05);
+                border-radius: 40px;
                 display: flex;
                 flex-direction: column;
                 justify-content: space-between;
-                padding: 50px;
-                margin-bottom: 10vh;
-                /* Space between cards while scrolling */
+                padding: 60px;
+                margin-bottom: 15vh;
                 box-sizing: border-box;
-                will-change: transform, filter, opacity;
-                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.04);
+                will-change: transform, opacity, filter;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.04);
+                transition: border-color 0.4s ease, box-shadow 0.4s ease;
+                position: sticky;
+                top: 12vh;
+            }
+
+            .digital-solution-card:hover {
+                border-color: var(--brand-color);
+                box-shadow: 0 20px 50px rgba(255, 60, 0, 0.1);
             }
 
             /* Remove margin from the last card */
@@ -973,28 +983,23 @@
 
             if (!isMobileDS) {
                 dsCards.forEach((card, index) => {
-                    card.style.zIndex = index + 1;
+                    // Set increasing z-index so later cards physically slide OVER earlier ones
+                    gsap.set(card, { zIndex: index + 1 });
 
+                    // We only animate cards if they are NOT the last one (base card)
                     if (index < dsCards.length - 1) {
                         gsap.to(card, {
-                            scale: 0.85,
-                            y: -15,
-                            filter: "blur(12px)",
-                            opacity: 0.25,
+                            scale: 0.9,
+                            y: -30,
+                            filter: "blur(10px)",
+                            opacity: 1,
                             scrollTrigger: {
-                                trigger: card,
-                                start: "top 12%",
-                                end: "bottom 12%",
+                                trigger: dsCards[index + 1], // Triggered by the NEXT card approaching
+                                start: "top 80%", // Start fading when next card is coming up
+                                end: "top 12%",   // Finish when next card hits the sticky point
                                 scrub: true,
+                                invalidateOnRefresh: true,
                             }
-                        });
-
-                        ScrollTrigger.create({
-                            trigger: card,
-                            start: "top 12%",
-                            pin: true,
-                            pinSpacing: false,
-                            end: () => `+=${dsCards[index + 1].offsetHeight + (window.innerHeight * 0.1)}`,
                         });
                     }
                 });
@@ -1046,17 +1051,18 @@
             </div>
         </section>
 
-        <!-- CTA Section -->
         <section class="cta-section">
-            <a href="contact.html" class="cta-link">
+            <div class="cta-container-wrap">
                 <div class="container cta-content">
-
-                    <h2 class="cta-title">Start Your Project</h2>
-                    <br> <span class="cta-subtitle">&</span>
-                    <h3 class="cta-subtitle">Book a Consultation</h3>
+                    <h2 class="cta-title">Start Your Project &<br>Book a Consultation</h2>
+                    <h3 class="cta-subtitle">Click either button below to get started.</h3>
+                    <div class="cta-actions">
+                        <a href="contact.html" class="cta-button primary">Book a Call</a>
+                        <a href="contact.html" class="cta-button secondary">Get a Quote</a>
+                    </div>
                 </div>
-                <div class="floating-btn">Book a Call</div>
-            </a>
+                <div class="floating-btn">Contact Us</div>
+            </div>
         </section>
 
     </main>

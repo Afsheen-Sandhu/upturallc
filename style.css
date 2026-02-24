@@ -571,7 +571,7 @@ html.lenis body {
     align-items: flex-start;
     justify-content: flex-end;
     padding-bottom: 10px;
-    margin-bottom: 30px;
+    margin-bottom: 0;
 }
 
 .hero-lottie-wrapper {
@@ -580,7 +580,7 @@ html.lenis body {
     left: max(40px, calc(50% - 660px));
     transform: translateY(-50%);
     width: 100%;
-    max-width: 140px;
+    max-width: 240px;
     display: flex;
     justify-content: center;
     z-index: 5;
@@ -1124,7 +1124,7 @@ html.lenis body {
     color: #000;
     letter-spacing: -3px;
     position: relative;
-    top: -120px;
+    top: 0;
     margin-left: 30px;
 }
 
@@ -1990,10 +1990,11 @@ html.lenis body {
 }
 
 .cta-subtitle {
-    font-size: 3rem;
-    font-weight: 800;
-    margin: 0;
-    letter-spacing: -1px;
+    font-size: 1.5rem;
+    font-weight: 500;
+    margin: 10px 0 0;
+    letter-spacing: -0.5px;
+    color: #6B6763;
 }
 
 .floating-btn {
@@ -2084,6 +2085,66 @@ html.lenis body {
         font-size: 1.8rem;
         letter-spacing: -0.5px;
     }
+
+    .cta-actions {
+        flex-direction: column;
+        gap: 15px !important;
+    }
+
+    .cta-actions .cta-button {
+        width: 100%;
+        min-width: unset !important;
+    }
+}
+
+.cta-actions {
+    margin-top: 50px;
+    display: flex;
+    gap: 24px;
+    justify-content: center;
+    position: relative;
+    z-index: 20;
+}
+
+.cta-button {
+    padding: 20px 40px;
+    border-radius: 100px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid transparent;
+    letter-spacing: -0.01em;
+    text-transform: none;
+}
+
+.cta-button.primary {
+    background: #FF3C00;
+    color: #fff;
+    box-shadow: 0 10px 30px rgba(255, 60, 0, 0.3);
+}
+
+.cta-button.primary:hover {
+    background: #000;
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
+}
+
+.cta-button.secondary {
+    background: #FF3C00;
+    color: #fff;
+    border-color: #FF3C00;
+    box-shadow: 0 10px 30px rgba(255, 60, 0, 0.2);
+}
+
+.cta-button.secondary:hover {
+    background: #000;
+    border-color: #000;
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.25);
 }
 
 /* Stacked Advantages Section -> Grid Layout */
@@ -2125,41 +2186,40 @@ html.lenis body {
 
 .card-item {
     background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    /* Subtle border initially */
-    border-radius: 20px;
-    padding: 40px 32px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 32px;
+    padding: 50px 40px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 380px;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    min-height: 420px;
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
 }
 
 .card-item:hover {
-    transform: translateY(-8px);
-    border-color: #FF3C00;
-    box-shadow: 0 20px 40px rgba(255, 60, 0, 0.15);
+    transform: translateY(-15px);
+    border-color: rgba(255, 60, 0, 0.3);
+    box-shadow: 0 40px 80px rgba(255, 60, 0, 0.15);
 }
 
-.card-item::before {
+.card-item::after {
     content: '';
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 4px;
-    background: #FF3C00;
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform 0.4s ease;
+    height: 100%;
+    background: radial-gradient(circle at top right, rgba(255, 60, 0, 0.05), transparent 70%);
+    opacity: 0;
+    transition: opacity 0.6s ease;
+    pointer-events: none;
 }
 
-.card-item:hover::before {
-    transform: scaleX(1);
+.card-item:hover::after {
+    opacity: 1;
 }
 
 .icon-box {
@@ -2514,24 +2574,45 @@ html.lenis body {
 
 .service-card {
     background: #FFFFFF;
-    border-radius: 24px;
-    padding: 50px 40px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    border-radius: 32px;
+    padding: 60px 48px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
     opacity: 0;
     transform: translateY(40px);
+    position: relative;
+    overflow: hidden;
 }
 
 .service-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 20px 60px rgba(255, 60, 0, 0.12);
+    transform: translateY(-12px);
+    border-color: rgba(255, 60, 0, 0.2);
+    box-shadow: 0 30px 70px rgba(255, 60, 0, 0.12);
+}
+
+.service-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 6px;
+    background: #FF3C00;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.service-card:hover::before {
+    transform: scaleX(1);
 }
 
 .card-header {
     display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    margin-bottom: 24px;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 32px;
 }
 
 .card-icon {
@@ -3328,12 +3409,12 @@ html.lenis body {
 }
 
 .section-container {
-    background: rgba(255, 255, 255, 0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    padding: 48px 40px;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    border-radius: 32px;
+    padding: 60px 48px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.06);
     height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .how-pricing-works h2,
@@ -3353,15 +3434,16 @@ html.lenis body {
 
 .step-item,
 .philosophy-item {
-    padding: 20px 24px;
-    background: rgba(255, 255, 255, 0.6);
-    border-radius: 16px;
-    transition: all 0.3s ease;
+    padding: 24px 32px;
+    background: #ffffff;
+    border-radius: 20px;
+    transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
     display: flex;
     align-items: flex-start;
-    gap: 16px;
-    min-height: 90px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+    gap: 20px;
+    min-height: 100px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.02);
 }
 
 .step-item:hover,
@@ -3585,29 +3667,36 @@ html.lenis body {
 }
 
 .impact-card {
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(6px);
-    border-radius: 24px;
-    padding: 40px 32px;
-    min-height: 180px;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    border-radius: 32px;
+    padding: 48px 40px;
+    min-height: 220px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    gap: 18px;
+    gap: 24px;
     opacity: 0;
-    transform: scale(0.92);
-    filter: blur(6px);
-    transition: transform 0.35s ease, box-shadow 0.35s ease;
+    transform: scale(0.95);
+    transition: all 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.02);
 }
 
 .impact-card:hover {
-    transform: scale(1.02);
-    box-shadow: 0 20px 50px rgba(255, 72, 15, 0.08);
+    transform: translateY(-10px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(255, 72, 15, 0.12);
+    border-color: rgba(255, 60, 0, 0.2);
 }
 
 .impact-card.highlight {
-    background: linear-gradient(135deg, rgba(255, 60, 0, 0.12), rgba(255, 255, 255, 0.8));
-    border: 1px solid rgba(255, 72, 15, 0.08);
+    background: #ffffff;
+    border: 2px solid #FF3C00;
+    box-shadow: 0 20px 50px rgba(255, 60, 0, 0.1);
+}
+
+.impact-card.highlight:hover {
+    background: #fff;
+    box-shadow: 0 40px 80px rgba(255, 60, 0, 0.2);
 }
 
 .impact-icon {
@@ -3747,16 +3836,22 @@ html.lenis body {
     display: inline-flex;
     align-items: center;
     gap: 12px;
-    padding: 16px 22px;
+    padding: 18px 24px;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.6);
-    backdrop-filter: blur(6px);
-    font-weight: 600;
+    background: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    font-weight: 700;
     font-size: 1rem;
     color: #1a1a1a;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
     opacity: 0;
     transform: translateX(-40px);
+    transition: all 0.4s ease;
+}
+
+.audience-pill:hover {
+    border-color: #FF3C00;
+    transform: translateY(-5px);
 }
 
 .audience-pill i {

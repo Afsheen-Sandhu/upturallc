@@ -1010,23 +1010,28 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     // --- IMPACT SECTION ANIMATIONS ---
-    const impactCards = document.querySelector(".impact-grid");
-    if (impactCards) {
-        gsap.fromTo(".impact-card",
-            { opacity: 0, scale: 0.92, filter: "blur(6px)" },
-            {
-                opacity: 1,
-                scale: 1,
-                filter: "blur(0px)",
-                duration: 0.9,
-                ease: "power3.out",
-                stagger: 0.12,
-                scrollTrigger: {
-                    trigger: ".impact-grid",
-                    start: "top 80%"
+    const impactCardsElements = gsap.utils.toArray(".impact-card");
+    if (impactCardsElements.length > 0) {
+        impactCardsElements.forEach((card, index) => {
+            gsap.fromTo(card,
+                {
+                    opacity: 0,
+                    scale: 0.92,
+                    filter: "none"
+                },
+                {
+                    opacity: 1,
+                    scale: 1,
+                    filter: "none",
+                    duration: 0.9,
+                    ease: "power3.out",
+                    scrollTrigger: {
+                        trigger: card,
+                        start: "top 85%"
+                    }
                 }
-            }
-        );
+            );
+        });
     }
     // --- AUDIENCE SECTION ANIMATIONS ---
     const audienceSection = document.querySelector(".audience-section");

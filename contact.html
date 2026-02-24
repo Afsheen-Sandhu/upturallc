@@ -637,14 +637,10 @@
         };
 
         async function saveLeadToFirebase(lead) {
-            try {
-                await addDoc(collection(db, "leads"), {
-                    ...lead,
-                    createdAt: serverTimestamp()
-                });
-            } catch (error) {
-                console.error("Error saving lead to Firebase:", error);
-            }
+            await addDoc(collection(db, "leads"), {
+                ...lead,
+                createdAt: serverTimestamp()
+            });
         }
 
         // Interactive Sidebar Confetti
@@ -784,15 +780,14 @@
                 console.error("Meta Pixel tracking error:", pixelError);
             }
 
-            // 2b. Save to Firebase (non-blocking for user)
-            saveLeadToFirebase(lead);
+            // 2b. Save to Firebase 
+            try {
+                await saveLeadToFirebase(lead);
 
-            // 3. Simulate Delay & Finish
-            setTimeout(() => {
-                // Success State
+                // 3. Success State
                 spinner.style.display = "none";
                 btnText.textContent = "Sent ✔";
-                submitBtn.style.backgroundColor = "#4CAF50"; // Green for success
+                submitBtn.style.backgroundColor = "#4CAF50";
 
                 // Reset after a delay
                 setTimeout(() => {
@@ -800,8 +795,20 @@
                     btnText.textContent = "Submit";
                     submitBtn.style.backgroundColor = "#FF3C00";
                     form.reset();
-                }, 2500);
-            }, 800);
+                }, 3000);
+
+            } catch (error) {
+                console.error("Submission Error:", error);
+                spinner.style.display = "none";
+                btnText.textContent = "Error ❌";
+                submitBtn.style.backgroundColor = "#f44336";
+
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    btnText.textContent = "Submit";
+                    submitBtn.style.backgroundColor = "#FF3C00";
+                }, 3000);
+            }
         });
 
         // Animation Loop
