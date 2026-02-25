@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | Uptura Admin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <style>
+        :root {
+            --primary: #FF3C00;
+            --primary-gradient: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
+            --sidebar-bg: #1a1a1a;
+            --main-bg: #F8F7F5;
+            --card-bg: #ffffff;
+            --text-dark: #1a1a1a;
+            --text-muted: #6B6763;
+            --border: #e0e0e0;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--main-bg);
+            color: var(--text-dark);
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: var(--sidebar-bg);
+            height: 100%;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            color: #fff;
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .sidebar-logo {
+            padding: 0 20px;
+            margin-bottom: 50px;
+        }
+
+        .sidebar-logo img {
+            width: 100px;
+            filter: brightness(0) invert(1);
+        }
+
+        .nav-menu {
+            list-style: none;
+            flex-grow: 1;
+        }
+
+        .nav-item {
+            margin-bottom: 10px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 14px 20px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-link.active {
+            background: var(--primary);
+            box-shadow: 0 10px 20px rgba(255, 60, 0, 0.2);
+        }
+
+        .logout-btn {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 20px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex-grow: 1;
+            padding: 40px 50px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .download-btn {
+            background: #fff;
+            color: var(--text-dark);
+            border: 1.5px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .download-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: rgba(255, 60, 0, 0.05);
+        }
+
+        /* Notification Styling */
+        .notification-wrapper {
+            position: relative;
+        }
+
+        .bell-btn {
+            background: #fff;
+            border: 1.5px solid var(--border);
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--text-dark);
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .bell-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .bell-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.7rem;
+            font-weight: 800;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #fff;
+            display: none;
+        }
+
+        .notification-dropdown {
+            position: absolute;
+            top: 55px;
+            right: 0;
+            width: 320px;
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            display: none;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .notification-dropdown.active {
+            display: block;
+        }
+
+        .notif-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fcfcfc;
+        }
+
+        .notif-header h4 {
+            font-size: 0.9rem;
+            font-weight: 800;
+        }
+
+        .notif-clear {
+            font-size: 0.75rem;
+            color: var(--primary);
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .notif-list {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        .notif-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            gap: 12px;
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .notif-item:hover {
+            background: #f9f9f9;
+        }
+
+        .notif-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 0.9rem;
+        }
+
+        .notif-icon.order {
+            background: rgba(255, 60, 0, 0.1);
+            color: var(--primary);
+        }
+
+        .notif-icon.lead {
+            background: rgba(25, 118, 210, 0.1);
+            color: #1976d2;
+        }
+
+        .notif-content {
+            flex-grow: 1;
+        }
+
+        .notif-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .notif-text {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .notif-time {
+            font-size: 0.7rem;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        .notif-empty {
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        /* Individual Download buttons styling */
+        .tab-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .welcome-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 24px;
+            border-radius: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            border: 1px solid var(--border);
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        /* Table */
+        .table-container {
+            background: var(--card-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+        }
+
+        th {
+            background: #fcfcfc;
+            padding: 16px 24px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            font-weight: 700;
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 18px 24px;
+            font-size: 0.95rem;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .badge-ai {
+            background: rgba(255, 60, 0, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-digital {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .timestamp {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        /* Settings Form */
+        .settings-card {
+            max-width: 500px;
+            background: #fff;
+            padding: 32px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #eee;
+            border-radius: 10px;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+        }
+
+        input:focus {
+            border-color: var(--primary);
+        }
+
+        .save-btn {
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 60, 0, 0.2);
+        }
+
+        /* Loading */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(248, 247, 245, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 60, 0, 0.1);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #ddd;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #ccc;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 80px;
+                padding: 40px 10px;
+            }
+
+            .sidebar-logo,
+            .nav-text {
+                display: none;
+            }
+
+            .nav-link {
+                justify-content: center;
+                padding: 15px;
+            }
+
+            .main-content {
+                padding: 30px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <aside class="sidebar">
+        <div class="sidebar-logo">
+            <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                alt="Uptura">
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <div class="nav-link active" onclick="switchTab('orders')">
+                    <i class="fa-solid fa-cart-shopping"></i>
+                    <span class="nav-text">Orders</span>
+                </div>
+            </li>
+            <li class="nav-item">
+                <div class="nav-link" onclick="switchTab('leads')">
+                    <i class="fa-solid fa-users"></i>
+                    <span class="nav-text">Leads</span>
+                </div>
+            </li>
+            <li class="nav-item">
+                <div class="nav-link" onclick="switchTab('settings')">
+                    <i class="fa-solid fa-gear"></i>
+                    <span class="nav-text">Settings</span>
+                </div>
+            </li>
+        </ul>
+        <div class="logout-btn">
+            <div class="nav-link" onclick="logout()">
+                <i class="fa-solid fa-right-from-bracket"></i>
+                <span class="nav-text">Logout</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h1 class="welcome-title" id="pageTitle">Orders Dashboard</h1>
+            <div class="header-actions">
+                <div class="notification-wrapper">
+                    <div class="bell-btn" id="bellBtn">
+                        <i class="fa-solid fa-bell"></i>
+                        <div class="bell-badge" id="bellBadge">0</div>
+                    </div>
+                    <div class="notification-dropdown" id="notifDropdown">
+                        <div class="notif-header">
+                            <h4>Notifications</h4>
+                            <span class="notif-clear" id="clearNotifs">Clear all</span>
+                        </div>
+                        <div class="notif-list" id="notifList">
+                            <div class="notif-empty">No new notifications</div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Global Download moved here as "Download All" -->
+                <button class="download-btn" id="downloadCsvBtn" title="Download All Data">
+                    <i class="fa-solid fa-file-csv"></i>
+                    <span>Export All</span>
+                </button>
+                <div class="user-meta" style="color: var(--text-muted); font-weight: 500;">admin@uptura.net</div>
+            </div>
+        </div>
+
+        <!-- Orders View -->
+        <div id="orders" class="tab-content active">
+            <div class="tab-section-header">
+                <h3 style="font-weight: 800;">Orders Overview</h3>
+                <button class="download-btn" onclick="exportOrdersToCSV()"
+                    style="padding: 8px 16px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Orders</span>
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Orders</div>
+                    <div class="stat-value" id="totalOrdersCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">AI Plans</div>
+                    <div class="stat-value" id="aiOrdersCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Digital Plans</div>
+                    <div class="stat-value" id="digitalOrdersCount">0</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Client</th>
+                            <th>Plan / Service</th>
+                            <th>Add-ons</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
+                <div id="ordersLoading" class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leads View -->
+        <div id="leads" class="tab-content">
+            <div class="tab-section-header">
+                <h3 style="font-weight: 800;">Leads Management</h3>
+                <button class="download-btn" onclick="exportLeadsToCSV()" style="padding: 8px 16px; font-size: 0.8rem;">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Download Leads</span>
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Leads</div>
+                    <div class="stat-value" id="totalLeadsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Recent (7d)</div>
+                    <div class="stat-value" id="recentLeadsCount">0</div>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Email / Contact</th>
+                            <th>Company</th>
+                            <th>Message</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leadsTableBody">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
+                <div id="leadsLoading" class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings View -->
+        <div id="settings" class="tab-content">
+            <div class="settings-card">
+                <h2 style="margin-bottom: 24px;">Security Settings</h2>
+                <form id="passwordForm">
+                    <div class="form-group">
+                        <label>Current Password</label>
+                        <input type="password" id="currentPass" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label>New Password</label>
+                        <input type="password" id="newPass" placeholder="••••••••" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Confirm New Password</label>
+                        <input type="password" id="confirmPass" placeholder="••••••••" required>
+                    </div>
+                    <button type="submit" class="save-btn">Update Password</button>
+                    <div id="settingsMsg" style="margin-top: 15px; font-weight: 600; font-size: 0.9rem;"></div>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, query, orderBy, getDocs, limit, onSnapshot } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+        // Auth Check
+        if (localStorage.getItem('uptura_admin_auth') !== 'true') {
+            window.location.href = 'admin.html';
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
+            authDomain: "uptura-leads.firebaseapp.com",
+            projectId: "uptura-leads",
+            storageBucket: "uptura-leads.firebasestorage.app",
+            messagingSenderId: "146306181969",
+            appId: "1:146306181969:web:c91b776edc33f652c2c170",
+            measurementId: "G-ELHWMEHZ9W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // State Management
+        window.switchTab = (tabId) => {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+
+            document.getElementById(tabId).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            const titles = { 'orders': 'Orders Dashboard', 'leads': 'Leads Management', 'settings': 'Account Settings' };
+            document.getElementById('pageTitle').textContent = titles[tabId];
+
+            if (tabId === 'orders') fetchOrders();
+            if (tabId === 'leads') fetchLeads();
+        };
+
+        window.logout = () => {
+            localStorage.removeItem('uptura_admin_auth');
+            window.location.href = 'admin.html';
+        };
+
+        // Data Fetching
+        async function fetchOrders() {
+            const loading = document.getElementById('ordersLoading');
+            loading.style.display = 'flex';
+
+            try {
+                const q = query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(50));
+                const querySnapshot = await getDocs(q);
+                const tbody = document.getElementById('ordersTableBody');
+                tbody.innerHTML = '';
+
+                let stats = { total: 0, ai: 0, digital: 0 };
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    stats.total++;
+                    if (data.category === 'ai') stats.ai++;
+                    if (data.category === 'digital') stats.digital++;
+
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+                    const addons = data.addons ? data.addons.map(a => a.title).join(', ') : 'None';
+
+                    const row = `
+                        <tr>
+                            <td>
+                                <div style="font-weight: 700;">${data.name}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${data.email}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-${data.category}">${data.category}</span>
+                                <div style="margin-top: 5px; font-size: 0.9rem;">${data.planLabel || 'Custom Package'}</div>
+                                <div style="font-weight: 600; color: var(--primary); font-size: 0.85rem;">${data.price || ''}</div>
+                            </td>
+                            <td style="font-size: 0.85rem; color: var(--text-muted); max-width: 250px;">${addons}</td>
+                            <td class="timestamp">${date}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById('totalOrdersCount').textContent = stats.total;
+                document.getElementById('aiOrdersCount').textContent = stats.ai;
+                document.getElementById('digitalOrdersCount').textContent = stats.digital;
+
+            } catch (err) {
+                console.error(err);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        async function fetchLeads() {
+            const loading = document.getElementById('leadsLoading');
+            loading.style.display = 'flex';
+
+            try {
+                const q = query(collection(db, "leads"), orderBy("createdAt", "desc"), limit(50));
+                const querySnapshot = await getDocs(q);
+                const tbody = document.getElementById('leadsTableBody');
+                tbody.innerHTML = '';
+
+                let total = 0;
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    total++;
+                    const date = data.createdAt ? data.createdAt.toDate().toLocaleDateString() : 'N/A';
+
+                    const row = `
+                        <tr>
+                            <td style="font-weight: 700;">${data.name}</td>
+                            <td>
+                                <div>${data.email}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${data.phone || ''}</div>
+                            </td>
+                            <td>${data.company || '—'}</td>
+                            <td style="font-size: 0.85rem; max-width: 300px;">${data.message || '—'}</td>
+                            <td class="timestamp">${date}</td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById('totalLeadsCount').textContent = total;
+            } catch (err) {
+                console.error(err);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
+        // Password Change
+        const passwordForm = document.getElementById('passwordForm');
+        passwordForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const current = document.getElementById('currentPass').value;
+            const newP = document.getElementById('newPass').value;
+            const confirmP = document.getElementById('confirmPass').value;
+            const msg = document.getElementById('settingsMsg');
+
+            const storedPass = localStorage.getItem('uptura_admin_pass') || 'qamaruptura12!';
+
+            if (current !== storedPass) {
+                msg.textContent = '❌ Current password is incorrect.';
+                msg.style.color = '#ff3333';
+                return;
+            }
+
+            if (newP !== confirmP) {
+                msg.textContent = '❌ New passwords do not match.';
+                msg.style.color = '#ff3333';
+                return;
+            }
+
+            localStorage.setItem('uptura_admin_pass', newP);
+            msg.textContent = '✅ Password updated successfully!';
+            msg.style.color = '#4CAF50';
+            passwordForm.reset();
+        });
+
+        // --- CSV Export Logic ---
+        function downloadCSV(content, filename) {
+            const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", filename);
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
+        window.exportOrdersToCSV = async () => {
+            const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            let csv = "Date,Client Name,Email,Phone,Plan,Price,Add-ons\n";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const date = d.createdAt ? d.createdAt.toDate().toISOString() : '';
+                const addons = d.addons ? d.addons.map(a => a.title).join('|') : '';
+                csv += `"${date}","${d.name || ''}","${d.email || ''}","${d.phone || ''}","${d.planLabel || ''}","${d.price || ''}","${addons}"\n`;
+            });
+            downloadCSV(csv, `uptura_orders_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+        };
+
+        window.exportLeadsToCSV = async () => {
+            const q = query(collection(db, "leads"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            let csv = "Date,Name,Email,Phone,Company,Message\n";
+            snap.forEach(doc => {
+                const d = doc.data();
+                const date = d.createdAt ? d.createdAt.toDate().toISOString() : '';
+                csv += `"${date}","${d.name || ''}","${d.email || ''}","${d.phone || ''}","${d.company || ''}","${(d.message || '').replace(/"/g, '""')}"\n`;
+            });
+            downloadCSV(csv, `uptura_leads_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+        };
+
+        async function exportAllToCSV() {
+            const btn = document.getElementById('downloadCsvBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Exporting...</span>';
+            btn.disabled = true;
+
+            try {
+                await exportOrdersToCSV();
+                await exportLeadsToCSV();
+            } catch (err) {
+                console.error("Export failed:", err);
+                alert("Export failed. Check console for details.");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        document.getElementById('downloadCsvBtn').addEventListener('click', exportAllToCSV);
+
+        // --- Notification Logic ---
+        const notifications = [];
+        const startTime = Date.now();
+
+        function addNotification(type, title, text) {
+            const notif = {
+                id: Date.now(),
+                type,
+                title,
+                text,
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+            };
+            notifications.unshift(notif);
+            updateNotifUI();
+        }
+
+        function updateNotifUI() {
+            const list = document.getElementById('notifList');
+            const badge = document.getElementById('bellBadge');
+
+            if (notifications.length === 0) {
+                list.innerHTML = '<div class="notif-empty">No new notifications</div>';
+                badge.style.display = 'none';
+                return;
+            }
+
+            badge.style.display = 'flex';
+            badge.textContent = notifications.length;
+
+            list.innerHTML = notifications.map(n => `
+                <div class="notif-item" onclick="handleNotifClick('${n.type}')">
+                    <div class="notif-icon ${n.type}">
+                        <i class="fa-solid ${n.type === 'order' ? 'fa-cart-shopping' : 'fa-user-plus'}"></i>
+                    </div>
+                    <div class="notif-content">
+                        <div class="notif-title">${n.title}</div>
+                        <div class="notif-text">${n.text}</div>
+                        <div class="notif-time">${n.time}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.handleNotifClick = (type) => {
+            switchTab(type === 'order' ? 'orders' : 'leads');
+            document.getElementById('notifDropdown').classList.remove('active');
+        };
+
+        document.getElementById('bellBtn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('notifDropdown').classList.toggle('active');
+        });
+
+        document.getElementById('clearNotifs').addEventListener('click', () => {
+            notifications.length = 0;
+            updateNotifUI();
+        });
+
+        document.addEventListener('click', () => {
+            document.getElementById('notifDropdown').classList.remove('active');
+        });
+
+        // --- Real-time Listeners ---
+        onSnapshot(query(collection(db, "orders"), orderBy("createdAt", "desc"), limit(1)), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    // Only notify if created AFTER the page loaded
+                    const created = data.createdAt ? data.createdAt.toMillis() : 0;
+                    if (created > startTime) {
+                        addNotification('order', 'New Order Received', `${data.name} just placed an order for ${data.planLabel || 'a custom plan'}.`);
+                        fetchOrders(); // Refresh table
+                    }
+                }
+            });
+        });
+
+        onSnapshot(query(collection(db, "leads"), orderBy("createdAt", "desc"), limit(1)), (snapshot) => {
+            snapshot.docChanges().forEach((change) => {
+                if (change.type === "added") {
+                    const data = change.doc.data();
+                    const created = data.createdAt ? data.createdAt.toMillis() : 0;
+                    if (created > startTime) {
+                        addNotification('lead', 'New Lead Generated', `${data.name} from ${data.company || 'a new company'} just reached out.`);
+                        fetchLeads(); // Refresh table
+                    }
+                }
+            });
+        });
+
+        // Init
+        fetchOrders();
+    </script>
+</body>
+
+</html>
