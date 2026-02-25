@@ -1192,7 +1192,44 @@ document.addEventListener("DOMContentLoaded", function () {
         const addMessage = (text, sender) => {
             const msg = document.createElement('div');
             msg.className = `message ${sender}`;
-            msg.innerText = text;
+
+            // Handle Action Buttons for Bot
+            if (sender === 'bot') {
+                const actionRegex = /```ACTION_JSON\n([\s\S]*?)\n```/;
+                const match = text.match(actionRegex);
+
+                if (match) {
+                    try {
+                        const actionData = JSON.parse(match[1]);
+                        const cleanText = text.replace(actionRegex, '').trim();
+                        msg.innerText = cleanText;
+
+                        if (actionData.actions && actionData.actions.length > 0) {
+                            const actionContainer = document.createElement('div');
+                            actionContainer.className = 'message-actions';
+
+                            actionData.actions.forEach(action => {
+                                const btn = document.createElement('a');
+                                btn.className = 'btn-action';
+                                btn.href = action.url;
+                                btn.innerText = action.label;
+                                btn.target = '_blank'; // Optional
+                                actionContainer.appendChild(btn);
+                            });
+
+                            msg.appendChild(actionContainer);
+                        }
+                    } catch (e) {
+                        console.error("Error parsing Action JSON:", e);
+                        msg.innerText = text;
+                    }
+                } else {
+                    msg.innerText = text;
+                }
+            } else {
+                msg.innerText = text;
+            }
+
             messages.appendChild(msg);
             messages.scrollTop = messages.scrollHeight;
         };

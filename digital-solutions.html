@@ -33,6 +33,33 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
     <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js"></script>
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e); t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '919718663794319');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=919718663794319&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
 </head>
 
 <body>
@@ -349,7 +376,8 @@
                     </tbody>
                 </table>
                 <div class="pricing-cards">
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="hourly" data-price="$30–$40/hr">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">⏱ Hourly</div>
                             <div class="card-price">$30–$40/hr</div>
@@ -363,7 +391,8 @@
                         <div class="card-feature"><span class="feature-label">Support</span><span
                                 class="feature-value">Pay-as-you-go</span></div>
                     </div>
-                    <div class="price-card featured">
+                    <div class="price-card featured selectable-tier" data-tier="project" data-price="$1,200–$3,500+">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="recommended-badge">RECOMMENDED</div>
                         <div class="card-header">
                             <div class="card-title">📦 Project-Based</div>
@@ -378,7 +407,8 @@
                         <div class="card-feature"><span class="feature-label">Support</span><span
                                 class="feature-value">30-day support</span></div>
                     </div>
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="monthly" data-price="Custom">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">🔁 Monthly</div>
                             <div class="card-price">Custom</div>
@@ -435,7 +465,8 @@
                     </tbody>
                 </table>
                 <div class="pricing-cards">
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="hourly" data-price="$25–$35/hr">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">⏱ Hourly</div>
                             <div class="card-price">$25–$35/hr</div>
@@ -447,7 +478,8 @@
                         <div class="card-feature"><span class="feature-label">Support</span><span
                                 class="feature-value">Limited</span></div>
                     </div>
-                    <div class="price-card featured">
+                    <div class="price-card featured selectable-tier" data-tier="project" data-price="$700–$2,000+">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="recommended-badge">RECOMMENDED</div>
                         <div class="card-header">
                             <div class="card-title">📦 Project-Based</div>
@@ -460,7 +492,8 @@
                         <div class="card-feature"><span class="feature-label">Support</span><span
                                 class="feature-value">30 days</span></div>
                     </div>
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="monthly" data-price="Custom">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">🔁 Monthly</div>
                             <div class="card-price">Custom</div>
@@ -509,7 +542,8 @@
                     </tbody>
                 </table>
                 <div class="pricing-cards">
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="hourly" data-price="$25–$35/hr">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">⏱ Hourly</div>
                             <div class="card-price">$25–$35/hr</div>
@@ -519,7 +553,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">As needed</span></div>
                     </div>
-                    <div class="price-card featured">
+                    <div class="price-card featured selectable-tier" data-tier="monthly" data-price="$400–$1,200/mo">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="recommended-badge">RECOMMENDED</div>
                         <div class="card-header">
                             <div class="card-title">🔁 Monthly Retainer</div>
@@ -530,7 +565,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">Monthly cycle</span></div>
                     </div>
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="campaign" data-price="Custom">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">📦 Campaign-Based</div>
                             <div class="card-price">Custom</div>
@@ -576,7 +612,8 @@
                     </tbody>
                 </table>
                 <div class="pricing-cards">
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="hourly" data-price="$25–$40/hr">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">⏱ Hourly</div>
                             <div class="card-price">$25–$40/hr</div>
@@ -586,7 +623,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">Short-term</span></div>
                     </div>
-                    <div class="price-card featured">
+                    <div class="price-card featured selectable-tier" data-tier="monthly" data-price="$300–$1,000/mo">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="recommended-badge">RECOMMENDED</div>
                         <div class="card-header">
                             <div class="card-title">🔁 Monthly Retainer</div>
@@ -597,7 +635,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">Monthly</span></div>
                     </div>
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="sprint" data-price="Custom">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">📦 SEO Sprint</div>
                             <div class="card-price">Custom</div>
@@ -643,7 +682,8 @@
                     </tbody>
                 </table>
                 <div class="pricing-cards">
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="hourly" data-price="$30–$45/hr">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">⏱ Hourly</div>
                             <div class="card-price">$30–$45/hr</div>
@@ -653,7 +693,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">As needed</span></div>
                     </div>
-                    <div class="price-card featured">
+                    <div class="price-card featured selectable-tier" data-tier="project" data-price="$3,000–$12,000+">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="recommended-badge">RECOMMENDED</div>
                         <div class="card-header">
                             <div class="card-title">📦 Project-Based</div>
@@ -664,7 +705,8 @@
                         <div class="card-feature"><span class="feature-label">Timeline</span><span
                                 class="feature-value">6–12 weeks</span></div>
                     </div>
-                    <div class="price-card">
+                    <div class="price-card selectable-tier" data-tier="monthly" data-price="Custom">
+                        <div class="tier-select-ring"><i class="fa-solid fa-check"></i></div>
                         <div class="card-header">
                             <div class="card-title">🔁 Monthly</div>
                             <div class="card-price">Custom</div>
@@ -678,16 +720,41 @@
             </div>
 
             <div class="pricing-footer-cta">
-                <h2>Not sure which option is right?</h2>
+                <h2>Ready to move forward?</h2>
                 <div class="cta-buttons">
-                    <a href="contact.html" class="cta-btn primary" style="text-decoration: none;">Book a Strategy
+                    <a href="checkout.html" class="cta-btn primary pricing-checkout-btn" data-action="strategy"
+                        style="text-decoration: none;">Book a Strategy
                         Call</a>
-                    <a href="contact.html" class="cta-btn secondary" style="text-decoration: none;">Get a Custom
+                    <a href="checkout.html" class="cta-btn secondary pricing-checkout-btn" data-action="quote"
+                        style="text-decoration: none;">Get a Custom
                         Quote</a>
                 </div>
                 <p>Most clients start with a project-based setup and scale later.</p>
             </div>
         </section>
+
+        <!-- Sticky Place Order Bar (Digital Solutions) -->
+        <div id="ds-place-order-bar" style="display:none;">
+            <div class="ds-order-bar-inner">
+                <div class="ds-order-summary">
+                    <div class="ds-order-icon"><i class="fa-solid fa-cart-shopping"></i></div>
+                    <div class="ds-order-details">
+                        <div class="ds-order-label" id="ds-order-label">Suggested Plan</div>
+                        <div class="ds-order-plan" id="ds-order-plan-text">—</div>
+                    </div>
+                </div>
+                <button class="ds-order-btn" id="ds-place-order-btn">
+                    <i class="fa-solid fa-arrow-right"></i>
+                    Place Order
+                </button>
+            </div>
+        </div>
+
+        <!-- Digital Solutions Toast -->
+        <div id="ds-toast">
+            <i class="fa-solid fa-circle-exclamation" style="color: #FF3C00;"></i>
+            <span id="ds-toast-message">Please select a tier</span>
+        </div>
 
         <!-- Section Divider -->
         <div class="section-divider"></div>
@@ -842,8 +909,8 @@
 
             /* Added scroll runway for the last card to reach sticky top */
             .digital-solutions-stack {
-                padding: 10vh 5% 80vh 5%;
-                /* Large bottom padding is the fix */
+                padding: 10vh 5% 15vh 5%;
+                /* Reduced bottom padding from 80vh to 15vh */
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -952,6 +1019,9 @@
                     padding: 40px 30px;
                     min-height: 450px;
                     margin-bottom: 5vh;
+                    position: relative;
+                    /* Remove sticky on mobile to avoid overlapping */
+                    top: 0;
                 }
 
                 .digital-solution-card h2 {
@@ -960,6 +1030,25 @@
 
                 .bullet-list li {
                     font-size: 1rem;
+                }
+
+                /* Ensure pricing tables are hidden and cards are visible on mobile */
+                .pricing-table {
+                    display: none;
+                }
+
+                .pricing-cards {
+                    display: grid;
+                }
+
+                /* Mobile-friendly billing model buttons */
+                .tier-btn-row-wrapper {
+                    padding: 24px 16px 20px;
+                }
+
+                .tier-pick-btn {
+                    padding: 10px 20px;
+                    font-size: 0.8rem;
                 }
             }
 
@@ -971,6 +1060,10 @@
 
                 .digital-solution-card h2 {
                     font-size: 1.8rem;
+                }
+
+                .tier-btn-row {
+                    gap: 8px;
                 }
             }
         </style>
@@ -1004,6 +1097,479 @@
                     }
                 });
             }
+        </script>
+
+        <style>
+            /* ===== Tier Pick Buttons (desktop + mobile) ===== */
+            .tier-btn-row-wrapper {
+                text-align: center;
+                padding: 40px 32px 36px;
+                background: #fff;
+                border-radius: 20px 20px 0 0;
+                border-bottom: 1.5px dashed rgba(0, 0, 0, 0.08);
+                margin-bottom: 0;
+            }
+
+            .tier-btn-row-label {
+                font-size: 0.68rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.14em;
+                color: #A8A09A;
+                margin-bottom: 22px;
+            }
+
+            .tier-btn-row {
+                display: flex;
+                gap: 14px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .tier-pick-btn {
+                padding: 14px 30px;
+                border: 1.5px solid #E5E0DA;
+                border-radius: 50px;
+                font-family: 'Inter', sans-serif;
+                font-size: 0.9rem;
+                font-weight: 700;
+                cursor: pointer;
+                transition: all 0.25s ease;
+                background: #FAFAF9;
+                color: #555;
+                position: relative;
+                letter-spacing: -0.01em;
+            }
+
+            .tier-pick-btn.recommended-pick::after {
+                content: 'POPULAR';
+                position: absolute;
+                top: -11px;
+                right: 0px;
+                background: #FF3C00;
+                color: #fff;
+                font-size: 0.52rem;
+                font-weight: 900;
+                letter-spacing: 0.08em;
+                padding: 3px 9px;
+                border-radius: 20px;
+            }
+
+            .tier-pick-btn:hover {
+                border-color: #FF3C00;
+                color: #FF3C00;
+                background: #fff;
+                box-shadow: 0 6px 22px rgba(255, 60, 0, 0.12);
+                transform: translateY(-3px);
+            }
+
+            .tier-pick-btn.active-tier {
+                background: #FF3C00;
+                color: #fff;
+                border-color: #FF3C00;
+                box-shadow: 0 8px 28px rgba(255, 60, 0, 0.3);
+                transform: translateY(-3px);
+            }
+
+            .tier-pick-btn.active-tier.recommended-pick::after {
+                background: #fff;
+                color: #FF3C00;
+            }
+
+            /* ===== Selectable Tier Cards (mobile) ===== */
+            .selectable-tier {
+                cursor: pointer;
+                position: relative;
+                transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.2s ease;
+            }
+
+            .selectable-tier:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 16px 40px rgba(255, 60, 0, 0.14);
+            }
+
+            .tier-select-ring {
+                position: absolute;
+                top: 14px;
+                right: 14px;
+                width: 26px;
+                height: 26px;
+                border-radius: 50%;
+                border: 2px solid rgba(0, 0, 0, 0.12);
+                background: #fff;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 0.75rem;
+                color: transparent;
+                transition: all 0.25s ease;
+                z-index: 2;
+            }
+
+            .selectable-tier.tier-selected {
+                border: 2px solid #FF3C00;
+                box-shadow: 0 0 0 4px rgba(255, 60, 0, 0.1);
+            }
+
+            .selectable-tier.tier-selected .tier-select-ring {
+                background: #FF3C00;
+                border-color: #FF3C00;
+                color: #fff;
+                box-shadow: 0 4px 10px rgba(255, 60, 0, 0.35);
+            }
+
+            /* ===== Place Order Bar ===== */
+            #ds-place-order-bar {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                z-index: 9999;
+                padding: 0 20px 0;
+                animation: slideUpBar 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+            }
+
+            @keyframes slideUpBar {
+                from {
+                    transform: translateY(100%);
+                    opacity: 0;
+                }
+
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+
+            .ds-order-bar-inner {
+                max-width: 1100px;
+                margin: 0 auto;
+                background: #1a1a1a;
+                border-radius: 24px 24px 0 0;
+                padding: 18px 28px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 20px;
+                box-shadow: 0 -8px 40px rgba(0, 0, 0, 0.25);
+            }
+
+            .ds-order-summary {
+                display: flex;
+                align-items: center;
+                gap: 14px;
+                flex: 1;
+            }
+
+            .ds-order-icon {
+                width: 44px;
+                height: 44px;
+                border-radius: 12px;
+                background: rgba(255, 60, 0, 0.15);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: #FF3C00;
+                font-size: 1.1rem;
+                flex-shrink: 0;
+            }
+
+            .ds-order-label {
+                font-size: 0.72rem;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.08em;
+                color: rgba(255, 255, 255, 0.45);
+                margin-bottom: 3px;
+            }
+
+            .ds-order-plan {
+                font-size: 0.95rem;
+                font-weight: 700;
+                color: #fff;
+                white-space: normal;
+                line-height: 1.2;
+                max-width: none;
+            }
+
+            .ds-order-btn {
+                padding: 12px 28px;
+                border-radius: 999px;
+                border: none;
+                background: linear-gradient(135deg, #FF3C00, #FF5722);
+                color: #fff;
+                font-size: 0.95rem;
+                font-weight: 800;
+                font-family: 'Inter', sans-serif;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 8px 24px rgba(255, 60, 0, 0.4);
+                transition: all 0.25s ease;
+                white-space: nowrap;
+            }
+
+            /* ===== Toast Notification ===== */
+            #ds-toast {
+                position: fixed;
+                top: 40px;
+                left: 50%;
+                transform: translateX(-50%) translateY(-20px);
+                background: #1a1a1a;
+                color: #fff;
+                padding: 14px 28px;
+                border-radius: 50px;
+                font-weight: 700;
+                font-size: 0.95rem;
+                z-index: 10001;
+                box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                pointer-events: none;
+                opacity: 0;
+                transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            }
+
+            #ds-toast.show {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+
+            .ds-order-btn:hover {
+                background: #fff;
+                color: #FF3C00;
+                transform: translateY(-2px);
+                box-shadow: 0 10px 30px rgba(255, 60, 0, 0.25);
+            }
+
+            @media (max-width: 600px) {
+                .ds-order-bar-inner {
+                    flex-direction: column;
+                    align-items: flex-start;
+                }
+
+                .ds-order-btn {
+                    width: 100%;
+                    justify-content: center;
+                }
+
+                .ds-order-plan {
+                    max-width: 100%;
+                }
+            }
+        </style>
+
+        <script>
+            (function () {
+                /* ===== Per-service tier definitions ===== */
+                const tiersByService = {
+                    'web-table': [
+                        { tier: 'hourly', label: '⏱ Hourly', price: '$30–$40/hr' },
+                        { tier: 'project', label: '📦 Project-Based', price: '$1,200–$3,500+', recommended: true },
+                        { tier: 'monthly', label: '🔁 Monthly', price: 'Custom' }
+                    ],
+                    'redesign-table': [
+                        { tier: 'hourly', label: '⏱ Hourly', price: '$25–$35/hr' },
+                        { tier: 'project', label: '📦 Project-Based', price: '$700–$2,000+', recommended: true },
+                        { tier: 'monthly', label: '🔁 Monthly', price: 'Custom' }
+                    ],
+                    'social-table': [
+                        { tier: 'hourly', label: '⏱ Hourly', price: '$25–$35/hr' },
+                        { tier: 'monthly', label: '🔁 Monthly Retainer', price: '$400–$1,200/mo', recommended: true },
+                        { tier: 'campaign', label: '📦 Campaign-Based', price: 'Custom' }
+                    ],
+                    'seo-table': [
+                        { tier: 'hourly', label: '⏱ Hourly', price: '$25–$40/hr' },
+                        { tier: 'monthly', label: '🔁 Monthly Retainer', price: '$300–$1,000/mo', recommended: true },
+                        { tier: 'sprint', label: '📦 SEO Sprint', price: 'Custom' }
+                    ],
+                    'app-table': [
+                        { tier: 'hourly', label: '⏱ Hourly', price: '$30–$45/hr' },
+                        { tier: 'project', label: '📦 Project-Based', price: '$3,000–$12,000+', recommended: true },
+                        { tier: 'monthly', label: '🔁 Monthly', price: 'Custom' }
+                    ]
+                };
+
+                const serviceNameMap = {
+                    web: 'Custom Web Development', redesign: 'Website Redesign',
+                    social: 'Social Media Marketing', seo: 'SEO Services', app: 'App Development'
+                };
+
+                let selectedTier = null; // { tier, label }
+                let selectedPrice = null;
+                let manuallySelected = false;
+
+                const orderBar = document.getElementById('ds-place-order-bar');
+                const orderLabel = document.getElementById('ds-order-label');
+                const orderText = document.getElementById('ds-order-plan-text');
+                const orderBtn = document.getElementById('ds-place-order-btn');
+
+                /* ===== Inject tier-btn rows into every pricing-table-container ===== */
+                Object.entries(tiersByService).forEach(([tableId, tiers]) => {
+                    const container = document.getElementById(tableId);
+                    if (!container) return;
+
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'tier-btn-row-wrapper';
+
+                    const lbl = document.createElement('div');
+                    lbl.className = 'tier-btn-row-label';
+                    lbl.textContent = '✨ Choose a billing model';
+                    wrapper.appendChild(lbl);
+
+                    const row = document.createElement('div');
+                    row.className = 'tier-btn-row';
+
+                    tiers.forEach(t => {
+                        const btn = document.createElement('button');
+                        btn.className = 'tier-pick-btn' + (t.recommended ? ' recommended-pick' : '');
+                        btn.setAttribute('data-tier', t.tier);
+                        btn.setAttribute('data-price', t.price);
+                        btn.setAttribute('data-label', t.label);
+                        btn.setAttribute('data-table', tableId);
+                        btn.textContent = t.label;
+                        row.appendChild(btn);
+                    });
+
+                    wrapper.appendChild(row);
+                    container.insertBefore(wrapper, container.firstChild);
+                });
+
+                /* ===== Update sticky bar ===== */
+                function updateBar() {
+                    const activeServiceBtn = document.querySelector('.service-btn.active');
+                    const service = activeServiceBtn ? activeServiceBtn.getAttribute('data-service') : 'web';
+                    const serviceName = serviceNameMap[service] || 'Digital Service';
+
+                    // Bar should appear once a service is active
+                    orderBar.style.display = 'block';
+
+                    if (manuallySelected && orderLabel) {
+                        orderLabel.textContent = 'Selected Plan';
+                    }
+
+                    if (selectedTier) {
+                        orderText.textContent = serviceName + '  ·  ' + selectedTier.label + ' – ' + selectedPrice;
+                        orderText.style.opacity = '1';
+                    } else {
+                        orderText.textContent = serviceName + '  ·  ' + '(Please select a billing model)';
+                        orderText.style.opacity = '0.6';
+                    }
+                }
+
+                /* ===== Show Toast ===== */
+                function showToast(msg) {
+                    const toast = document.getElementById('ds-toast');
+                    const text = document.getElementById('ds-toast-message');
+                    if (!toast) return;
+
+                    text.textContent = msg;
+                    toast.classList.add('show');
+                    setTimeout(() => {
+                        toast.classList.remove('show');
+                    }, 3000);
+                }
+
+                /* ===== Tier pick-button click ===== */
+                document.addEventListener('click', function (e) {
+                    const btn = e.target.closest('.tier-pick-btn');
+                    if (!btn) return;
+
+                    manuallySelected = true;
+                    const tableId = btn.getAttribute('data-table');
+                    const container = document.getElementById(tableId);
+                    if (!container || container.classList.contains('hidden')) return;
+
+                    container.querySelectorAll('.tier-pick-btn').forEach(b => b.classList.remove('active-tier'));
+                    btn.classList.add('active-tier');
+
+                    selectedTier = { tier: btn.getAttribute('data-tier'), label: btn.getAttribute('data-label') };
+                    selectedPrice = btn.getAttribute('data-price');
+
+                    // Sync mobile cards
+                    container.querySelectorAll('.selectable-tier').forEach(c => c.classList.remove('tier-selected'));
+                    const match = container.querySelector('.selectable-tier[data-tier="' + selectedTier.tier + '"]');
+                    if (match) match.classList.add('tier-selected');
+
+                    updateBar();
+                });
+
+                /* ===== Mobile card click (secondary) ===== */
+                document.addEventListener('click', function (e) {
+                    const card = e.target.closest('.selectable-tier');
+                    if (!card) return;
+                    manuallySelected = true;
+                    const container = card.closest('.pricing-table-container');
+                    if (!container || container.classList.contains('hidden')) return;
+
+                    container.querySelectorAll('.selectable-tier').forEach(c => c.classList.remove('tier-selected'));
+                    card.classList.add('tier-selected');
+
+                    const tier = card.getAttribute('data-tier');
+                    const price = card.getAttribute('data-price');
+
+                    container.querySelectorAll('.tier-pick-btn').forEach(b => {
+                        b.classList.toggle('active-tier', b.getAttribute('data-tier') === tier);
+                    });
+
+                    const lbl = card.querySelector('.card-title') ? card.querySelector('.card-title').textContent.trim() : tier;
+                    selectedTier = { tier, label: lbl };
+                    selectedPrice = price;
+                    updateBar();
+                });
+
+                /* ===== Service tab change clears selection ===== */
+                document.querySelectorAll('.service-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        selectedTier = null;
+                        selectedPrice = null;
+                        document.querySelectorAll('.selectable-tier').forEach(c => c.classList.remove('tier-selected'));
+                        document.querySelectorAll('.tier-pick-btn').forEach(b => b.classList.remove('active-tier'));
+                        updateBar();
+                    });
+                });
+
+                /* ===== Place Order button ===== */
+                if (orderBtn) {
+                    orderBtn.addEventListener('click', function () {
+                        if (!selectedTier) {
+                            showToast('Please select a billing model first! ✨');
+                            return;
+                        }
+                        const activeServiceBtn = document.querySelector('.service-btn.active');
+                        const service = activeServiceBtn ? activeServiceBtn.getAttribute('data-service') : 'web';
+                        const serviceName = serviceNameMap[service] || service;
+
+                        const params = new URLSearchParams();
+                        params.set('category', 'digital');
+                        params.set('service', service);
+                        params.set('tier', selectedTier.tier);
+                        params.set('plan', serviceName + ' – ' + selectedTier.label);
+                        params.set('price', selectedPrice);
+                        window.location.href = 'checkout.html?' + params.toString();
+                    });
+                }
+
+                /* ===== Legacy footer CTA buttons ===== */
+                document.querySelectorAll('.pricing-checkout-btn').forEach(btn => {
+                    btn.addEventListener('click', function (e) {
+                        e.preventDefault();
+                        const activeServiceBtn = document.querySelector('.service-btn.active');
+                        const service = activeServiceBtn ? activeServiceBtn.getAttribute('data-service') : 'web';
+                        const action = this.getAttribute('data-action') || 'strategy';
+                        const params = new URLSearchParams();
+                        params.set('category', 'digital');
+                        params.set('service', service);
+                        params.set('type', action === 'strategy' ? 'strategy-call' : 'custom-quote');
+                        window.location.href = 'checkout.html?' + params.toString();
+                    });
+                });
+
+                // Initialize bar state
+                updateBar();
+            })();
         </script>
 
         <!-- How We Work Section -->
@@ -1057,8 +1623,8 @@
                     <h2 class="cta-title">Start Your Project &<br>Book a Consultation</h2>
                     <h3 class="cta-subtitle">Click either button below to get started.</h3>
                     <div class="cta-actions">
-                        <a href="contact.html" class="cta-button primary">Book a Call</a>
-                        <a href="contact.html" class="cta-button secondary">Get a Quote</a>
+                        <a href="contact.html" class="cta-button primary"><span>Book a Call</span></a>
+                        <a href="contact.html" class="cta-button secondary"><span>Get a Quote</span></a>
                     </div>
                 </div>
                 <div class="floating-btn">Contact Us</div>
