@@ -141,12 +141,12 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         function initNeuralFlux(container) {
-            let width = container.clientWidth || 500;
-            let height = container.clientHeight || 350;
+            let width = container.clientWidth || 400;
+            let height = container.clientHeight || 220;
 
             const scene = new THREE.Scene();
-            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
-            camera.position.z = 8;
+            const camera = new THREE.PerspectiveCamera(48, width / height, 0.1, 1000);
+            camera.position.z = 8.5;
 
             const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
             renderer.setSize(width, height);
@@ -161,8 +161,8 @@ document.addEventListener("DOMContentLoaded", function () {
             const initialPositions = new Float32Array(particlesCount * 3);
 
             for (let i = 0; i < particlesCount; i++) {
-                // Sphere distribution
-                const r = 2.5 + Math.random() * 0.5;
+                // Sphere distribution (slightly tighter to avoid edges)
+                const r = 2.2 + Math.random() * 0.4;
                 const theta = Math.acos(2 * Math.random() - 1);
                 const phi = 2 * Math.PI * Math.random();
 
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 initialPositions[i * 3 + 1] = y;
                 initialPositions[i * 3 + 2] = z;
 
-                sizes[i] = Math.random() * 1.5 + 0.5;
+                sizes[i] = Math.random() * 2.5 + 1.2;
             }
 
             const geometry = new THREE.BufferGeometry();
@@ -186,10 +186,10 @@ document.addEventListener("DOMContentLoaded", function () {
             geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
 
             const material = new THREE.PointsMaterial({
-                color: 0xFF3C00,
-                size: 0.05,
+                color: 0xFF5500,
+                size: 0.1,
                 transparent: true,
-                opacity: 0.8,
+                opacity: 0.95,
                 blending: THREE.AdditiveBlending,
                 sizeAttenuation: true
             });
@@ -220,7 +220,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
             scene.add(ambientLight);
 
-            const centerLight = new THREE.PointLight(0xFF3C00, 20, 10);
+            const centerLight = new THREE.PointLight(0xFF3C00, 35, 12);
             scene.add(centerLight);
 
             // 4. Interactivity
