@@ -197,24 +197,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const points = new THREE.Points(geometry, material);
             scene.add(points);
 
-            // 2. Add Floating Rings (Digital Horizons)
-            const ringGroup = new THREE.Group();
-            const ringMat = new THREE.MeshStandardMaterial({
-                color: 0xFF3C00,
-                transparent: true,
-                opacity: 0.1,
-                side: THREE.DoubleSide
-            });
 
-            for (let i = 0; i < 3; i++) {
-                const r = 3 + i * 0.5;
-                const ringGeo = new THREE.TorusGeometry(r, 0.005, 16, 128);
-                const ring = new THREE.Mesh(ringGeo, ringMat);
-                ring.rotation.x = Math.random() * Math.PI;
-                ring.rotation.y = Math.random() * Math.PI;
-                ringGroup.add(ring);
-            }
-            scene.add(ringGroup);
 
             // 3. Lights
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
@@ -258,10 +241,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 // Rotate Overlays
                 points.rotation.y += 0.001;
-                ringGroup.rotation.y -= 0.002;
-                ringGroup.children.forEach((ring, idx) => {
-                    ring.rotation.z += 0.001 * (idx + 1);
-                });
+
 
                 // Subtle Scene Tilt
                 scene.rotation.x = mouseY * 0.1;
