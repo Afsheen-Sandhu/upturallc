@@ -1453,11 +1453,25 @@ html.lenis body {
     min-height: 180px;
 }
 
-.copyright-text {
-    font-size: 1rem;
+.footer-about-container {
+    max-width: 400px;
+    margin-bottom: 35px;
+}
+
+.footer-about-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: rgba(0, 0, 0, 0.6);
+    font-weight: 500;
+}
+
+.copyright-text-bottom {
+    font-size: 0.9rem;
     font-weight: 600;
-    color: #000;
-    margin-bottom: 25px;
+    color: rgba(0, 0, 0, 0.4);
+    margin-top: 15px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
 }
 
 .footer-cta-btn {
@@ -1543,6 +1557,12 @@ html.lenis body {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
+}
+
+.footer-logo-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
 }
 
 .footer-logo-large {

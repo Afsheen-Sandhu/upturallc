@@ -107,8 +107,8 @@ document.addEventListener("DOMContentLoaded", function () {
         const placeholder = document.getElementById(placeholderId);
         if (!placeholder) return;
 
-        // If the placeholder is already hardcoded (not empty), just trigger callback
-        if (placeholder.innerHTML.trim() !== "") {
+        // If the placeholder is already hardcoded (contains elements), just trigger callback
+        if (placeholder.children.length > 0) {
             if (callback) callback();
             return;
         }
@@ -127,32 +127,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Load Footer and Init Confetti
     loadComponent('footer.html', 'footer-placeholder', () => {
-        // --- Footer Girl Scroll Animation ---
-        const footerLottie = document.getElementById('footer-girl-lottie');
-        if (footerLottie) {
-            footerLottie.addEventListener('ready', () => {
-                const lottieInstance = footerLottie.getLottie();
-                if (typeof ScrollTrigger !== 'undefined' && lottieInstance) {
-                    let playhead = { frame: 0 };
-                    const targetEndFrame = (lottieInstance.totalFrames || 100) * 0.6;
-
-                    gsap.to(playhead, {
-                        frame: targetEndFrame,
-                        ease: "none",
-                        scrollTrigger: {
-                            trigger: ".footer-wrapper",
-                            start: "top bottom",
-                            end: "bottom bottom",
-                            scrub: 1.5
-                        },
-                        onUpdate: () => {
-                            lottieInstance.goToAndStop(playhead.frame, true);
-                        }
-                    });
-                }
-            });
-        }
-
         // --- Footer Confetti Effect ---
         const footer = document.querySelector('.footer-wrapper');
         if (footer) {
