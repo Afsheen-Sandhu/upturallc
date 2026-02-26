@@ -1168,8 +1168,10 @@ document.addEventListener("DOMContentLoaded", function () {
                         </div>
                         <i class="fa-solid fa-xmark" id="chatbot-close" style="cursor:pointer;"></i>
                     </div>
-                    <div class="chatbot-messages" id="chatbot-messages">
-                        <div class="message bot">Hello! I'm TuraBot. How can I help you today?</div>
+                    <div class="chatbot-messages" id="chatbot-messages" data-lenis-prevent>
+                        <div class="message bot">
+                            Hey! I'm TuraBot. 🤖 How can I help you today?
+                        </div>
                     </div>
                     <div class="chatbot-input-area">
                         <input type="text" class="chatbot-input" id="chatbot-input" placeholder="Type your message...">
@@ -1182,27 +1184,61 @@ document.addEventListener("DOMContentLoaded", function () {
         `;
         document.body.insertAdjacentHTML('beforeend', chatbotHTML);
 
+        // --- HASH-BASED TAB SWITCHING ---
+        // Helper to handle URL hash for pricing tabs
+        const handleHashTab = () => {
+            const hash = window.location.hash;
+            if (hash && hash.includes('-table')) {
+                const service = hash.replace('#', '').replace('-table', '');
+                const btn = document.querySelector(`.service-btn[data-service="${service}"]`);
+                if (btn) {
+                    btn.click();
+                    // Manually scroll to the table after it's unhidden
+                    setTimeout(() => {
+                        const table = document.getElementById(hash.replace('#', ''));
+                        if (table) {
+                            table.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }, 100);
+                }
+            }
+        };
+
+        // Listen for internal hash changes (from bot links)
+        window.addEventListener('hashchange', handleHashTab);
+        // Also run on load
+        setTimeout(handleHashTab, 500);
+
         const toggle = document.getElementById('chatbot-toggle');
-        const window = document.getElementById('chatbot-window');
+        const chatbotWindow = document.getElementById('chatbot-window');
         const close = document.getElementById('chatbot-close');
         const input = document.getElementById('chatbot-input');
         const send = document.getElementById('chatbot-send');
         const messages = document.getElementById('chatbot-messages');
 
+        let chatHistory = [
+            { role: 'assistant', content: "Hey! I'm TuraBot. 🤖 How can I help you today?" }
+        ];
+
         const addMessage = (text, sender) => {
             const msg = document.createElement('div');
             msg.className = `message ${sender}`;
 
-            // Handle Action Buttons for Bot
+            // Add to internal history for AI context
+            chatHistory.push({ role: sender === 'bot' ? 'assistant' : 'user', content: text });
+            // Maintain a reasonable history size
+            if (chatHistory.length > 20) chatHistory.shift();
+
+            // Handle Action Buttons for Bot (More robust regex)
             if (sender === 'bot') {
-                const actionRegex = /```ACTION_JSON\n([\s\S]*?)\n```/;
+                const actionRegex = /```(?:json|ACTION_JSON)?\s*([\s\S]*?)\s*```/;
                 const match = text.match(actionRegex);
 
-                if (match) {
+                if (match && match[1].includes('"actions"')) {
                     try {
-                        const actionData = JSON.parse(match[1]);
+                        const actionData = JSON.parse(match[1].trim());
                         const cleanText = text.replace(actionRegex, '').trim();
-                        msg.innerText = cleanText;
+                        msg.innerHTML = cleanText.replace(/\n/g, '<br>');
 
                         if (actionData.actions && actionData.actions.length > 0) {
                             const actionContainer = document.createElement('div');
@@ -1213,7 +1249,13 @@ document.addEventListener("DOMContentLoaded", function () {
                                 btn.className = 'btn-action';
                                 btn.href = action.url;
                                 btn.innerText = action.label;
-                                btn.target = '_blank'; // Optional
+                                // Only open in new tab if it's an external domain
+                                const isExternal = action.url.startsWith('http') &&
+                                    !action.url.includes('uptura.net') &&
+                                    !action.url.includes('localhost');
+                                if (isExternal) {
+                                    btn.target = '_blank';
+                                }
                                 actionContainer.appendChild(btn);
                             });
 
@@ -1224,7 +1266,7 @@ document.addEventListener("DOMContentLoaded", function () {
                         msg.innerText = text;
                     }
                 } else {
-                    msg.innerText = text;
+                    msg.innerHTML = text.replace(/\n/g, '<br>');
                 }
             } else {
                 msg.innerText = text;
@@ -1240,7 +1282,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 const response = await fetch('/api/chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: userText })
+                    body: JSON.stringify({
+                        message: userText,
+                        history: chatHistory
+                    })
                 });
 
                 const data = await response.json();
@@ -1265,12 +1310,14 @@ document.addEventListener("DOMContentLoaded", function () {
             messages.appendChild(loadingMsg);
 
             const aiResponse = await getAIResponse(text);
-            messages.removeChild(loadingMsg);
+            if (messages.contains(loadingMsg)) {
+                messages.removeChild(loadingMsg);
+            }
             addMessage(aiResponse, 'bot');
         };
 
-        toggle.addEventListener('click', () => window.classList.toggle('active'));
-        close.addEventListener('click', () => window.classList.remove('active'));
+        toggle.addEventListener('click', () => chatbotWindow.classList.toggle('active'));
+        close.addEventListener('click', () => chatbotWindow.classList.remove('active'));
         send.addEventListener('click', handleSend);
         input.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleSend(); });
     }

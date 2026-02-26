@@ -117,7 +117,7 @@
             <div class="digital-solutions-container">
 
                 <!-- CARD 1: Custom Website Development -->
-                <div class="digital-solution-card">
+                <div class="digital-solution-card" id="web-dev">
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24">
@@ -143,7 +143,7 @@
                 </div>
 
                 <!-- CARD 2: Website Redesign & Revamp -->
-                <div class="digital-solution-card">
+                <div class="digital-solution-card" id="web-redesign">
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24">
@@ -169,7 +169,7 @@
                 </div>
 
                 <!-- CARD 3: Mobile App Development -->
-                <div class="digital-solution-card">
+                <div class="digital-solution-card" id="app-dev">
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24">
@@ -195,7 +195,7 @@
                 </div>
 
                 <!-- CARD 4: Search Engine Optimization -->
-                <div class="digital-solution-card">
+                <div class="digital-solution-card" id="seo-services">
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24">
@@ -221,7 +221,7 @@
                 </div>
 
                 <!-- CARD 5: Social Media Marketing -->
-                <div class="digital-solution-card">
+                <div class="digital-solution-card" id="social-marketing">
                     <div class="card-top">
                         <div class="icon-box">
                             <svg viewBox="0 0 24 24">
@@ -333,6 +333,7 @@
 
             <!-- Web Development Table -->
             <div class="pricing-table-container" id="web-table">
+                <h3 class="table-anchor-label">Web Development Pricing</h3>
                 <table class="pricing-table">
                     <thead>
                         <tr>
@@ -428,6 +429,7 @@
 
             <!-- Redesign Table -->
             <div class="pricing-table-container hidden" id="redesign-table">
+                <h3 class="table-anchor-label">Website Redesign Pricing</h3>
                 <table class="pricing-table">
                     <thead>
                         <tr>
@@ -511,6 +513,7 @@
 
             <!-- Social Media Table -->
             <div class="pricing-table-container hidden" id="social-table">
+                <h3 class="table-anchor-label">Social Media Marketing Pricing</h3>
                 <table class="pricing-table">
                     <thead>
                         <tr>
@@ -581,6 +584,7 @@
 
             <!-- SEO Table -->
             <div class="pricing-table-container hidden" id="seo-table">
+                <h3 class="table-anchor-label">SEO Services Pricing</h3>
                 <table class="pricing-table">
                     <thead>
                         <tr>
@@ -651,6 +655,7 @@
 
             <!-- App Development Table -->
             <div class="pricing-table-container hidden" id="app-table">
+                <h3 class="table-anchor-label">App Development Pricing</h3>
                 <table class="pricing-table">
                     <thead>
                         <tr>
@@ -1050,6 +1055,17 @@
                     padding: 10px 20px;
                     font-size: 0.8rem;
                 }
+            }
+
+            .table-anchor-label {
+                font-size: 1.4rem;
+                font-weight: 800;
+                color: #000;
+                margin-bottom: 25px;
+                letter-spacing: -0.03em;
+                text-align: left;
+                padding-left: 5px;
+                border-left: 4px solid var(--brand-color);
             }
 
             @media (max-width: 479px) {
