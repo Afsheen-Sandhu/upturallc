@@ -320,12 +320,12 @@ html.lenis body {
     padding: 16px 36px;
     background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
     color: #fff;
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 700;
     text-decoration: none;
     border-radius: 50px;
-    transition: all 0.4s ease;
-    box-shadow: 0 4px 15px rgba(255, 60, 0, 0.3);
+    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+    box-shadow: 0 4px 15px rgba(255, 60, 0, 0.25);
     position: relative;
     overflow: hidden;
     z-index: 1;
@@ -335,6 +335,8 @@ html.lenis body {
     position: relative;
     z-index: 2;
     transition: color 0.4s ease;
+    display: block;
+    /* Ensure correct centering */
 }
 
 .footer-cta-btn::before {
@@ -348,7 +350,7 @@ html.lenis body {
     border-radius: 50px;
     z-index: 0;
     transform: translateY(100%);
-    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
 }
 
 .footer-cta-btn:hover::before {
@@ -357,12 +359,12 @@ html.lenis body {
 
 .footer-cta-btn:hover {
     transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 60, 0, 0.4);
-    color: #FF3C00;
+    box-shadow: 0 8px 25px rgba(255, 60, 0, 0.35);
+    color: #FF3C00 !important;
 }
 
 .footer-cta-btn:hover span {
-    color: #FF3C00;
+    color: #FF3C00 !important;
 }
 
 /* Nav Button Styles with same effect */
@@ -578,9 +580,10 @@ html.lenis body {
     position: absolute;
     top: 45%;
     left: max(40px, calc(50% - 660px));
-    transform: translateY(-50%);
+    transform: translate(-12%, -50%);
+    /* Offset internal lottie padding */
     width: 100%;
-    max-width: 240px;
+    max-width: 450px;
     display: flex;
     justify-content: center;
     z-index: 5;
@@ -615,7 +618,7 @@ html.lenis body {
         display: flex !important;
         order: 2;
         margin: 40px auto 0;
-        max-width: 120px;
+        max-width: 250px;
     }
 
     .book-call {
@@ -1292,10 +1295,9 @@ html.lenis body {
     }
 
     .footer-cta-btn {
-        width: 100%;
         text-align: center;
-        padding: 18px;
-        font-size: 16px;
+        padding: 16px 32px;
+        font-size: 15px;
     }
 
     .footer-left-top {
@@ -1449,6 +1451,8 @@ html.lenis body {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    align-items: flex-start;
+    /* Fix: Prevent stretching child buttons */
     height: 100%;
     min-height: 120px;
 }
@@ -1474,22 +1478,8 @@ html.lenis body {
     text-transform: uppercase;
 }
 
-.footer-cta-btn {
-    background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%);
-    color: #fff;
-    padding: 18px 40px;
-    border-radius: 50px;
-    text-decoration: none;
-    font-weight: 700;
-    display: inline-block;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(255, 60, 0, 0.2);
-}
 
-.footer-cta-btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 25px rgba(255, 60, 0, 0.3);
-}
+/* Replaced duplicate footer styles */
 
 .footer-center {
     display: flex;
@@ -3092,6 +3082,7 @@ html.lenis body {
     margin-top: 30px;
     padding: 12px 24px;
     background: #fff;
+    border: 1.8px solid #FF3C00;
     border-radius: 50px;
     font-size: 14px;
     font-style: italic;
@@ -3121,7 +3112,7 @@ html.lenis body {
 .service-btn {
     padding: 12px 24px;
     background: #fff;
-    border: 2px solid #ddd;
+    border: 1.8px solid #FF3C00;
     border-radius: 50px;
     font-size: 14px;
     font-weight: 700;
@@ -3859,7 +3850,7 @@ html.lenis body {
     padding: 18px 24px;
     border-radius: 999px;
     background: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1.8px solid #FF3C00;
     font-weight: 700;
     font-size: 1rem;
     color: #1a1a1a;
