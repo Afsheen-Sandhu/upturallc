@@ -207,27 +207,48 @@
             const loginForm = document.getElementById('loginForm');
             const errorMsg = document.getElementById('errorMsg');
 
-            loginForm.addEventListener('submit', (e) => {
+            loginForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const email = document.getElementById('email').value;
                 const password = document.getElementById('password').value;
+                const loginBtn = document.getElementById('loginBtn');
 
-                // Check stored password (for settings page update logic later)
-                const storedPass = localStorage.getItem('uptura_admin_pass') || 'qamaruptura12!';
+                // Show loading state
+                const originalBtnText = loginBtn.innerHTML;
+                loginBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Logging in...</span>';
+                loginBtn.disabled = true;
 
-                if (email === 'admin@uptura.net' && password === storedPass) {
-                    localStorage.setItem('uptura_admin_auth', 'true');
-                    gsap.to('#loginCard', {
-                        opacity: 0,
-                        scale: 0.95,
-                        duration: 0.4,
-                        onComplete: () => {
-                            window.location.href = 'admin-dashboard.html';
-                        }
+                try {
+                    const response = await fetch('/api/admin-auth?action=login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
                     });
-                } else {
-                    errorMsg.style.display = 'block';
-                    gsap.fromTo('#loginCard', { x: -10 }, { x: 10, duration: 0.1, repeat: 5, yoyo: true });
+
+                    const data = await response.json();
+
+                    if (data.success) {
+                        localStorage.setItem('uptura_admin_token', data.token);
+                        localStorage.setItem('uptura_admin_auth', 'true');
+                        gsap.to('#loginCard', {
+                            opacity: 0,
+                            scale: 0.95,
+                            duration: 0.4,
+                            onComplete: () => {
+                                window.location.href = 'admin-dashboard.html';
+                            }
+                        });
+                    } else {
+                        errorMsg.style.display = 'block';
+                        gsap.fromTo('#loginCard', { x: -10 }, { x: 10, duration: 0.1, repeat: 5, yoyo: true });
+                        loginBtn.innerHTML = originalBtnText;
+                        loginBtn.disabled = false;
+                    }
+                } catch (err) {
+                    console.error('Login error:', err);
+                    alert('An error occurred during login. Please try again.');
+                    loginBtn.innerHTML = originalBtnText;
+                    loginBtn.disabled = false;
                 }
             });
         });
