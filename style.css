@@ -2988,8 +2988,10 @@ html.lenis body {
 /* Digital Solutions Header & Helpers */
 .solutions-header {
     padding-top: 100px;
+    padding-bottom: 60px;
     text-align: center;
     background: #EEE9E3;
+    scroll-margin-top: 80px;
 }
 
 .about-badge.centered {
