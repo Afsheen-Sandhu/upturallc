@@ -125,8 +125,163 @@ document.addEventListener("DOMContentLoaded", function () {
             .catch(error => console.error(error));
     };
 
-    // Load Footer and Init Confetti
+    // Load Footer and Init Neural Flux
     loadComponent('footer.html', 'footer-placeholder', () => {
+        // --- Footer Premium Animation: Neural Flux ---
+        const footerContainer = document.getElementById('footer-3d-canvas-container');
+        if (footerContainer) {
+            if (typeof THREE === 'undefined') {
+                const script = document.createElement('script');
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js";
+                script.onload = () => setTimeout(() => initNeuralFlux(footerContainer), 100);
+                document.head.appendChild(script);
+            } else {
+                setTimeout(() => initNeuralFlux(footerContainer), 100);
+            }
+        }
+
+        function initNeuralFlux(container) {
+            let width = container.clientWidth || 500;
+            let height = container.clientHeight || 350;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+            camera.position.z = 8;
+
+            const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            container.innerHTML = '';
+            container.appendChild(renderer.domElement);
+
+            // 1. Create Neural Field (Particles)
+            const particlesCount = 2500;
+            const positions = new Float32Array(particlesCount * 3);
+            const sizes = new Float32Array(particlesCount);
+            const initialPositions = new Float32Array(particlesCount * 3);
+
+            for (let i = 0; i < particlesCount; i++) {
+                // Sphere distribution
+                const r = 2.5 + Math.random() * 0.5;
+                const theta = Math.acos(2 * Math.random() - 1);
+                const phi = 2 * Math.PI * Math.random();
+
+                const x = r * Math.sin(theta) * Math.cos(phi);
+                const y = r * Math.sin(theta) * Math.sin(phi);
+                const z = r * Math.cos(theta);
+
+                positions[i * 3] = x;
+                positions[i * 3 + 1] = y;
+                positions[i * 3 + 2] = z;
+
+                initialPositions[i * 3] = x;
+                initialPositions[i * 3 + 1] = y;
+                initialPositions[i * 3 + 2] = z;
+
+                sizes[i] = Math.random() * 1.5 + 0.5;
+            }
+
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+            const material = new THREE.PointsMaterial({
+                color: 0xFF3C00,
+                size: 0.05,
+                transparent: true,
+                opacity: 0.8,
+                blending: THREE.AdditiveBlending,
+                sizeAttenuation: true
+            });
+
+            const points = new THREE.Points(geometry, material);
+            scene.add(points);
+
+            // 2. Add Floating Rings (Digital Horizons)
+            const ringGroup = new THREE.Group();
+            const ringMat = new THREE.MeshStandardMaterial({
+                color: 0xFF3C00,
+                transparent: true,
+                opacity: 0.1,
+                side: THREE.DoubleSide
+            });
+
+            for (let i = 0; i < 3; i++) {
+                const r = 3 + i * 0.5;
+                const ringGeo = new THREE.TorusGeometry(r, 0.005, 16, 128);
+                const ring = new THREE.Mesh(ringGeo, ringMat);
+                ring.rotation.x = Math.random() * Math.PI;
+                ring.rotation.y = Math.random() * Math.PI;
+                ringGroup.add(ring);
+            }
+            scene.add(ringGroup);
+
+            // 3. Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+            scene.add(ambientLight);
+
+            const centerLight = new THREE.PointLight(0xFF3C00, 20, 10);
+            scene.add(centerLight);
+
+            // 4. Interactivity
+            let mouseX = 0, mouseY = 0;
+            let targetMouseX = 0, targetMouseY = 0;
+
+            window.addEventListener('mousemove', (e) => {
+                const rect = container.getBoundingClientRect();
+                targetMouseX = ((e.clientX - rect.left) / width) * 2 - 1;
+                targetMouseY = -((e.clientY - rect.top) / height) * 2 + 1;
+            });
+
+            // 5. Animation Loop
+            function animate() {
+                requestAnimationFrame(animate);
+
+                const time = Date.now() * 0.0005;
+
+                // Smooth mouse interpolation
+                mouseX += (targetMouseX - mouseX) * 0.05;
+                mouseY += (targetMouseY - mouseY) * 0.05;
+
+                // Animate Particles (Neural Pulsing)
+                const posAttr = points.geometry.attributes.position;
+                for (let i = 0; i < particlesCount; i++) {
+                    const ix = i * 3, iy = i * 3 + 1, iz = i * 3 + 2;
+
+                    // Wave motion
+                    const wave = Math.sin(time + initialPositions[ix]) * 0.1;
+                    posAttr.array[ix] = initialPositions[ix] + wave + (mouseX * 0.2);
+                    posAttr.array[iy] = initialPositions[iy] + Math.cos(time + initialPositions[iy]) * 0.1 + (mouseY * 0.2);
+                    posAttr.array[iz] = initialPositions[iz] + Math.sin(time * 0.5) * 0.1;
+                }
+                posAttr.needsUpdate = true;
+
+                // Rotate Overlays
+                points.rotation.y += 0.001;
+                ringGroup.rotation.y -= 0.002;
+                ringGroup.children.forEach((ring, idx) => {
+                    ring.rotation.z += 0.001 * (idx + 1);
+                });
+
+                // Subtle Scene Tilt
+                scene.rotation.x = mouseY * 0.1;
+                scene.rotation.y = mouseX * 0.1;
+
+                renderer.render(scene, camera);
+            }
+
+            window.addEventListener('resize', () => {
+                const newWidth = container.clientWidth;
+                const newHeight = container.clientHeight;
+                if (newWidth && newHeight) {
+                    camera.aspect = newWidth / newHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(newWidth, newHeight);
+                }
+            });
+
+            animate();
+        }
         // --- Footer Confetti Effect ---
         const footer = document.querySelector('.footer-wrapper');
         if (footer) {
