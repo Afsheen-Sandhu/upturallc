@@ -1667,6 +1667,5 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Force init without delay
-    initBookingModal();
+
 });
