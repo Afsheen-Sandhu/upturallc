@@ -1058,14 +1058,88 @@
             }
 
             .table-anchor-label {
-                font-size: 1.4rem;
+                font-size: 2.8rem;
                 font-weight: 800;
                 color: #000;
-                margin-bottom: 25px;
-                letter-spacing: -0.03em;
+                margin: 60px 0 45px;
+                letter-spacing: -0.05em;
+                text-align: center;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                border: none;
+                padding-left: 0;
+            }
+
+            .table-anchor-label::after {
+                content: '';
+                display: block;
+                width: 70px;
+                height: 6px;
+                background: linear-gradient(90deg, var(--brand-color), #FF5722);
+                margin-top: 18px;
+                border-radius: 10px;
+            }
+
+            .pricing-table {
+                width: 100%;
+                border-collapse: separate;
+                border-spacing: 0;
+                background: #fff;
+                border-radius: 28px;
+                overflow: hidden;
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.06);
+                margin-bottom: 60px;
+                border: 1px solid rgba(0, 0, 0, 0.06);
+            }
+
+            .pricing-table thead th {
+                background: linear-gradient(135deg, var(--brand-color), #ff5722);
+                color: #fff;
+                padding: 28px 24px;
+                font-size: 0.9rem;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.1em;
+                text-align: center;
+                border: none;
+            }
+
+            .pricing-table thead th:first-child {
+                padding-left: 40px;
                 text-align: left;
-                padding-left: 5px;
-                border-left: 4px solid var(--brand-color);
+            }
+
+            .pricing-table tbody td {
+                padding: 22px 24px;
+                border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+                color: #555;
+                font-size: 1.05rem;
+                font-weight: 500;
+                transition: background 0.2s ease;
+                text-align: center;
+            }
+
+            .pricing-table tbody td:first-child {
+                padding-left: 40px;
+                color: #000;
+                font-weight: 800;
+                background: rgba(0, 0, 0, 0.015);
+                width: 25%;
+                text-align: left;
+            }
+
+            .pricing-table tbody tr:last-child td {
+                border-bottom: none;
+            }
+
+            .pricing-table tbody tr:hover td {
+                background: rgba(255, 60, 0, 0.03);
+                color: #000;
+            }
+
+            .pricing-table tbody tr:hover td:first-child {
+                background: rgba(255, 60, 0, 0.05);
             }
 
             @media (max-width: 479px) {
