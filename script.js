@@ -78,6 +78,51 @@ document.addEventListener("DOMContentLoaded", function () {
 
     gsap.ticker.lagSmoothing(0);
 
+    // --- BOOKING MODAL GLOBAL TRIGGER ---
+    // This catches all "Book a Call" / "Get Started" clicks globally and prevents navigation to contact.html
+    document.body.addEventListener('click', (e) => {
+        const target = e.target.closest('a, button, [class*="book-call"], [class*="cta"]');
+        if (!target) return;
+
+        const href = target.getAttribute('href') || '';
+        const textContent = target.textContent.trim().toLowerCase();
+        const classStr = target.className.toLowerCase();
+
+        // 1. Direct Text check (Highest Priority)
+        const isBookingText = textContent.includes('book a call') ||
+            textContent.includes('schedule') ||
+            textContent.includes('get started') ||
+            textContent.includes('get a quote');
+
+        // 2. Class check
+        const isCTAClass = classStr.includes('book-call') ||
+            classStr.includes('cta-button') ||
+            classStr.includes('cta-btn') ||
+            classStr.includes('footer-cta-btn');
+
+        // 3. Contact link filter
+        // If it's explicitly a "Contact" link in the navigation, we might let it through, 
+        // BUT if it says "Book a Call", we always hijack it.
+        const isNavLink = classStr.includes('nav-link') || classStr.includes('mobile-link');
+        const isContactTextOnly = textContent === 'contact';
+
+        if (isBookingText || (href.includes('contact.html') && !isNavLink) || (href.includes('contact.html') && isCTAClass)) {
+            // Exceptions: If it's just the 'Contact' word in the menu, let it go to contact page
+            if (isContactTextOnly && isNavLink) return;
+
+            e.preventDefault();
+            if (window.openBookingModal) {
+                window.openBookingModal(e);
+            } else {
+                // Modal not loaded yet? Force load it and then open
+                console.log("Booking modal not ready, initializing...");
+                initBookingModal();
+                // Wait a bit for the load and then try again
+                setTimeout(() => window.openBookingModal?.(e), 500);
+            }
+        }
+    });
+
     // --- LOAD DYNAMIC COMPONENTS ---
 
     // Function to add Global WhatsApp Button
@@ -1468,27 +1513,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 }, 400);
             };
 
-            // Global Bind for all "Book a Call" and "Get Started" triggers
-            document.body.addEventListener('click', (e) => {
-                const target = e.target.closest('a, button, .book-call, .cta-button, .cta-btn, .footer-cta-btn');
-                if (target) {
-                    const textContent = target.textContent.trim().toLowerCase();
-                    const href = target.getAttribute('href') || '';
-
-                    // If the button says "book a call" or "get started", OR links to contact page but is a CTA button
-                    if (
-                        textContent.includes('book a call') ||
-                        (textContent.includes('get started') && href.includes('contact.html')) ||
-                        target.classList.contains('book-call') ||
-                        (href.includes('contact.html') && target.classList.contains('cta-button')) ||
-                        (href.includes('contact.html') && target.classList.contains('footer-cta-btn'))
-                    ) {
-                        e.preventDefault();
-                        if (window.openBookingModal) window.openBookingModal(e);
-                    }
-                }
-            });
-
             closeBtn.onclick = closeBookingModal;
             modal.onclick = (e) => { if (e.target === modal) closeBookingModal(); };
 
@@ -1639,6 +1663,6 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // Call it after components load (to ensure placeholder is ready)
-    setTimeout(initBookingModal, 1000);
+    // Force init without delay
+    initBookingModal();
 });
