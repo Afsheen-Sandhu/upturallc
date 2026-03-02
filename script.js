@@ -107,8 +107,12 @@ document.addEventListener("DOMContentLoaded", function () {
         const isContactTextOnly = textContent === 'contact';
 
         if (isBookingText || (href.includes('contact.html') && !isNavLink) || (href.includes('contact.html') && isCTAClass)) {
-            // Exceptions: If it's just the 'Contact' word in the menu, let it go to contact page
+            // EXCEPTION 1: If it's just the 'Contact' word in the menu, let it go to contact page
             if (isContactTextOnly && isNavLink) return;
+
+            // EXCEPTION 2: If the button is ALREADY inside the booking modal, do NOT hijack it!
+            // This prevents the "Schedule Meeting" submit button from being blocked.
+            if (target.closest('.booking-modal-overlay') || target.closest('.booking-modal-card')) return;
 
             e.preventDefault();
             if (window.openBookingModal) {
