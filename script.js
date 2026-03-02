@@ -1432,4 +1432,213 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     initPremiumChatbot();
+
+    // --- BOOKING MODAL LOGIC ---
+    function initBookingModal() {
+        const placeholderId = 'booking-modal-placeholder';
+        loadComponent('booking-modal.html', placeholderId, () => {
+            const modal = document.getElementById('bookingModal');
+            const closeBtn = document.getElementById('closeBookingModal');
+            const form = document.getElementById('bookingForm');
+            const successMsg = document.getElementById('bookingSuccess');
+            const submitBtn = document.getElementById('bookingSubmitBtn');
+            const btnText = submitBtn.querySelector('.booking-btn-text');
+            const spinner = document.getElementById('bookingSpinner');
+
+            // Open Modal Function
+            window.openBookingModal = (e) => {
+                if (e) e.preventDefault();
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden'; // Lock scroll
+            };
+
+            // Close Modal Function
+            window.closeBookingModal = () => {
+                modal.classList.remove('active');
+                document.body.style.overflow = ''; // Unlock scroll
+
+                // Reset form and view after a delay
+                setTimeout(() => {
+                    form.style.display = 'block';
+                    successMsg.style.display = 'none';
+                    form.reset();
+                    submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.textContent = 'Schedule Meeting';
+                }, 400);
+            };
+
+            // Global Bind for all "Book a Call" and "Get Started" triggers
+            document.body.addEventListener('click', (e) => {
+                const target = e.target.closest('a, button, .book-call, .cta-button, .cta-btn, .footer-cta-btn');
+                if (target) {
+                    const textContent = target.textContent.trim().toLowerCase();
+                    const href = target.getAttribute('href') || '';
+
+                    // If the button says "book a call" or "get started", OR links to contact page but is a CTA button
+                    if (
+                        textContent.includes('book a call') ||
+                        (textContent.includes('get started') && href.includes('contact.html')) ||
+                        target.classList.contains('book-call') ||
+                        (href.includes('contact.html') && target.classList.contains('cta-button')) ||
+                        (href.includes('contact.html') && target.classList.contains('footer-cta-btn'))
+                    ) {
+                        e.preventDefault();
+                        if (window.openBookingModal) window.openBookingModal(e);
+                    }
+                }
+            });
+
+            closeBtn.onclick = closeBookingModal;
+            modal.onclick = (e) => { if (e.target === modal) closeBookingModal(); };
+
+            // Form Logic
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const name = document.getElementById('booking-name').value;
+                const email = document.getElementById('booking-email').value;
+                const phone = document.getElementById('booking-phone').value;
+                const company = document.getElementById('booking-company').value;
+                const date = document.getElementById('booking-date').value;
+                const time = document.getElementById('booking-time').value;
+                const message = document.getElementById('booking-message').value;
+
+                submitBtn.disabled = true;
+                spinner.style.display = 'block';
+                btnText.textContent = 'Checking availability...';
+
+                try {
+                    // 1. Check Availability (Dynamic Import Firebase for Slot Check)
+                    // We'll use the same Firebase config as the site
+                    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js");
+                    const { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js");
+
+                    const firebaseConfig = {
+                        apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
+                        authDomain: "uptura-leads.firebaseapp.com",
+                        projectId: "uptura-leads",
+                        storageBucket: "uptura-leads.firebasestorage.app",
+                        messagingSenderId: "146306181969",
+                        appId: "1:146306181969:web:c91b776edc33f652c2c170"
+                    };
+
+                    const app = initializeApp(firebaseConfig);
+                    const db = getFirestore(app);
+
+                    // Slot Check
+                    const q = query(collection(db, "leads"), where("appointmentDate", "==", date), where("appointmentTime", "==", time));
+                    const snapshot = await getDocs(q);
+
+                    if (!snapshot.empty) {
+                        alert("Ops! This slot is already taken. Please pick another time.");
+                        submitBtn.disabled = false;
+                        spinner.style.display = 'none';
+                        btnText.textContent = 'Schedule Meeting';
+                        return;
+                    }
+
+                    btnText.textContent = 'Scheduling...';
+
+                    // 2. Save to Firebase
+                    const leadData = {
+                        name, email, phone, company, appointmentDate: date, appointmentTime: time, message,
+                        status: 'pending',
+                        createdAt: serverTimestamp(),
+                        source: 'Booking Modal'
+                    };
+                    await addDoc(collection(db, "leads"), leadData);
+
+                    // Generate Google Calendar Link for Admin
+                    const [year, month, day] = date.split('-');
+                    const [hour, minute] = time.split(':');
+
+                    // Convert to UTC assuming EST (UTC-5)
+                    const eventStart = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 5, minute));
+                    const eventEnd = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 6, minute)); // Assume 1 hour
+
+                    const formatGCalDate = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+                    const gCalLink = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=Strategy+Call+with+${encodeURIComponent(name)}&dates=${formatGCalDate(eventStart)}/${formatGCalDate(eventEnd)}&details=Client+Email:+${encodeURIComponent(email)}%0ACompany:+${encodeURIComponent(company)}%0A%0AMessage:%0A${encodeURIComponent(message)}`;
+
+                    // 3. Send Email Notification
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            to: 'info@uptura.net',
+                            subject: `New Call Requested: ${name}`,
+                            html: `
+                                <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                                    <div style="background-color: #ffffff; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0;">
+                                        <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png" alt="Uptura" height="40" style="display: block; margin: 0 auto; height: 40px;">
+                                    </div>
+                                    
+                                    <div style="background: linear-gradient(135deg, #FF3C00 0%, #FF5722 100%); padding: 15px; border-radius: 8px; color: white; text-align: center; margin-bottom: 25px;">
+                                        <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Booking Request Received</h2>
+                                    </div>
+
+                                    <div style="padding: 0 15px;">
+                                        <p style="font-size: 15px; color: #444; margin-top: 0;">A new prospect has requested a strategy call. Here are the details:</p>
+                                        
+                                        <table style="width: 100%; border-collapse: collapse; margin-top: 25px;">
+                                            <tr>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; width: 130px; color: #666; font-weight: 600; font-size: 14px;">CLIENT NAME:</td>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #111; font-weight: 600; font-size: 15px;">${name}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #666; font-weight: 600; font-size: 14px;">EMAIL ADDRESS:</td>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #111; font-weight: 500; font-size: 15px;"><a href="mailto:${email}" style="color: #FF3C00; text-decoration: none;">${email}</a></td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #666; font-weight: 600; font-size: 14px;">DATE & TIME:</td>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #111; font-weight: 700; font-size: 16px;">${date} at ${time} EST</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #666; font-weight: 600; font-size: 14px;">COMPANY:</td>
+                                                <td style="padding: 12px 0; border-bottom: 1px solid #f0f0f0; color: #111; font-weight: 500; font-size: 15px;">${company || 'Not Provided'}</td>
+                                            </tr>
+                                            <tr>
+                                                <td style="padding: 15px 0 5px 0; color: #666; font-weight: 600; font-size: 14px;">MESSAGE:</td>
+                                                <td></td>
+                                            </tr>
+                                            <tr>
+                                                <td colspan="2" style="padding: 15px; background-color: #f9f9f9; border-radius: 6px; color: #444; line-height: 1.6; font-size: 14px; border: 1px solid #f0f0f0;">
+                                                    ${message || 'No additional details provided by the client.'}
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                        <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+                                            <a href="${gCalLink}" style="display: inline-block; padding: 14px 30px; background-color: #111111; color: #ffffff; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 15px; transition: opacity 0.3s; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+                                                📅 Add to Google Calendar
+                                            </a>
+                                        </div>
+                                        
+                                        <p style="text-align: center; color: #888; font-size: 13px; margin-top: 30px; margin-bottom: 0;">
+                                            Manage your appointments in the <a href="https://uptura.com/admin.html" style="color: #FF3C00; text-decoration: none; font-weight: 600;">Admin Dashboard</a>.
+                                        </p>
+                                    </div>
+                                </div>
+                            `
+                        })
+                    });
+
+                    // 4. Success State
+                    form.style.display = 'none';
+                    successMsg.style.display = 'flex';
+
+                } catch (error) {
+                    console.error("Booking Error:", error);
+                    alert("Something went wrong. Please try again or contact us directly.");
+                    submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.textContent = 'Schedule Meeting';
+                }
+            });
+        });
+    }
+
+    // Call it after components load (to ensure placeholder is ready)
+    setTimeout(initBookingModal, 1000);
 });

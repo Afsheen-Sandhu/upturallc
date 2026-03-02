@@ -1107,7 +1107,95 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Reschedule Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-card {
+            background: #fff;
+            padding: 32px;
+            border-radius: 24px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-dark);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+            font-size: 1.2rem;
+        }
+
+        .modal-footer {
+            margin-top: 30px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 14px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #fff;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .btn-confirm {
+            flex: 2;
+            padding: 14px;
+            border-radius: 12px;
+            background: var(--primary-gradient);
+            color: #fff;
+            border: none;
+            font-weight: 700;
+            cursor: pointer;
+        }
     </style>
+    <div class="modal-overlay" id="rescheduleModal">
+        <div class="modal-card">
+            <i class="fa-solid fa-times modal-close" onclick="closeRescheduleModal()"></i>
+            <h3 class="modal-title">Reschedule Appointment</h3>
+            <p id="rescheduleTarget" style="margin-bottom: 20px; font-size: 0.9rem; color: var(--text-muted);"></p>
+
+            <div class="form-group">
+                <label>New Date</label>
+                <input type="date" id="newAppDate">
+            </div>
+            <div class="form-group">
+                <label>New Time (EST)</label>
+                <input type="time" id="newAppTime">
+            </div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeRescheduleModal()">Cancel</button>
+                <button class="btn-confirm" id="confirmRescheduleBtn">Confirm & Send Email</button>
+            </div>
+        </div>
+    </div>
 </head>
 
 <body>
@@ -1130,6 +1218,12 @@
                 <div class="nav-link" onclick="switchTab('leads')">
                     <i class="fa-solid fa-users"></i>
                     <span class="nav-text">Leads</span>
+                </div>
+            </li>
+            <li class="nav-item">
+                <div class="nav-link" onclick="switchTab('appointments')">
+                    <i class="fa-solid fa-calendar-check"></i>
+                    <span class="nav-text">Appointments</span>
                 </div>
             </li>
             <li class="nav-item">
@@ -1241,6 +1335,7 @@
                             <th>Client</th>
                             <th>Plan / Service</th>
                             <th>Add-ons</th>
+                            <th>Appointment</th>
                             <th>Status</th>
                             <th>Remarks</th>
                             <th>Date</th>
@@ -1326,6 +1421,74 @@
             </div>
         </div>
 
+        <!-- Appointments View -->
+        <div id="appointments" class="tab-content">
+            <div class="tab-section-header">
+                <h3 style="font-weight: 800;">Appointments Management</h3>
+                <button class="download-btn" onclick="exportAppointmentsToCSV()">
+                    <i class="fa-solid fa-download"></i>
+                    <span class="btn-text">Download Appointments</span>
+                </button>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total</div>
+                    <div class="stat-value" id="totalAppointmentsCount">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Pending</div>
+                    <div class="stat-value" id="pendingAppointmentsCount" style="color: #ca8a04;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Approved</div>
+                    <div class="stat-value" id="approvedAppointmentsCount" style="color: #16a34a;">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Rejected</div>
+                    <div class="stat-value" id="rejectedAppointmentsCount" style="color: #dc2626;">0</div>
+                </div>
+            </div>
+
+            <div class="filters-row">
+                <div class="search-container">
+                    <i class="fa-solid fa-search search-icon"></i>
+                    <input type="text" id="appointmentSearch" class="search-input" placeholder="Search appointments...">
+                </div>
+                <div class="filter-group">
+                    <select id="appointmentStatusFilter" class="filter-select">
+                        <option value="all">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="approved">Approved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <input type="date" id="appointmentDateFilter" class="date-input">
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Contact</th>
+                            <th>Company</th>
+                            <th>Appointment</th>
+                            <th>Status</th>
+                            <th>Remarks</th>
+                            <th style="text-align: center;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appointmentsTableBody">
+                        <!-- Data will be injected here -->
+                    </tbody>
+                </table>
+                <div id="appointmentsLoading" class="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+
         <!-- Settings View -->
         <div id="settings" class="tab-content">
             <div class="settings-card">
@@ -1352,7 +1515,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-        import { getFirestore, collection, query, orderBy, getDocs, limit, onSnapshot, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+        import { getFirestore, collection, query, orderBy, limit, onSnapshot, doc, getDocs, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
         // Auth Check (Improved Server-Side Verification)
         const authCheck = async () => {
@@ -1360,6 +1523,8 @@
             const isAuth = localStorage.getItem('uptura_admin_auth');
 
             if (!token || isAuth !== 'true') {
+                localStorage.removeItem('uptura_admin_auth');
+                localStorage.removeItem('uptura_admin_token');
                 window.location.href = 'admin.html';
                 return;
             }
@@ -1470,7 +1635,7 @@
                 }
             });
 
-            const titles = { 'orders': 'Orders Dashboard', 'leads': 'Leads Management', 'settings': 'Account Settings' };
+            const titles = { 'orders': 'Orders Dashboard', 'leads': 'Leads Management', 'appointments': 'Appointments Management', 'settings': 'Account Settings' };
             document.getElementById('pageTitle').textContent = titles[tabId];
 
             // Animation in
@@ -1481,6 +1646,7 @@
 
             if (tabId === 'orders') fetchOrders();
             if (tabId === 'leads') fetchLeads();
+            if (tabId === 'appointments') fetchAppointments();
         }
 
         window.logout = () => {
@@ -1490,15 +1656,157 @@
         };
 
         // Helper Functions for Data Management
+        // Helper Functions for Data Management
         window.setRecordStatus = async (collectionName, id, newStatus) => {
             try {
                 const docRef = doc(db, collectionName, id);
+                const snap = await getDoc(docRef);
+                const data = snap.data();
+
                 await updateDoc(docRef, { status: newStatus });
-                if (collectionName === 'orders') fetchOrders(); else fetchLeads();
+
+                // Trigger Email via Resend bridge
+                let subject = "Update regarding your Uptura Appointment";
+                let html = "";
+
+                if (newStatus === 'approved') {
+                    subject = "Confirmed: Your Appointment with Uptura";
+                    html = `
+                        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                            <div style="background-color: #ffffff; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0;">
+                                <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png" alt="Uptura" height="40" style="display: block; margin: 0 auto; height: 40px;">
+                            </div>
+                            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 15px; border-radius: 8px; color: white; text-align: center; margin-bottom: 25px;">
+                                <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Appointment Confirmed!</h2>
+                            </div>
+                            <div style="padding: 0 15px; color: #444; line-height: 1.6; font-size: 15px;">
+                                <p>Hi <strong>${data.name}</strong>,</p>
+                                <p>Great news! Your strategy call has been confirmed for:</p>
+                                <div style="background-color: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 700; margin: 20px 0;">
+                                    📅 ${data.appointmentDate} at ${data.appointmentTime} EST
+                                </div>
+                                <p>We look forward to speaking with you and discussing how we can accelerate your business with AI innovation.</p>
+                                <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;">
+                                <p style="color: #666; font-size: 14px; margin: 0;">Best regards,<br><strong style="color: #111;">The Uptura Team</strong></p>
+                            </div>
+                        </div>
+                    `;
+                } else if (newStatus === 'rejected') {
+                    subject = "Update: Your Uptura Appointment Request";
+                    html = `
+                        <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                            <div style="background-color: #ffffff; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0;">
+                                <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png" alt="Uptura" height="40" style="display: block; margin: 0 auto; height: 40px;">
+                            </div>
+                            <div style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); padding: 15px; border-radius: 8px; color: white; text-align: center; margin-bottom: 25px;">
+                                <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Slot Unavailable</h2>
+                            </div>
+                            <div style="padding: 0 15px; color: #444; line-height: 1.6; font-size: 15px;">
+                                <p>Hi <strong>${data.name}</strong>,</p>
+                                <p>Thank you for reaching out to Uptura. Unfortunately, the time slot you requested is no longer available.</p>
+                                <p>Would you like to pick another time? You can simply reply to this email, or visit our website to submit a new scheduling request.</p>
+                                <div style="text-align: center; margin: 30px 0;">
+                                    <a href="https://uptura.com" style="display: inline-block; padding: 12px 24px; background-color: #111111; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 15px;">Book New Time</a>
+                                </div>
+                                <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;">
+                                <p style="color: #666; font-size: 14px; margin: 0;">Best regards,<br><strong style="color: #111;">The Uptura Team</strong></p>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                if (html) {
+                    await fetch('/api/send-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ to: data.email, subject, html })
+                    });
+                }
+
+                if (collectionName === 'orders') fetchOrders();
+                else {
+                    fetchLeads();
+                    fetchAppointments();
+                }
             } catch (err) {
                 console.error("Error updating status:", err);
             }
         };
+
+        // Reschedule Logic
+        let currentReschedule = { col: '', id: '', name: '', email: '' };
+
+        window.openRescheduleModal = (col, id, name, email) => {
+            currentReschedule = { col, id, name, email };
+            document.getElementById('rescheduleTarget').textContent = `Suggesting new time for ${name} (${email})`;
+            document.getElementById('rescheduleModal').style.display = 'flex';
+        };
+
+        window.closeRescheduleModal = () => {
+            document.getElementById('rescheduleModal').style.display = 'none';
+        };
+
+        document.getElementById('confirmRescheduleBtn').addEventListener('click', async () => {
+            const newDate = document.getElementById('newAppDate').value;
+            const newTime = document.getElementById('newAppTime').value;
+
+            if (!newDate || !newTime) return alert("Please select date and time");
+
+            const btn = document.getElementById('confirmRescheduleBtn');
+            btn.disabled = true;
+            btn.textContent = "Sending...";
+
+            try {
+                const docRef = doc(db, currentReschedule.col, currentReschedule.id);
+                await updateDoc(docRef, {
+                    appointmentDate: newDate,
+                    appointmentTime: newTime,
+                    status: 'rescheduled'
+                });
+
+                // Send Reschedule Email
+                const html = `
+                    <div style="font-family: 'Helvetica Neue', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 12px; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 1px solid #f0f0f0;">
+                            <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png" alt="Uptura" height="40" style="display: block; margin: 0 auto; height: 40px;">
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); padding: 15px; border-radius: 8px; color: white; text-align: center; margin-bottom: 25px;">
+                            <h2 style="margin: 0; font-size: 20px; font-weight: 600;">Time Slot Conflict</h2>
+                        </div>
+                        <div style="padding: 0 15px; color: #444; line-height: 1.6; font-size: 15px;">
+                            <p>Hi <strong>${currentReschedule.name}</strong>,</p>
+                            <p>We've reviewed your request but unfortunately had a scheduling conflict with the original time you selected. We would love to suggest a new time instead:</p>
+                            <div style="background-color: #fffbeb; border: 1px solid #fde68a; color: #b45309; padding: 15px; border-radius: 8px; text-align: center; font-size: 18px; font-weight: 700; margin: 20px 0;">
+                                📅 ${newDate} at ${newTime} EST
+                            </div>
+                            <p>If this works for you, please let us know by simply <strong>replying to this email</strong>! Otherwise, feel free to suggest another time that better fits your schedule.</p>
+                            <hr style="border: none; border-top: 1px solid #eaeaea; margin: 30px 0;">
+                            <p style="color: #666; font-size: 14px; margin: 0;">Best regards,<br><strong style="color: #111;">The Uptura Team</strong></p>
+                        </div>
+                    </div>
+                `;
+
+                await fetch('/api/send-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ to: currentReschedule.email, subject: "New Suggested Time: Uptura Appointment", html })
+                });
+
+                alert("Succesfully rescheduled and emailed client! ✔");
+                closeRescheduleModal();
+                if (currentReschedule.col === 'orders') fetchOrders();
+                else {
+                    // Refresh both since we don't know if it's a lead or appointment easily without checking data
+                    fetchLeads();
+                    fetchAppointments();
+                }
+            } catch (err) {
+                console.error("Reschedule failed:", err);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = "Confirm & Send Email";
+            }
+        });
 
         window.updateRecordRemarks = async (collectionName, id, newRemarks) => {
             try {
@@ -1514,7 +1822,11 @@
             try {
                 const docRef = doc(db, collectionName, id);
                 await deleteDoc(docRef);
-                if (collectionName === 'orders') fetchOrders(); else fetchLeads();
+                if (collectionName === 'orders') fetchOrders();
+                else {
+                    fetchLeads();
+                    fetchAppointments();
+                }
             } catch (err) {
                 console.error("Error deleting record:", err);
             }
@@ -1588,6 +1900,10 @@
                                 </div>
                             </td>
                             <td data-label="Add-ons" style="font-size: 0.85rem; color: var(--text-muted); max-width: 200px;">${addons}</td>
+                            <td data-label="Appointment">
+                                <div style="font-weight: 700; font-size: 0.85rem;">${data.appointmentDate || 'N/A'}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${data.appointmentTime || ''}</div>
+                            </td>
                             <td data-label="Status">
                                 <span class="badge badge-status-${status}">${status}</span>
                             </td>
@@ -1614,6 +1930,9 @@
                                             <i class="fa-solid fa-times"></i>
                                         </div>
                                     ` : ''}
+                                    <div class="btn-icon" title="Reschedule" style="color: #ca8a04; border-color: #ca8a04;" onclick="openRescheduleModal('orders', '${id}', '${data.name}', '${data.email}')">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </div>
                                     <div class="btn-icon btn-delete" title="Delete" onclick="deleteRecord('orders', '${id}')">
                                         <i class="fa-solid fa-trash"></i>
                                     </div>
@@ -1655,6 +1974,10 @@
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
                     const id = doc.id;
+
+                    // EXCLUDE Appointments from Leads tab
+                    if (data.appointmentDate) return;
+
                     let status = (data.status || 'pending').toLowerCase();
                     const dateObj = data.createdAt ? data.createdAt.toDate() : null;
 
@@ -1718,6 +2041,9 @@
                                             <i class="fa-solid fa-times"></i>
                                         </div>
                                     ` : ''}
+                                    <div class="btn-icon" title="Reschedule" style="color: #ca8a04; border-color: #ca8a04;" onclick="openRescheduleModal('leads', '${id}', '${data.name}', '${data.email}')">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </div>
                                     <div class="btn-icon btn-delete" title="Delete" onclick="deleteRecord('leads', '${id}')">
                                         <i class="fa-solid fa-trash"></i>
                                     </div>
@@ -1740,10 +2066,123 @@
             }
         }
 
+        async function fetchAppointments() {
+            const loading = document.getElementById('appointmentsLoading');
+            loading.style.display = 'flex';
+
+            const searchTerm = (document.getElementById('appointmentSearch')?.value || "").toLowerCase();
+            const statusFilter = document.getElementById('appointmentStatusFilter')?.value || "all";
+            const dateFilter = document.getElementById('appointmentDateFilter')?.value || "";
+
+            try {
+                // We fetch from leads collection but filter for those WITH appointmentDate
+                const q = query(collection(db, "leads"), orderBy("createdAt", "desc"), limit(500));
+                const querySnapshot = await getDocs(q);
+                const tbody = document.getElementById('appointmentsTableBody');
+                tbody.innerHTML = '';
+
+                let stats = { total: 0, pending: 0, approved: 0, rejected: 0 };
+
+                querySnapshot.forEach((doc) => {
+                    const data = doc.data();
+                    const id = doc.id;
+
+                    // ONLY Include Appointments
+                    if (!data.appointmentDate) return;
+
+                    let status = (data.status || 'pending').toLowerCase();
+                    const dateObj = data.createdAt ? data.createdAt.toDate() : null;
+
+                    let dateISO = "";
+                    if (dateObj) {
+                        const y = dateObj.getFullYear();
+                        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+                        const d = String(dateObj.getDate()).padStart(2, '0');
+                        dateISO = `${y}-${m}-${d}`;
+                    }
+
+                    // Filtering
+                    if (statusFilter !== 'all' && status !== statusFilter) return;
+                    if (dateFilter && dateISO !== dateFilter) return;
+
+                    const searchStr = `${data.name} ${data.email} ${data.company} ${data.appointmentDate}`.toLowerCase();
+                    if (searchTerm && !searchStr.includes(searchTerm)) return;
+
+                    // KPIs
+                    stats.total++;
+                    if (status === 'pending') stats.pending++;
+                    if (status === 'approved') stats.approved++;
+                    if (status === 'rejected') stats.rejected++;
+
+                    const remarks = data.remarks || '';
+
+                    const row = `
+                        <tr class="row-${status}">
+                            <td data-label="Name" style="font-weight: 700;">${data.name}</td>
+                            <td data-label="Contact">
+                                <div>${data.email}</div>
+                                <div style="font-size: 0.8rem; color: var(--text-muted);">${data.phone || ''}</div>
+                            </td>
+                            <td data-label="Company">${data.company || '—'}</td>
+                            <td data-label="Appointment">
+                                <div style="font-weight: 700; font-size: 0.85rem;">${data.appointmentDate}</div>
+                                <div style="font-size: 0.75rem; color: var(--text-muted);">${data.appointmentTime || ''}</div>
+                            </td>
+                            <td data-label="Status">
+                                <span class="badge badge-status-${status}">${status}</span>
+                            </td>
+                            <td data-label="Remarks">
+                                <input type="text" class="remarks-text" value="${remarks}" 
+                                    placeholder="Add remarks..." 
+                                    onblur="updateRecordRemarks('leads', '${id}', this.value)"
+                                    onkeydown="if(event.key==='Enter') this.blur()">
+                            </td>
+                            <td data-label="Actions">
+                                <div style="display: flex; justify-content: center; gap: 8px;">
+                                    ${status !== 'approved' ? `
+                                        <div class="btn-icon btn-approve" title="Approve" onclick="setRecordStatus('leads', '${id}', 'approved')">
+                                            <i class="fa-solid fa-check"></i>
+                                        </div>
+                                    ` : `
+                                        <div class="btn-icon" title="Reset to Pending" onclick="setRecordStatus('leads', '${id}', 'pending')">
+                                            <i class="fa-solid fa-undo"></i>
+                                        </div>
+                                    `}
+                                    ${status !== 'rejected' ? `
+                                        <div class="btn-icon btn-reject" title="Reject" onclick="setRecordStatus('leads', '${id}', 'rejected')">
+                                            <i class="fa-solid fa-times"></i>
+                                        </div>
+                                    ` : ''}
+                                    <div class="btn-icon" title="Reschedule" style="color: #ca8a04; border-color: #ca8a04;" onclick="openRescheduleModal('leads', '${id}', '${data.name}', '${data.email}')">
+                                        <i class="fa-solid fa-calendar-day"></i>
+                                    </div>
+                                    <div class="btn-icon btn-delete" title="Delete" onclick="deleteRecord('leads', '${id}')">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+
+                document.getElementById('totalAppointmentsCount').textContent = stats.total;
+                document.getElementById('pendingAppointmentsCount').textContent = stats.pending;
+                document.getElementById('approvedAppointmentsCount').textContent = stats.approved;
+                document.getElementById('rejectedAppointmentsCount').textContent = stats.rejected;
+
+            } catch (err) {
+                console.error("Appointment fetch error:", err);
+            } finally {
+                loading.style.display = 'none';
+            }
+        }
+
         // Search & Filter Handlers
         const inputs = [
             'orderSearch', 'orderCategoryFilter', 'orderStatusFilter', 'orderDateFilter',
-            'leadSearch', 'leadStatusFilter', 'leadDateFilter'
+            'leadSearch', 'leadStatusFilter', 'leadDateFilter',
+            'appointmentSearch', 'appointmentStatusFilter', 'appointmentDateFilter'
         ];
 
         let debounceTimer;
@@ -1753,7 +2192,9 @@
             el.addEventListener(el.tagName === 'INPUT' && el.type === 'text' ? 'input' : 'change', () => {
                 clearTimeout(debounceTimer);
                 debounceTimer = setTimeout(() => {
-                    if (id.startsWith('order')) fetchOrders(); else fetchLeads();
+                    if (id.startsWith('order')) fetchOrders();
+                    else if (id.startsWith('lead')) fetchLeads();
+                    else fetchAppointments();
                 }, 300);
             });
         });
@@ -1801,10 +2242,24 @@
             let csv = "Date,Name,Email,Phone,Company,Message,Status,Remarks\n";
             snap.forEach(doc => {
                 const d = doc.data();
+                if (d.appointmentDate) return; // ONLY Leads
                 const date = d.createdAt ? d.createdAt.toDate().toISOString() : '';
                 csv += `"${date}","${d.name || ''}","${d.email || ''}","${d.phone || ''}","${d.company || ''}","${(d.message || '').replace(/"/g, '""')}","${d.status || 'pending'}","${(d.remarks || '').replace(/"/g, '""')}"\n`;
             });
             downloadCSV(csv, `uptura_leads_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
+        };
+
+        window.exportAppointmentsToCSV = async () => {
+            const q = query(collection(db, "leads"), orderBy("createdAt", "desc"));
+            const snap = await getDocs(q);
+            let csv = "Date,Name,Email,Phone,Company,Appointment Date,Appointment Time,Status,Remarks\n";
+            snap.forEach(doc => {
+                const d = doc.data();
+                if (!d.appointmentDate) return; // ONLY Appointments
+                const date = d.createdAt ? d.createdAt.toDate().toISOString() : '';
+                csv += `"${date}","${d.name || ''}","${d.email || ''}","${d.phone || ''}","${d.company || ''}","${d.appointmentDate || ''}","${d.appointmentTime || ''}","${d.status || 'pending'}","${(d.remarks || '').replace(/"/g, '""')}"\n`;
+            });
+            downloadCSV(csv, `uptura_appointments_${new Date().toLocaleDateString().replace(/\//g, '-')}.csv`);
         };
 
         async function exportAllToCSV() {
@@ -1816,6 +2271,7 @@
             try {
                 await exportOrdersToCSV();
                 await exportLeadsToCSV();
+                await exportAppointmentsToCSV();
             } catch (err) {
                 console.error("Export failed:", err);
                 alert("Export failed. Check console for details.");

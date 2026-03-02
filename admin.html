@@ -191,10 +191,16 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Check if already logged in
-            if (localStorage.getItem('uptura_admin_auth') === 'true') {
+            // Check if already logged in with both auth state and valid token
+            const isAuth = localStorage.getItem('uptura_admin_auth') === 'true';
+            const hasToken = !!localStorage.getItem('uptura_admin_token');
+
+            if (isAuth && hasToken) {
                 window.location.href = 'admin-dashboard.html';
                 return;
+            } else {
+                localStorage.removeItem('uptura_admin_auth');
+                localStorage.removeItem('uptura_admin_token');
             }
 
             // Animation
