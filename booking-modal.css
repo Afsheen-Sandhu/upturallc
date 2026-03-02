@@ -230,17 +230,68 @@
 }
 
 @media (max-width: 640px) {
+    .booking-modal-overlay {
+        align-items: flex-end;
+        /* Push to bottom on mobile for better reachability */
+        padding: 10px;
+    }
+
     .booking-modal-card {
-        padding: 30px 20px;
+        padding: 32px 20px 24px;
+        border-radius: 24px 24px 0 0;
+        /* Rounded top only if pushed to bottom */
+        width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+        transform: translateY(100%);
+        /* Slide up animation */
+    }
+
+    .booking-modal-overlay.active .booking-modal-card {
+        transform: translateY(0);
+    }
+
+    .booking-modal-close {
+        top: 16px;
+        right: 16px;
+        width: 32px;
+        height: 32px;
+    }
+
+    .booking-modal-title {
+        font-size: 1.4rem;
+        margin-bottom: 8px;
+    }
+
+    .booking-modal-subtitle {
+        font-size: 0.9rem;
     }
 
     .booking-form-grid,
     .booking-form-row {
         grid-template-columns: 1fr;
-        gap: 15px;
+        gap: 12px;
+    }
+
+    .booking-submit-btn {
+        padding: 14px;
+        font-size: 1rem;
+    }
+}
+
+@media (max-height: 700px) and (min-width: 641px) {
+    .booking-modal-card {
+        max-height: 95vh;
+        overflow-y: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .booking-modal-card {
+        padding: 24px 16px 20px;
     }
 
     .booking-modal-title {
-        font-size: 1.5rem;
+        font-size: 1.25rem;
     }
 }
