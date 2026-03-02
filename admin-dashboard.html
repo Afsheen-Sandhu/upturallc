@@ -1716,7 +1716,7 @@
                 }
 
                 if (html) {
-                    await fetch('/api/send-email', {
+                    const emailRes = await fetch('/api/send-email', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1726,6 +1726,11 @@
                             html
                         })
                     });
+                    const resData = await emailRes.json();
+                    if (!resData.success) {
+                        console.error("Email API Failed:", resData);
+                        alert(`⚠️ Email delivery failed: ${resData.message || 'Unknown Error'}. Check Vercel logs.`);
+                    }
                 }
 
                 if (collectionName === 'orders') fetchOrders();
