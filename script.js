@@ -1582,8 +1582,8 @@ document.addEventListener("DOMContentLoaded", function () {
                     const [hour, minute] = time.split(':');
 
                     // Convert to UTC assuming EST (UTC-5)
-                    const eventStart = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 5, minute));
-                    const eventEnd = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 6, minute)); // Assume 1 hour
+                    const eventStart = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 5, parseInt(minute)));
+                    const eventEnd = new Date(Date.UTC(year, month - 1, day, parseInt(hour) + 5, parseInt(minute) + 30)); // 30-minute Strategy Call
 
                     const formatGCalDate = (d) => d.toISOString().replace(/-|:|\.\d\d\d/g, '');
 
