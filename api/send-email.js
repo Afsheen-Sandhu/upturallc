@@ -3,7 +3,7 @@ export default async function handler(req, res) {
         return res.status(405).json({ success: false, message: 'Method Not Allowed' });
     }
 
-    const { to, subject, html, type } = req.body;
+    const { to, cc, subject, html, type } = req.body;
     const RESEND_API_KEY = process.env.RESEND_API_KEY;
     const SENDER = process.env.RESEND_SENDER || 'onboarding@resend.dev';
 
@@ -21,7 +21,8 @@ export default async function handler(req, res) {
             },
             body: JSON.stringify({
                 from: `Uptura <${SENDER}>`,
-                to: [to],
+                to: Array.isArray(to) ? to : [to],
+                cc: cc ? (Array.isArray(cc) ? cc : [cc]) : undefined,
                 subject: subject,
                 html: html,
             }),
