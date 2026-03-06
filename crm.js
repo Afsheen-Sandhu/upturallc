@@ -311,7 +311,7 @@ async function fetchUsers() {
 function buildWelcomeMessage(email, password) {
   return `Welcome to Uptura! 
 
-We have onboarded you as a Bussiness Development Agent. Your account details are:
+We have onboarded you as a Business Development Agent. Your account details are:
 
 📧 Email: ${email}
 🔑 Password: ${password}
