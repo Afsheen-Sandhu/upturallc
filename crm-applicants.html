@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM – Applicants | Uptura</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="crm.css" />
+    <script>
+        (function () {
+            try {
+                var raw = localStorage.getItem('uptura_crm_session_v1');
+                if (!raw) return;
+                var s = JSON.parse(raw || 'null');
+                if (!s || !s.role) return;
+                document.documentElement.setAttribute('data-crm-role', s.role);
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body data-crm-page="applicants">
+    <div class="background-blobs" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">
+                <img class="brand-logo"
+                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                    alt="Uptura" />
+            </div>
+            <button class="icon-btn" id="sidebarToggle" title="Toggle sidebar">
+                <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav-link" href="crm-dashboard.html" id="dashboardNav" style="display:none;">
+                <i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" href="crm.html">
+                <i class="fa-solid fa-users"></i><span class="nav-text">Clients</span>
+            </a>
+            <a class="nav-link" href="crm-meetings.html">
+                <i class="fa-solid fa-calendar-check"></i><span class="nav-text">Meetings</span>
+            </a>
+            <a class="nav-link" href="crm-employees.html">
+                <i class="fa-solid fa-user-group"></i><span class="nav-text">Employees</span>
+            </a>
+            <a class="nav-link active" href="crm-applicants.html">
+                <i class="fa-solid fa-briefcase"></i><span class="nav-text">Applicants</span>
+            </a>
+            <a class="nav-link" href="crm-sales.html">
+                <i class="fa-solid fa-chart-line"></i><span class="nav-text">Sales</span>
+            </a>
+            <a class="nav-link" href="crm-invoices.html">
+                <i class="fa-solid fa-file-invoice-dollar"></i><span class="nav-text">Invoices</span>
+            </a>
+            <a class="nav-link" href="crm-reports.html">
+                <i class="fa-solid fa-chart-pie"></i><span class="nav-text">Reports</span>
+            </a>
+            <a class="nav-link" href="crm-chat.html">
+                <i class="fa-solid fa-comments"></i><span class="nav-text">Chat</span>
+            </a>
+            <a class="nav-link" href="crm-attendance.html" id="attendanceNav" style="display:none;">
+                <i class="fa-solid fa-clock"></i><span class="nav-text">Attendance</span>
+            </a>
+            <a class="nav-link" href="crm-users.html" id="usersNav">
+                <i class="fa-solid fa-user-plus"></i><span class="nav-text">User Management</span>
+            </a>
+            <button class="nav-link" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i><span class="nav-text">Logout</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-foot">
+            <div class="pill" id="rolePill">Role: —</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="icon-btn mobile-only" id="mobileMenuBtn" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <div class="title" id="pageTitle">Applicants</div>
+                <div class="subtitle" id="pageSubtitle">Hiring stages</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <!-- Login -->
+            <div class="card login-card" id="loginCard">
+                <div class="logo">
+                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                        alt="Uptura">
+                </div>
+                <h2 class="login-title">CRM Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                    </div>
+                    <button class="login-btn" type="submit" id="loginBtn">
+                        <span>Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <div class="error-msg" id="loginError"></div>
+                    <div class="login-help">Use your CRM credentials. Admin credentials also work (super_admin).</div>
+                </form>
+            </div>
+
+            <!-- Applicants -->
+            <div class="tab active" id="tab-applicants">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Add Applicant</h2>
+                            <div class="muted">Track candidates through Applied → Interview → Hired.</div>
+                        </div>
+                    </div>
+                    <form id="createApplicantForm" class="grid4">
+                        <div class="field">
+                            <label>Name</label>
+                            <input id="appName" placeholder="Candidate name" />
+                        </div>
+                        <div class="field">
+                            <label>Email</label>
+                            <input id="appEmail" type="email" placeholder="candidate@email.com" />
+                        </div>
+                        <div class="field">
+                            <label>Role / Position</label>
+                            <input id="appRole" placeholder="Applied for…" />
+                        </div>
+                        <div class="field">
+                            <label>Stage</label>
+                            <select id="appStage">
+                                <option value="applied">Applied</option>
+                                <option value="interview">Interview</option>
+                                <option value="hired">Hired</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Source</label>
+                            <input id="appSource" placeholder="LinkedIn, Referral, etc." />
+                        </div>
+                        <div class="field">
+                            <label>&nbsp;</label>
+                            <button class="btn primary" type="submit">Add Applicant</button>
+                        </div>
+                        <div class="msg" id="appMsg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Applicants</h2>
+                            <div class="muted">Update hiring stage and notes.</div>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="table" id="appTable">
+                            <thead>
+                                <tr>
+                                    <th>Candidate</th>
+                                    <th>Email</th>
+                                    <th>Role</th>
+                                    <th>Stage</th>
+                                    <th>Source</th>
+                                    <th>Created by</th>
+                                </tr>
+                            </thead>
+                            <tbody id="appTbody"></tbody>
+                        </table>
+                        <div class="inline-loader" id="appLoading">
+                            <div class="loader"></div>
+                        </div>
+                        <div class="empty muted" id="appEmpty">No applicants yet.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="crm.js" type="module"></script>
+</body>
+
+</html>
+

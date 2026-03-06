@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM – Chat | Uptura</title>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="crm.css" />
+    <script>
+        (function () {
+            try {
+                var raw = localStorage.getItem('uptura_crm_session_v1');
+                if (!raw) return;
+                var s = JSON.parse(raw || 'null');
+                if (!s || !s.role) return;
+                document.documentElement.setAttribute('data-crm-role', s.role);
+            } catch (e) { }
+        })();
+    </script>
+</head>
+
+<body data-crm-page="chat">
+    <div class="background-blobs" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">
+                <img class="brand-logo"
+                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                    alt="Uptura" />
+            </div>
+            <button class="icon-btn" id="sidebarToggle" title="Toggle sidebar">
+                <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav-link" href="crm-dashboard.html" id="dashboardNav" style="display:none;">
+                <i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" href="crm.html">
+                <i class="fa-solid fa-users"></i><span class="nav-text">Clients</span>
+            </a>
+            <a class="nav-link" href="crm-meetings.html">
+                <i class="fa-solid fa-calendar-check"></i><span class="nav-text">Meetings</span>
+            </a>
+            <a class="nav-link" href="crm-employees.html">
+                <i class="fa-solid fa-user-group"></i><span class="nav-text">Employees</span>
+            </a>
+            <a class="nav-link" href="crm-applicants.html">
+                <i class="fa-solid fa-briefcase"></i><span class="nav-text">Applicants</span>
+            </a>
+            <a class="nav-link" href="crm-sales.html">
+                <i class="fa-solid fa-chart-line"></i><span class="nav-text">Sales</span>
+            </a>
+            <a class="nav-link" href="crm-invoices.html">
+                <i class="fa-solid fa-file-invoice-dollar"></i><span class="nav-text">Invoices</span>
+            </a>
+            <a class="nav-link" href="crm-reports.html">
+                <i class="fa-solid fa-chart-pie"></i><span class="nav-text">Reports</span>
+            </a>
+            <a class="nav-link active" href="crm-chat.html">
+                <i class="fa-solid fa-comments"></i><span class="nav-text">Chat</span>
+            </a>
+            <a class="nav-link" href="crm-attendance.html" id="attendanceNav" style="display:none;">
+                <i class="fa-solid fa-clock"></i><span class="nav-text">Attendance</span>
+            </a>
+            <a class="nav-link" href="crm-users.html" id="usersNav">
+                <i class="fa-solid fa-user-plus"></i><span class="nav-text">User Management</span>
+            </a>
+            <button class="nav-link" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i><span class="nav-text">Logout</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-foot">
+            <div class="pill" id="rolePill">Role: —</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="icon-btn mobile-only" id="mobileMenuBtn" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <div class="title" id="pageTitle">Chat</div>
+                <div class="subtitle" id="pageSubtitle">Firestore real-time</div>
+            </div>
+        </header>
+
+        <section class="content">
+            <!-- Login -->
+            <div class="card login-card" id="loginCard">
+                <div class="logo">
+                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                        alt="Uptura">
+                </div>
+                <h2 class="login-title">CRM Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                    </div>
+                    <button class="login-btn" type="submit" id="loginBtn">
+                        <span>Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <div class="error-msg" id="loginError"></div>
+                    <div class="login-help">Use your CRM credentials. Admin credentials also work (super_admin).</div>
+                </form>
+            </div>
+
+            <!-- Chat -->
+            <div class="tab active" id="tab-chat">
+                <div class="card" id="superAdminCard" style="display:none;">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Contact Super Admin</h2>
+                            <div class="muted" id="superAdminContact">—</div>
+                        </div>
+                        <a class="btn primary" id="superAdminEmailLink" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">
+                            <i class="fa-solid fa-envelope"></i><span>Email</span>
+                        </a>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2 class="h2">Chat</h2>
+                    <div class="muted">One-on-one with admin or team.</div>
+                    <div class="chat">
+                        <div class="chat-split">
+                            <div class="chat-threads">
+                                <div class="chat-threads-head" style="margin-bottom:6px;">
+                                    <div style="font-weight:900;">Conversations</div>
+                                </div>
+                                <div class="inline-loader" id="chatConversationsLoader" style="display:flex; padding:16px;">
+                                    <div class="loader"></div>
+                                    <span class="muted" style="margin-left:8px;">Loading conversations…</span>
+                                </div>
+                                <div class="chat-people-wrap" id="chatPeopleWrap" style="display:none;">
+                                    <div class="chat-people-list" id="chatPeopleList"></div>
+                                </div>
+                                <div class="chat-threads-list" id="chatThreads"></div>
+                            </div>
+                            <div class="chat-pane">
+                                <div class="chat-pane-head">
+                                    <div style="font-weight:900;" id="chatActiveTitle">Select a conversation</div>
+                                    <div class="muted" id="chatActiveMeta"></div>
+                                </div>
+                                <div class="chat-messages" id="chatMessages"></div>
+                        <form class="chat-form" id="chatForm">
+                            <input id="chatInput" placeholder="Type a message…" autocomplete="off" />
+                            <button class="btn primary" type="submit">Send</button>
+                        </form>
+                        <div class="msg error" id="chatMsg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="crm.js" type="module"></script>
+</body>
+
+</html>
+
