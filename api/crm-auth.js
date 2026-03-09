@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import { collection, getDocs, limit, query, serverTimestamp, setDoc, where, doc } from "firebase/firestore";
-import { getDb } from "./crm/_firebase.js";
-import { signCrmToken } from "./crm/_auth.js";
+import { getDb } from "./_crm_internal/_firebase.js";
+import { signCrmToken } from "./_crm_internal/_auth.js";
 
 function json(res, status, body) {
   res.status(status).json(body);
@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         { lastLoginAt: serverTimestamp() },
         { merge: true }
       );
-    } catch (_) {}
+    } catch (_) { }
 
     return json(res, 200, { success: true, token, role, userId: userDoc.id });
   } catch (err) {
