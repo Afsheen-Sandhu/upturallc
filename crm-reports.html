@@ -13,6 +13,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
     <link rel="stylesheet" href="crm.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body data-crm-page="reports">
@@ -99,7 +100,8 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
@@ -124,6 +126,36 @@
                         <button class="btn" id="refreshReportsBtn"><i class="fa-solid fa-rotate"></i></button>
                     </div>
                     <div class="grid4" id="reportsGrid"></div>
+                    <div
+                        style="margin-top: 32px; display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 24px;">
+                        <div class="card"
+                            style="box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow: hidden; padding: 24px; border-radius: 16px;">
+                            <h3 class="h3"
+                                style="margin-bottom: 24px; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em;">
+                                Pipeline Distribution</h3>
+                            <div style="height: 320px; width: 100%; position: relative;">
+                                <canvas id="pipelineChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card"
+                            style="box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow: hidden; padding: 24px; border-radius: 16px;">
+                            <h3 class="h3"
+                                style="margin-bottom: 24px; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em;">
+                                Invoice Status</h3>
+                            <div style="height: 320px; width: 100%; position: relative;">
+                                <canvas id="invoiceChart"></canvas>
+                            </div>
+                        </div>
+                        <div class="card"
+                            style="box-shadow: 0 4px 15px -5px rgba(0,0,0,0.05); border: 1px solid var(--border); overflow: hidden; padding: 24px; border-radius: 16px;">
+                            <h3 class="h3"
+                                style="margin-bottom: 24px; font-weight: 800; font-size: 1.1rem; letter-spacing: -0.01em;">
+                                Internal Activity</h3>
+                            <div style="height: 320px; width: 100%; position: relative;">
+                                <canvas id="activityChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
                     <div class="msg" id="reportsMsg"></div>
                 </div>
             </div>
@@ -134,4 +166,3 @@
 </body>
 
 </html>
-

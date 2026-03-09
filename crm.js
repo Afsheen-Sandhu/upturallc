@@ -709,6 +709,7 @@ let meetingsCache = [];
 let salesCache = [];
 let invoicesCache = [];
 let reportsCache = null;
+let reportCharts = {};
 let usersCache = [];
 const userEmailById = {};
 
@@ -1318,29 +1319,116 @@ function renderReports(reports) {
   if (!grid) return;
   grid.innerHTML = "";
 
-  const pipeline = reports?.clientPipeline || {};
-  const employees = reports?.employees || {};
-  const applicants = reports?.applicants || {};
-  const invoices = reports?.invoices || {};
-  const sales = reports?.sales || {};
-  const meetings = reports?.meetings || {};
+  const r = reports || {};
+  const pipeline = r.clientPipeline || {};
+  const employees = r.employees || {};
+  const applicants = r.applicants || {};
+  const invoices = r.invoices || {};
+  const sales = r.sales || {};
+  const meetings = r.meetings || {};
 
+  // Stat Cards
   grid.appendChild(statCard("Clients (total)", Object.values(pipeline).reduce((a, b) => a + (Number(b) || 0), 0)));
   grid.appendChild(statCard("Employees (total)", employees.total ?? 0));
   grid.appendChild(statCard("Employees onboarded", employees.onboarded ?? 0));
   grid.appendChild(statCard("Applicants (total)", applicants.total ?? 0));
 
-  // second row - key pipeline stages
   grid.appendChild(statCard("Pipeline: Lead", pipeline.lead ?? 0));
   grid.appendChild(statCard("Pipeline: Proposal", pipeline.proposal_sent ?? 0));
   grid.appendChild(statCard("Pipeline: Active", pipeline.active ?? 0));
   grid.appendChild(statCard("Pipeline: Completed", pipeline.completed ?? 0));
 
-  // third row - invoices/sales/meetings
   grid.appendChild(statCard("Meetings", meetings.total ?? 0));
   grid.appendChild(statCard("Sales (count)", sales.total ?? 0));
   grid.appendChild(statCard("Invoices (total)", invoices.total ?? 0));
   grid.appendChild(statCard("Invoices paid", invoices.byStatus?.paid ?? 0));
+
+  if (!window.Chart) return;
+
+  // Destroy old charts
+  Object.values(reportCharts).forEach(c => c.destroy());
+
+  // 1. Pipeline Distribution (Horizontal Bar)
+  const ctxP = document.getElementById('pipelineChart')?.getContext('2d');
+  if (ctxP) {
+    reportCharts.pipeline = new Chart(ctxP, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(pipeline).map(s => s.replace('_', ' ')),
+        datasets: [{
+          label: 'Clients',
+          data: Object.values(pipeline),
+          backgroundColor: 'rgba(99, 102, 241, 0.6)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+      }
+    });
+  }
+
+  // 2. Invoice Status (Donut)
+  const ctxI = document.getElementById('invoiceChart')?.getContext('2d');
+  if (ctxI) {
+    const invData = invoices.byStatus || {};
+    reportCharts.invoice = new Chart(ctxI, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(invData),
+        datasets: [{
+          data: Object.values(invData),
+          backgroundColor: [
+            'rgba(148, 163, 184, 0.6)', // draft
+            'rgba(59, 130, 246, 0.6)', // sent
+            'rgba(34, 197, 94, 0.6)',  // paid
+            'rgba(239, 68, 68, 0.6)'   // void
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        },
+        cutout: '70%'
+      }
+    });
+  }
+
+  // 3. Activity Breakdown (Radar or Polar Area looks premium)
+  const ctxA = document.getElementById('activityChart')?.getContext('2d');
+  if (ctxA) {
+    reportCharts.activity = new Chart(ctxA, {
+      type: 'polarArea',
+      data: {
+        labels: ['Meetings', 'Sales', 'Applicants', 'Employees'],
+        datasets: [{
+          data: [meetings.total || 0, sales.total || 0, applicants.total || 0, employees.total || 0],
+          backgroundColor: [
+            'rgba(245, 158, 11, 0.6)',
+            'rgba(16, 185, 129, 0.6)',
+            'rgba(139, 92, 246, 0.6)',
+            'rgba(236, 72, 153, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { r: { ticks: { display: false } } }
+      }
+    });
+  }
 }
 
 async function refreshUsers() {
