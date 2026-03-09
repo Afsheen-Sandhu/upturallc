@@ -199,10 +199,61 @@
                         <div class="empty muted" id="invEmpty">No invoices yet.</div>
                     </div>
                 </div>
+
+                <!-- INVOICE GENERATOR CAARD -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Generate Invoice PDF</h2>
+                            <div class="muted">Create and download a professional PDF.</div>
+                        </div>
+                        <button class="btn primary" id="generatePdfBtn"><i class="fa-solid fa-file-pdf"></i> Download
+                            PDF</button>
+                    </div>
+                    <div class="grid4">
+                        <div class="field">
+                            <label>Client Name</label>
+                            <input id="pdfClientName" placeholder="e.g. John Doe / ACME Corp" />
+                        </div>
+                        <div class="field">
+                            <label>Client Email</label>
+                            <input id="pdfClientEmail" placeholder="client@example.com" />
+                        </div>
+                        <div class="field">
+                            <label>Amount Due ($)</label>
+                            <input id="pdfAmount" type="number" step="0.01" placeholder="1000.00" />
+                        </div>
+                        <div class="field">
+                            <label>Due Date</label>
+                            <input id="pdfDate" type="date" />
+                        </div>
+                        <div class="field" style="grid-column: span 2;">
+                            <label>Service Type</label>
+                            <select id="pdfService"
+                                style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; width: 100%; background: var(--card-bg);">
+                                <option value="Custom Service / Consulting">Custom Service / Consulting</option>
+                                <option value="Custom Website Development">Custom Website Development</option>
+                                <option value="Website Redesign & Revamp">Website Redesign & Revamp</option>
+                                <option value="Mobile App Development">Mobile App Development</option>
+                                <option value="Search Engine Optimization">Search Engine Optimization</option>
+                                <option value="Social Media Marketing">Social Media Marketing</option>
+                                <option value="AI Consultancy & Strategy">AI Consultancy & Strategy</option>
+                                <option value="Custom AI Agent Development">Custom AI Agent Development</option>
+                                <option value="Workflow Automation">Workflow Automation</option>
+                            </select>
+                        </div>
+                        <div class="field" style="grid-column: span 2;">
+                            <label>Additional Details (Optional)</label>
+                            <input id="pdfDescription" placeholder="e.g. March 2026 Deliverables or Phase 1" />
+                        </div>
+                    </div>
+                </div>
             </div>
+
         </section>
     </main>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="crm.js" type="module"></script>
 </body>
 

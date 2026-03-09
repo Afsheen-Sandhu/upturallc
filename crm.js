@@ -2539,6 +2539,175 @@ function boot() {
         toggleInlineLoader("invoicesLoading", false);
       }
     });
+
+    qs("#generatePdfBtn")?.addEventListener("click", () => {
+      if (!window.jspdf) {
+        alert("PDF generator not ready. Please check connection.");
+        return;
+      }
+      const clientName = qs("#pdfClientName")?.value || "Client Name";
+      const clientEmail = qs("#pdfClientEmail")?.value || "";
+      const amount = qs("#pdfAmount")?.value || "0.00";
+      const date = qs("#pdfDate")?.value || new Date().toISOString().split("T")[0];
+      const serviceType = qs("#pdfService")?.value || "Consulting & Services";
+      const desc = qs("#pdfDescription")?.value || "";
+
+      const processPDF = (logoDataUrl, logoW, logoH) => {
+        const doc = new window.jspdf.jsPDF();
+
+        // Define formal colors
+        const textMain = [30, 30, 30];
+        const textMuted = [100, 100, 100];
+        const accentColor = [59, 130, 246]; // Brand blue
+
+        let yOffset = 20;
+
+        // INVOICE TITLE (Top Right)
+        doc.setFontSize(32);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...textMain);
+        doc.text("INVOICE", 190, 30, null, null, "right");
+
+        // SETUP ID AND DATES
+        const invoiceId = "INV-" + Math.floor(1000 + Math.random() * 9000);
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...textMuted);
+        doc.text(`Invoice Number:`, 150, 42);
+        doc.text(`Date of Issue:`, 150, 48);
+
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...textMain);
+        doc.text(invoiceId, 190, 42, null, null, "right");
+        doc.text(date, 190, 48, null, null, "right");
+
+        // COMPANY LOGO (Top Left)
+        if (logoDataUrl) {
+          doc.addImage(logoDataUrl, "PNG", 20, 18, logoW, logoH);
+          yOffset = 18 + logoH + 10;
+        } else {
+          doc.setFontSize(26);
+          doc.setTextColor(...accentColor);
+          doc.setFont("helvetica", "bold");
+          doc.text("Uptura", 20, 30);
+          yOffset = 45;
+        }
+
+        // COMPANY INFO
+        doc.setFontSize(10);
+        doc.setTextColor(...textMuted);
+        doc.setFont("helvetica", "normal");
+        doc.text("Uptura LLC", 20, yOffset);
+        doc.text("info@uptura.net", 20, yOffset + 5);
+        doc.text("uptura.net", 20, yOffset + 10);
+
+        yOffset += 25;
+
+        // BILL TO
+        doc.setFontSize(11);
+        doc.setTextColor(...textMain);
+        doc.setFont("helvetica", "bold");
+        doc.text("BILLED TO:", 20, yOffset);
+
+        doc.setFont("helvetica", "normal");
+        doc.text(clientName, 20, yOffset + 6);
+        doc.setTextColor(...textMuted);
+        if (clientEmail) doc.text(clientEmail, 20, yOffset + 11);
+
+        yOffset += 25;
+
+        // TABLE HEADER
+        doc.setFillColor(248, 249, 250); // Very light grey
+        doc.rect(20, yOffset, 170, 12, "F");
+
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...textMain);
+        doc.text("SERVICE / DESCRIPTION", 25, yOffset + 8);
+        doc.text("QTY", 125, yOffset + 8);
+        doc.text("RATE", 145, yOffset + 8);
+        doc.text("AMOUNT", 190, yOffset + 8, null, null, "right");
+
+        yOffset += 20;
+
+        // TABLE BODY (Item 1)
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...textMain);
+        let currentY = yOffset;
+        let splitService = doc.splitTextToSize(serviceType, 90);
+        doc.text(splitService, 25, currentY);
+
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...textMuted);
+
+        currentY += (splitService.length * 5);
+
+        if (desc) {
+          let splitDesc = doc.splitTextToSize(desc, 90);
+          doc.text(splitDesc, 25, currentY);
+          currentY += (splitDesc.length * 5);
+        }
+
+        doc.setTextColor(...textMain);
+        doc.text("1", 125, yOffset);
+        doc.text(`$${Number(amount).toFixed(2)}`, 145, yOffset);
+        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+
+        yOffset = Math.max(currentY, yOffset) + 15;
+
+        // LINE UNDER TABLE
+        doc.setDrawColor(220, 220, 220);
+        doc.line(20, yOffset, 190, yOffset);
+        yOffset += 10;
+
+        // TOTALS SECTION
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "normal");
+        doc.setTextColor(...textMuted);
+        doc.text("Subtotal:", 145, yOffset, null, null, "right");
+        doc.setTextColor(...textMain);
+        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+
+        yOffset += 10;
+
+        // BOLD TOTAL
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(14);
+        doc.text("Total Due:", 145, yOffset, null, null, "right");
+        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+
+        // FOOTER
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "italic");
+        doc.setTextColor(150, 150, 150);
+        doc.text("Thank you for choosing Uptura. We appreciate your business.", 105, 275, null, null, "center");
+
+        doc.save(`${invoiceId}.pdf`);
+      };
+
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = "images/logo-main.png";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL("image/png");
+
+        // Define smaller logo size for formal aesthetic
+        let targetW = 26;
+        let targetH = Math.floor(26 * img.height / img.width);
+
+        processPDF(dataUrl, targetW, targetH);
+      };
+
+      img.onerror = () => {
+        processPDF(null, 0, 0);
+      };
+    });
   }
 
   if (page === "reports") {

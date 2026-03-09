@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth, requireRole } from "./_auth.js";
+import { sendEmail } from "./_email.js";
 
 function json(res, status, body) {
   res.status(status).json(body);
@@ -68,6 +69,30 @@ export default async function handler(req, res) {
         createdBy: auth.userId,
         createdByEmail: auth.email || "",
       });
+
+      if (e) {
+        const userName = name ? String(name).trim() : "Team Member";
+        const html = `
+          <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+            <h2>Welcome to Uptura CRM, ${userName}!</h2>
+            <p>Your account has been successfully created. Here are your login credentials:</p>
+            <ul>
+              <li><strong>Email:</strong> ${e}</li>
+              <li><strong>Password:</strong> ${p}</li>
+              <li><strong>Role:</strong> ${r}</li>
+            </ul>
+            <br />
+            <p>You can now log in at <a href="https://uptura.net/crm.html">uptura.net/crm.html</a>.</p>
+            <p>For your security, we recommend keeping this email safe or logging in immediately to verify your access.</p>
+            <br />
+            <p>Best regards,</p>
+            <p><strong>The Uptura Team</strong></p>
+          </div>
+        `;
+        // Fire and forget
+        sendEmail({ to: e, subject: "Your Uptura CRM Credentials", html }).catch(err => console.error(err));
+      }
+
       return json(res, 201, { success: true, userId: docRef.id });
     } catch (err) {
       console.error("[crm user-management POST] error", err);
