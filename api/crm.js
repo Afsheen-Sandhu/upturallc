@@ -10,13 +10,18 @@ import superAdmin from "./_crm_internal/super-admin.js";
 import userManagement from "./_crm_internal/user-management.js";
 
 export default async function handler(req, res) {
-    // Extract the resource from the path
-    // Since we use rewrites, the URL will look like /api/crm/clients
-    const url = new URL(req.url, "http://localhost");
-    const pathParts = url.pathname.split('/').filter(Boolean);
+    // Extract the resource from query (set by rewrite) or from path
+    let resource = req.query?.resource;
 
-    // Last part is the resource (e.g., "clients")
-    const resource = pathParts[2]; // /api/crm/clients -> [api, crm, clients]
+    if (!resource) {
+        try {
+            const url = new URL(req.url, "http://localhost");
+            const pathParts = url.pathname.split('/').filter(Boolean);
+            resource = pathParts[2];
+        } catch (e) {
+            resource = null;
+        }
+    }
 
     switch (resource) {
         case "applicants": return applicants(req, res);
