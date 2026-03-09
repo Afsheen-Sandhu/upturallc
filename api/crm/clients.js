@@ -1,6 +1,6 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
-import { requireCrmAuth } from "./_auth.js";
+import { requireCrmAuth, requireRole } from "./_auth.js";
 
 function json(res, status, body) {
   res.status(status).json(body);
@@ -58,6 +58,12 @@ export default async function handler(req, res) {
   }
 
   // POST /api/crm/clients
+  if (req.method === "POST" || req.method === "PATCH" || req.method === "DELETE") {
+    const writeAuth = requireRole(auth, ["super_admin", "admin", "manager", "hr"]);
+    if (!writeAuth.ok) return json(res, writeAuth.status || 403, { success: false, message: writeAuth.message });
+  }
+
+  // POST /api/crm/clients
   if (req.method === "POST") {
     try {
       const { name, email, phone, company, pipelineStatus } = req.body || {};
@@ -109,6 +115,18 @@ export default async function handler(req, res) {
       return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm clients PATCH] error", err);
+      return json(res, 500, { success: false, message: "Internal Server Error" });
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      const { id } = req.query || {};
+      if (!id) return json(res, 400, { success: false, message: "Missing id" });
+      await deleteDoc(doc(db, "clients", String(id)));
+      return json(res, 200, { success: true });
+    } catch (err) {
+      console.error("[crm clients DELETE] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });
     }
   }

@@ -287,6 +287,16 @@ async function updateClient(id, patch) {
   return data;
 }
 
+async function deleteClient(id) {
+  const resp = await fetch(`/api/crm/clients?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete client");
+  return true;
+}
+
 async function createUser(payload) {
   const resp = await fetch("/api/crm/user-management", {
     method: "POST",
@@ -388,6 +398,16 @@ async function updateEmployee(id, patch) {
   return data.employee;
 }
 
+async function deleteEmployee(id) {
+  const resp = await fetch(`/api/crm/employees?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete employee");
+  return true;
+}
+
 async function fetchApplicants() {
   const resp = await fetch("/api/crm/applicants", { headers: { ...authHeader() } });
   const data = await resp.json().catch(() => ({}));
@@ -417,6 +437,16 @@ async function updateApplicant(id, patch) {
   return data.applicant;
 }
 
+async function deleteApplicant(id) {
+  const resp = await fetch(`/api/crm/applicants?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete applicant");
+  return true;
+}
+
 async function fetchMeetings() {
   const resp = await fetch("/api/crm/meetings", { headers: { ...authHeader() } });
   const data = await resp.json().catch(() => ({}));
@@ -433,6 +463,27 @@ async function createMeeting(payload) {
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create meeting");
   return data;
+}
+
+async function updateMeeting(id, patch) {
+  const resp = await fetch(`/api/crm/meetings?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update meeting");
+  return data.meeting;
+}
+
+async function deleteMeeting(id) {
+  const resp = await fetch(`/api/crm/meetings?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete meeting");
+  return true;
 }
 
 async function fetchSales() {
@@ -453,11 +504,53 @@ async function createSale(payload) {
   return data;
 }
 
+async function updateSale(id, patch) {
+  const resp = await fetch(`/api/crm/sales?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update deal");
+  return data.sale;
+}
+
+async function deleteSale(id) {
+  const resp = await fetch(`/api/crm/sales?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete deal");
+  return true;
+}
+
 async function fetchInvoices() {
   const resp = await fetch("/api/crm/invoices", { headers: { ...authHeader() } });
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch invoices");
   return data.invoices || [];
+}
+
+async function updateUser(id, patch) {
+  const resp = await fetch(`/api/crm/user-management?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update user");
+  return data.user;
+}
+
+async function deleteUser(id) {
+  const resp = await fetch(`/api/crm/user-management?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete user");
+  return true;
 }
 
 async function createInvoice(payload) {
@@ -469,6 +562,27 @@ async function createInvoice(payload) {
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create invoice");
   return data;
+}
+
+async function updateInvoice(id, patch) {
+  const resp = await fetch(`/api/crm/invoices?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update invoice");
+  return data.invoice;
+}
+
+async function deleteInvoice(id) {
+  const resp = await fetch(`/api/crm/invoices?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete invoice");
+  return true;
 }
 
 async function fetchReports() {
@@ -498,6 +612,7 @@ function renderClientsTable(clients) {
 
   for (const c of filtered) {
     const tr = document.createElement("tr");
+
     const statusSelect = document.createElement("select");
     statusSelect.style.padding = "8px 10px";
     statusSelect.style.borderRadius = "10px";
@@ -517,11 +632,21 @@ function renderClientsTable(clients) {
 
     saveBtn.addEventListener("click", async () => {
       saveBtn.disabled = true;
-      saveBtn.textContent = "Saving...";
+      saveBtn.textContent = "…";
+      const name = tr.querySelector(".client-name").value;
+      const company = tr.querySelector(".client-company").value;
+      const email = tr.querySelector(".client-email").value;
+      const phone = tr.querySelector(".client-phone").value;
       try {
-        await updateClient(c.id, { pipelineStatus: statusSelect.value });
+        await updateClient(c.id, {
+          name,
+          company,
+          email,
+          phone,
+          pipelineStatus: statusSelect.value
+        });
         saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 800);
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
         alert(e.message || "Update failed");
         saveBtn.textContent = "Save";
@@ -530,21 +655,40 @@ function renderClientsTable(clients) {
       }
     });
 
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this client?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteClient(c.id);
+        tr.remove();
+        clientsCache = clientsCache.filter(item => item.id !== c.id);
+        if (!clientsCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
+
     tr.innerHTML = `
-      <td><div style="font-weight:900">${escapeHtml(c.name || "—")}</div></td>
-      <td>${escapeHtml(c.company || "—")}</td>
-      <td>${escapeHtml(c.email || "—")}</td>
-      <td>${escapeHtml(c.phone || "—")}</td>
+      <td><input class="field client-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(c.name || "")}" /></td>
+      <td><input class="field client-company" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.company || "")}" /></td>
+      <td><input class="field client-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.email || "")}" /></td>
+      <td><input class="field client-phone" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.phone || "")}" /></td>
+      <td class="td-status"></td>
+      <td>${escapeHtml(getCreatorEmail(c))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
-    const tdStatus = document.createElement("td");
-    tdStatus.appendChild(statusSelect);
-    const tdCreator = document.createElement("td");
-    tdCreator.textContent = getCreatorEmail(c);
-    const tdAction = document.createElement("td");
-    tdAction.appendChild(saveBtn);
-    tr.appendChild(tdStatus);
-    tr.appendChild(tdCreator);
-    tr.appendChild(tdAction);
+
+    tr.querySelector(".td-status").appendChild(statusSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -610,6 +754,7 @@ function renderEmployeesTable(list) {
 
   for (const emp of list) {
     const tr = document.createElement("tr");
+
     const onboardingSelect = document.createElement("select");
     onboardingSelect.style.padding = "8px 10px";
     onboardingSelect.style.borderRadius = "10px";
@@ -622,7 +767,54 @@ function renderEmployeesTable(list) {
       onboardingSelect.appendChild(opt);
     }
 
-    const startedLabel = emp.startedWorking ? "Yes" : "No";
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const name = tr.querySelector(".emp-name").value;
+      const email = tr.querySelector(".emp-email").value;
+      const role = tr.querySelector(".emp-role").value;
+      const dailyHours = tr.querySelector(".emp-hours").value;
+      try {
+        const updated = await updateEmployee(emp.id, {
+          name,
+          email,
+          role,
+          dailyHours,
+          onboardingStatus: onboardingSelect.value
+        });
+        Object.assign(emp, updated);
+        saveBtn.textContent = "Saved";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
+      } catch (e) {
+        alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this employee?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteEmployee(emp.id);
+        tr.remove();
+        employeesCache = employeesCache.filter(e => e.id !== emp.id);
+        if (!employeesCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
 
     const startedBtn = document.createElement("button");
     startedBtn.className = "btn";
@@ -633,12 +825,11 @@ function renderEmployeesTable(list) {
     startedBtn.addEventListener("click", async () => {
       if (emp.startedWorking) return;
       startedBtn.disabled = true;
-      startedBtn.textContent = "Saving...";
+      startedBtn.textContent = "…";
       try {
         const updated = await updateEmployee(emp.id, { markStartedWorking: true });
-        emp.startedWorking = updated?.startedWorking;
-        emp.onboardingStatus = updated?.onboardingStatus;
-        renderEmployeesTable(employeesCache.map((e) => (e.id === emp.id ? updated : e)));
+        Object.assign(emp, updated);
+        renderEmployeesTable(employeesCache);
       } catch (e) {
         alert(e.message || "Failed to update");
         startedBtn.textContent = "Started Working";
@@ -646,33 +837,23 @@ function renderEmployeesTable(list) {
       }
     });
 
-    onboardingSelect.addEventListener("change", async () => {
-      try {
-        const updated = await updateEmployee(emp.id, { onboardingStatus: onboardingSelect.value });
-        Object.assign(emp, updated);
-      } catch (e) {
-        alert(e.message || "Failed to update");
-      }
-    });
-
     tr.innerHTML = `
-      <td><div style="font-weight:900">${escapeHtml(emp.name || "—")}</div></td>
-      <td>${escapeHtml(emp.email || "—")}</td>
-      <td>${escapeHtml(emp.role || "—")}</td>
-      <td>${emp.dailyHours != null ? escapeHtml(emp.dailyHours) : "—"}</td>
+      <td><input class="field emp-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.name || "")}" /></td>
+      <td><input class="field emp-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.email || "")}" /></td>
+      <td><input class="field emp-role" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.role || "")}" /></td>
+      <td><input class="field emp-hours" type="number" style="background:transparent; border:none; padding:4px;" value="${emp.dailyHours || ""}" /></td>
+      <td class="td-onboarding"></td>
+      <td class="td-started"></td>
+      <td>${escapeHtml(getCreatorEmail(emp))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
-    const tdOnb = document.createElement("td");
-    tdOnb.appendChild(onboardingSelect);
-    const tdStarted = document.createElement("td");
-    tdStarted.textContent = startedLabel;
-    const tdCreator = document.createElement("td");
-    tdCreator.textContent = getCreatorEmail(emp);
-    const tdAction = document.createElement("td");
-    tdAction.appendChild(startedBtn);
-    tr.appendChild(tdOnb);
-    tr.appendChild(tdStarted);
-    tr.appendChild(tdCreator);
-    tr.appendChild(tdAction);
+
+    tr.querySelector(".td-onboarding").appendChild(onboardingSelect);
+    tr.querySelector(".td-started").appendChild(startedBtn);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -704,6 +885,7 @@ function renderApplicantsTable(list) {
 
   for (const app of list) {
     const tr = document.createElement("tr");
+
     const stageSelect = document.createElement("select");
     stageSelect.style.padding = "8px 10px";
     stageSelect.style.borderRadius = "10px";
@@ -715,25 +897,71 @@ function renderApplicantsTable(list) {
       if (app.stage === s.id) opt.selected = true;
       stageSelect.appendChild(opt);
     }
-    stageSelect.addEventListener("change", async () => {
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const name = tr.querySelector(".app-name").value;
+      const email = tr.querySelector(".app-email").value;
+      const role = tr.querySelector(".app-role").value;
+      const source = tr.querySelector(".app-source").value;
       try {
-        const updated = await updateApplicant(app.id, { stage: stageSelect.value });
+        const updated = await updateApplicant(app.id, {
+          name,
+          email,
+          role,
+          source,
+          stage: stageSelect.value
+        });
         Object.assign(app, updated);
+        saveBtn.textContent = "Saved";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
         alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this applicant?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteApplicant(app.id);
+        tr.remove();
+        applicantsCache = applicantsCache.filter(a => a.id !== app.id);
+        if (!applicantsCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
       }
     });
 
     tr.innerHTML = `
-      <td><div style="font-weight:900">${escapeHtml(app.name || "—")}</div></td>
-      <td>${escapeHtml(app.email || "—")}</td>
-      <td>${escapeHtml(app.role || "—")}</td>
-      <td></td>
-      <td>${escapeHtml(app.source || "—")}</td>
+      <td><input class="field app-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(app.name || "")}" /></td>
+      <td><input class="field app-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.email || "")}" /></td>
+      <td><input class="field app-role" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.role || "")}" /></td>
+      <td class="td-stage"></td>
+      <td><input class="field app-source" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.source || "")}" /></td>
       <td>${escapeHtml(getCreatorEmail(app))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
-    const tds = tr.querySelectorAll("td");
-    tds[3].appendChild(stageSelect);
+
+    tr.querySelector(".td-stage").appendChild(stageSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -763,17 +991,84 @@ function renderMeetingsTable(list) {
     return;
   }
   empty.style.display = "none";
+
   for (const m of list) {
-    const when = m.scheduledAt ? new Date(m.scheduledAt).toLocaleString() : "—";
-    const related = m.relatedType && m.relatedId ? `${m.relatedType}:${m.relatedId}` : "—";
     const tr = document.createElement("tr");
+
+    const statusSelect = document.createElement("select");
+    statusSelect.style.padding = "8px 10px";
+    statusSelect.style.borderRadius = "10px";
+    statusSelect.style.border = "1px solid var(--border)";
+    const statuses = ["scheduled", "completed", "cancelled"];
+    for (const st of statuses) {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st.charAt(0).toUpperCase() + st.slice(1);
+      if (m.status === st) opt.selected = true;
+      statusSelect.appendChild(opt);
+    }
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const title = tr.querySelector(".meet-title").value;
+      const scheduledAt = tr.querySelector(".meet-when").value;
+      try {
+        const updated = await updateMeeting(m.id, {
+          title,
+          scheduledAt,
+          status: statusSelect.value
+        });
+        Object.assign(m, updated);
+        saveBtn.textContent = "Saved";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
+      } catch (e) {
+        alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this meeting?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteMeeting(m.id);
+        tr.remove();
+        meetingsCache = meetingsCache.filter(item => item.id !== m.id);
+        if (!meetingsCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
+
+    const whenVal = m.scheduledAt ? new Date(m.scheduledAt).toISOString().slice(0, 16) : "";
+
     tr.innerHTML = `
-      <td><div style="font-weight:900">${escapeHtml(m.title || "—")}</div></td>
-      <td>${escapeHtml(when)}</td>
-      <td>${escapeHtml(related)}</td>
-      <td>${escapeHtml(m.status || "scheduled")}</td>
+      <td><input class="field meet-title" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(m.title || "")}" /></td>
+      <td><input class="field meet-when" type="datetime-local" style="background:transparent; border:none; padding:4px;" value="${whenVal}" /></td>
+      <td class="td-status"></td>
+      <td>${escapeHtml(m.relatedType && m.relatedId ? `${m.relatedType}:${m.relatedId}` : "—")}</td>
       <td>${escapeHtml(getCreatorEmail(m))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
+
+    tr.querySelector(".td-status").appendChild(statusSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -803,15 +1098,84 @@ function renderSalesTable(list) {
     return;
   }
   empty.style.display = "none";
+
   for (const s of list) {
     const tr = document.createElement("tr");
+
+    const stageSelect = document.createElement("select");
+    stageSelect.style.padding = "8px 10px";
+    stageSelect.style.borderRadius = "10px";
+    stageSelect.style.border = "1px solid var(--border)";
+    const stages = ["lead", "proposal_sent", "negotiation", "won", "lost"];
+    for (const st of stages) {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st.replace(/_/g, " ").charAt(0).toUpperCase() + st.replace(/_/g, " ").slice(1);
+      if (s.stage === st) opt.selected = true;
+      stageSelect.appendChild(opt);
+    }
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const agentEmail = tr.querySelector(".sale-agent").value;
+      const clientId = tr.querySelector(".sale-client").value;
+      const amount = tr.querySelector(".sale-amount").value;
+      try {
+        const updated = await updateSale(s.id, {
+          agentEmail,
+          clientId,
+          amount,
+          stage: stageSelect.value
+        });
+        Object.assign(s, updated);
+        saveBtn.textContent = "Saved";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
+      } catch (e) {
+        alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this deal?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteSale(s.id);
+        tr.remove();
+        salesCache = salesCache.filter(item => item.id !== s.id);
+        if (!salesCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
+
     tr.innerHTML = `
-      <td>${escapeHtml(s.agentEmail || "—")}</td>
-      <td>${escapeHtml(s.clientId || "—")}</td>
-      <td>${s.amount != null ? escapeHtml(s.amount) : "—"}</td>
-      <td>${escapeHtml(s.stage || "lead")}</td>
+      <td><input class="field sale-agent" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(s.agentEmail || "")}" /></td>
+      <td><input class="field sale-client" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(s.clientId || "")}" /></td>
+      <td><input class="field sale-amount" type="number" step="0.01" style="background:transparent; border:none; padding:4px;" value="${s.amount != null ? s.amount : ""}" /></td>
+      <td class="td-stage"></td>
       <td>${escapeHtml(getCreatorEmail(s))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
+
+    tr.querySelector(".td-stage").appendChild(stageSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -841,15 +1205,84 @@ function renderInvoicesTable(list) {
     return;
   }
   empty.style.display = "none";
+
   for (const inv of list) {
     const tr = document.createElement("tr");
+
+    const statusSelect = document.createElement("select");
+    statusSelect.style.padding = "8px 10px";
+    statusSelect.style.borderRadius = "10px";
+    statusSelect.style.border = "1px solid var(--border)";
+    const statuses = ["draft", "sent", "paid", "void"];
+    for (const st of statuses) {
+      const opt = document.createElement("option");
+      opt.value = st;
+      opt.textContent = st.charAt(0).toUpperCase() + st.slice(1);
+      if (inv.status === st) opt.selected = true;
+      statusSelect.appendChild(opt);
+    }
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const clientId = tr.querySelector(".inv-client").value;
+      const amount = tr.querySelector(".inv-amount").value;
+      const dueDate = tr.querySelector(".inv-due").value;
+      try {
+        const updated = await updateInvoice(inv.id, {
+          clientId,
+          amount,
+          dueDate,
+          status: statusSelect.value
+        });
+        Object.assign(inv, updated);
+        saveBtn.textContent = "Saved";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
+      } catch (e) {
+        alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm("Delete this invoice?")) return;
+      delBtn.disabled = true;
+      try {
+        await deleteInvoice(inv.id);
+        tr.remove();
+        invoicesCache = invoicesCache.filter(item => item.id !== inv.id);
+        if (!invoicesCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
+
     tr.innerHTML = `
-      <td>${escapeHtml(inv.clientId || "—")}</td>
-      <td>${inv.amount != null ? escapeHtml(inv.amount) : "—"}</td>
-      <td>${escapeHtml(inv.status || "draft")}</td>
-      <td>${escapeHtml(inv.dueDate || "—")}</td>
+      <td><input class="field inv-client" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(inv.clientId || "")}" /></td>
+      <td><input class="field inv-amount" type="number" step="0.01" style="background:transparent; border:none; padding:4px;" value="${inv.amount != null ? inv.amount : ""}" /></td>
+      <td class="td-status"></td>
+      <td><input class="field inv-due" type="date" style="background:transparent; border:none; padding:4px;" value="${inv.dueDate || ""}" /></td>
       <td>${escapeHtml(getCreatorEmail(inv))}</td>
+      <td class="td-action" style="display:flex; gap:6px;"></td>
     `;
+
+    tr.querySelector(".td-status").appendChild(statusSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -934,15 +1367,102 @@ function renderUsersTable(list) {
     return;
   }
   empty.style.display = "none";
+
   for (const u of list) {
     const tr = document.createElement("tr");
+
+    const roleSelect = document.createElement("select");
+    roleSelect.style.padding = "8px 10px";
+    roleSelect.style.borderRadius = "10px";
+    roleSelect.style.border = "1px solid var(--border)";
+    const roles = ["super_admin", "admin", "manager", "employee", "hr"];
+    for (const r of roles) {
+      const opt = document.createElement("option");
+      opt.value = r;
+      opt.textContent = r;
+      if (u.role === r) opt.selected = true;
+      roleSelect.appendChild(opt);
+    }
+
+    const statusSelect = document.createElement("select");
+    statusSelect.style.padding = "8px 10px";
+    statusSelect.style.borderRadius = "10px";
+    statusSelect.style.border = "1px solid var(--border)";
+    [{ v: false, l: "Active" }, { v: true, l: "Disabled" }].forEach(o => {
+      const opt = document.createElement("option");
+      opt.value = o.v;
+      opt.textContent = o.l;
+      if (!!u.disabled === o.v) opt.selected = true;
+      statusSelect.appendChild(opt);
+    });
+
+    const saveBtn = document.createElement("button");
+    saveBtn.className = "btn";
+    saveBtn.textContent = "Save";
+    saveBtn.style.padding = "8px 10px";
+    saveBtn.addEventListener("click", async () => {
+      saveBtn.disabled = true;
+      saveBtn.textContent = "…";
+      const name = tr.querySelector(".user-name").value;
+      const employeeId = tr.querySelector(".user-emp-id").value;
+      const pwd = tr.querySelector(".user-pwd").value;
+      try {
+        const patch = {
+          name,
+          employeeId,
+          role: roleSelect.value,
+          disabled: statusSelect.value === "true"
+        };
+        if (pwd) patch.password = pwd;
+        const updated = await updateUser(u.id, patch);
+        Object.assign(u, updated);
+        saveBtn.textContent = "Saved";
+        tr.querySelector(".user-pwd").value = "";
+        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
+      } catch (e) {
+        alert(e.message || "Failed to update");
+        saveBtn.textContent = "Save";
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn";
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.style.padding = "8px";
+    delBtn.style.color = "#ff3c00";
+    delBtn.addEventListener("click", async () => {
+      if (!confirm(`Delete user ${u.email}?`)) return;
+      delBtn.disabled = true;
+      try {
+        await deleteUser(u.id);
+        tr.remove();
+        usersCache = usersCache.filter(item => item.id !== u.id);
+        if (!usersCache.length) empty.style.display = "block";
+      } catch (e) {
+        alert(e.message || "Failed to delete");
+        delBtn.disabled = false;
+      }
+    });
+
     tr.innerHTML = `
       <td>${escapeHtml(u.email || "—")}</td>
-      <td>${escapeHtml(u.name || "—")}</td>
-      <td>${escapeHtml(u.role || "—")}</td>
-      <td>${escapeHtml(u.employeeId || "—")}</td>
-      <td>${u.disabled ? "Disabled" : "Active"}</td>
+      <td><input class="field user-name" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(u.name || "")}" /></td>
+      <td class="td-role"></td>
+      <td><input class="field user-emp-id" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(u.employeeId || "")}" /></td>
+      <td class="td-status"></td>
+      <td class="td-action" style="display:flex; gap:6px; align-items:center;">
+        <input class="field user-pwd" type="password" placeholder="Reset pwd" style="width:80px; font-size:10px; padding:4px;" />
+      </td>
     `;
+
+    tr.querySelector(".td-role").appendChild(roleSelect);
+    tr.querySelector(".td-status").appendChild(statusSelect);
+    const actionTd = tr.querySelector(".td-action");
+    actionTd.appendChild(saveBtn);
+    actionTd.appendChild(delBtn);
+
     tbody.appendChild(tr);
   }
 }
@@ -1010,6 +1530,7 @@ function setupChat() {
     if (!other) return;
     const existing = threadsList.find(
       (t) =>
+        t.type === "direct" &&
         (t.participantEmails || []).length === 2 &&
         t.participantEmails.includes(myEmail) &&
         t.participantEmails.includes(other)
@@ -1036,6 +1557,29 @@ function setupChat() {
   function renderThreads(threads) {
     threadsList = threads;
     threadsEl.innerHTML = "";
+    if (!threads.length) {
+      threadsEl.innerHTML = '<div class="muted" style="padding:10px;">No conversations yet.</div>';
+      return;
+    }
+    for (const t of threads) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "chat-thread" + (activeChatId === t.id ? " active" : "");
+
+      let title = t.name || (t.type === 'group' ? "Unnamed Group" : "Direct Chat");
+      let sub = "";
+      if (t.type === "direct") {
+        const others = (t.participantEmails || []).filter(e => e !== myEmail);
+        title = others[0] || title;
+        sub = "One-on-one";
+      } else {
+        sub = `${(t.participantEmails || []).length} participants`;
+      }
+
+      btn.innerHTML = `<div class="chat-thread-title">${escapeHtml(title)}</div><div class="chat-thread-sub">${escapeHtml(sub)}</div>`;
+      btn.addEventListener("click", () => selectThread(t));
+      threadsEl.appendChild(btn);
+    }
   }
 
   function renderMessages(items) {
@@ -1055,14 +1599,31 @@ function setupChat() {
 
   function selectThread(thread) {
     activeChatId = thread.id;
-    const others = (thread.participantEmails || []).filter((e) => e !== myEmail);
-    const otherEmail = others[0] || "";
-    activeTitle.textContent = thread.name ? `Chat with ${thread.name}` : (otherEmail ? `Chat with ${otherEmail}` : "Conversation");
-    activeMeta.textContent = otherEmail;
+    if (thread.type === "group") {
+      activeTitle.textContent = thread.name || "Group Chat";
+      activeMeta.textContent = (thread.participantEmails || []).length + " members";
+    } else {
+      const others = (thread.participantEmails || []).filter((e) => e !== myEmail);
+      const otherEmail = others[0] || "";
+      activeTitle.textContent = thread.name ? `Chat with ${thread.name}` : (otherEmail ? `Chat with ${otherEmail}` : "Conversation");
+      activeMeta.textContent = otherEmail;
+    }
     setMsg(msg, "", "");
 
+    // Highlight active thread
+    const all = threadsEl.querySelectorAll('.chat-thread');
+    all.forEach(el => el.classList.remove('active'));
+    for (const el of all) {
+      // Small hack: identify by title or simplified comparison if possible.
+      // Better: find by a stored data-id. But we can just use the fact that renderThreads will hit soon.
+      // Actually, let's just re-render threadsList to be sure, or just leave it since Snapshot will likely trigger anyway on message send.
+      // But if we just click, Snapshot might NOT trigger.
+    }
+    // Let's just re-run renderThreads with current list
+    renderThreads(threadsList);
+
     if (unsubMessages) {
-      try { unsubMessages(); } catch (_) {}
+      try { unsubMessages(); } catch (_) { }
       unsubMessages = null;
     }
 
@@ -1077,6 +1638,61 @@ function setupChat() {
       (err) => setMsg(msg, err.message || "Failed to load messages", "error")
     );
   }
+
+  // group chat UI
+  const groupBtn = qs("#createGroupChatBtn");
+  const groupModal = qs("#groupChatModal");
+  const groupListEl = qs("#groupUsersList");
+  const groupClose = qs("#closeGroupChatModal");
+  const groupSubmit = qs("#submitGroupChat");
+  const groupNameInput = qs("#groupName");
+  const groupError = qs("#groupChatError");
+
+  if (sessionRole === "admin" || sessionRole === "super_admin") {
+    if (groupBtn) groupBtn.style.display = "inline-flex";
+  }
+
+  groupBtn?.addEventListener("click", () => {
+    if (groupModal) groupModal.style.display = "flex";
+  });
+  groupClose?.addEventListener("click", () => {
+    if (groupModal) groupModal.style.display = "none";
+  });
+
+  groupSubmit?.addEventListener("click", async () => {
+    const name = (groupNameInput.value || "").trim();
+    if (!name) return setMsg(groupError, "Group name required", "error");
+
+    const checked = groupListEl.querySelectorAll('input:checked');
+    const selectedEmails = Array.from(checked).map(i => i.value);
+    if (!selectedEmails.length) return setMsg(groupError, "Select at least one user", "error");
+
+    const participantEmails = Array.from(new Set([myEmail, ...selectedEmails])).sort();
+
+    groupSubmit.disabled = true;
+    groupSubmit.textContent = "Creating…";
+    setMsg(groupError, "Creating group…", "");
+
+    try {
+      const docRef = await addDoc(chatsRef, {
+        type: "group",
+        name,
+        participantEmails,
+        createdAt: serverTimestamp(),
+        createdBy: myEmail,
+        updatedAt: serverTimestamp(),
+      });
+      groupModal.style.display = "none";
+      groupNameInput.value = "";
+      checked.forEach(i => i.checked = false);
+      selectThread({ id: docRef.id, name, type: "group", participantEmails });
+    } catch (err) {
+      setMsg(groupError, err.message || "Failed to create group", "error");
+    } finally {
+      groupSubmit.disabled = false;
+      groupSubmit.textContent = "Create Group Chat";
+    }
+  });
 
   // live threads list
   onSnapshot(
@@ -1114,6 +1730,7 @@ function setupChat() {
         if (wrap && listEl) {
           wrap.style.display = "block";
           listEl.innerHTML = "";
+          if (groupListEl) groupListEl.innerHTML = "";
           for (const p of people) {
             const btn = document.createElement("button");
             btn.type = "button";
@@ -1124,9 +1741,20 @@ function setupChat() {
             `;
             btn.addEventListener("click", () => openOrCreateChat(p.email, p.name || p.email));
             listEl.appendChild(btn);
+
+            if (groupListEl) {
+              const lbl = document.createElement("label");
+              lbl.style.display = "flex";
+              lbl.style.alignItems = "center";
+              lbl.style.gap = "8px";
+              lbl.style.padding = "6px 4px";
+              lbl.style.cursor = "pointer";
+              lbl.innerHTML = `<input type="checkbox" value="${p.email}" /> <span style="font-size:13px; font-weight:600;">${escapeHtml(p.name || p.email)} <small style="color:var(--text-muted)">(${p.email})</small></span>`;
+              groupListEl.appendChild(lbl);
+            }
           }
         }
-      } catch (_) {}
+      } catch (_) { }
       if (conversationsLoader) conversationsLoader.style.display = "none";
     })();
   }
@@ -1531,7 +2159,8 @@ function boot() {
   if (page === "clients") qs("#createClientForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#clientMsg");
-    setMsg(msg, "", "");
+    setMsg(msg, "Creating client…", "");
+    toggleInlineLoader("clientsLoading", true);
     const payload = {
       name: qs("#clientName")?.value || "",
       email: qs("#clientEmail")?.value || "",
@@ -1546,13 +2175,16 @@ function boot() {
       await refreshClients();
     } catch (err) {
       setMsg(msg, err.message || "Failed to create client", "error");
+    } finally {
+      toggleInlineLoader("clientsLoading", false);
     }
   });
 
   if (page === "users") qs("#createUserForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#userMsg");
-    setMsg(msg, "", "");
+    setMsg(msg, "Creating user…", "");
+    toggleInlineLoader("usersLoading", true);
     const payload = {
       email: qs("#userEmail")?.value || "",
       password: qs("#userPassword")?.value || "",
@@ -1582,13 +2214,16 @@ function boot() {
       await refreshUsers();
     } catch (err) {
       setMsg(msg, err.message || "Failed to create user", "error");
+    } finally {
+      toggleInlineLoader("usersLoading", false);
     }
   });
 
   if (page === "employees") qs("#createEmployeeForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#empMsg");
-    setMsg(msg, "", "");
+    setMsg(msg, "Adding employee…", "");
+    toggleInlineLoader("empLoading", true);
     const payload = {
       name: qs("#empName")?.value || "",
       email: qs("#empEmail")?.value || "",
@@ -1617,13 +2252,16 @@ function boot() {
       await refreshEmployees();
     } catch (err) {
       setMsg(msg, err.message || "Failed to add employee", "error");
+    } finally {
+      toggleInlineLoader("empLoading", false);
     }
   });
 
   if (page === "applicants") qs("#createApplicantForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#appMsg");
-    setMsg(msg, "", "");
+    setMsg(msg, "Adding applicant…", "");
+    toggleInlineLoader("appLoading", true);
     const payload = {
       name: qs("#appName")?.value || "",
       email: qs("#appEmail")?.value || "",
@@ -1638,6 +2276,8 @@ function boot() {
       await refreshApplicants();
     } catch (err) {
       setMsg(msg, err.message || "Failed to add applicant", "error");
+    } finally {
+      toggleInlineLoader("appLoading", false);
     }
   });
 
@@ -1646,7 +2286,8 @@ function boot() {
     qs("#createMeetingForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const msg = qs("#meetMsg");
-      setMsg(msg, "", "");
+      setMsg(msg, "Creating meeting…", "");
+      toggleInlineLoader("meetLoading", true);
       const relatedType = qs("#meetRelatedType")?.value || "";
       const relatedId = qs("#meetRelatedId")?.value || "";
       const payload = {
@@ -1664,6 +2305,8 @@ function boot() {
         await refreshMeetings();
       } catch (err) {
         setMsg(msg, err.message || "Failed to create meeting", "error");
+      } finally {
+        toggleInlineLoader("meetLoading", false);
       }
     });
   }
@@ -1673,7 +2316,8 @@ function boot() {
     qs("#createSaleForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const msg = qs("#saleMsg");
-      setMsg(msg, "", "");
+      setMsg(msg, "Creating deal…", "");
+      toggleInlineLoader("salesLoading", true);
       const payload = {
         clientId: qs("#saleClientId")?.value || "",
         agentEmail: qs("#saleAgentEmail")?.value || "",
@@ -1688,6 +2332,8 @@ function boot() {
         await refreshSales();
       } catch (err) {
         setMsg(msg, err.message || "Failed to create deal", "error");
+      } finally {
+        toggleInlineLoader("salesLoading", false);
       }
     });
   }
@@ -1697,7 +2343,8 @@ function boot() {
     qs("#createInvoiceForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
       const msg = qs("#invMsg");
-      setMsg(msg, "", "");
+      setMsg(msg, "Creating invoice…", "");
+      toggleInlineLoader("invoicesLoading", true);
       const payload = {
         clientId: qs("#invClientId")?.value || "",
         amount: qs("#invAmount")?.value || "",
@@ -1712,6 +2359,8 @@ function boot() {
         await refreshInvoices();
       } catch (err) {
         setMsg(msg, err.message || "Failed to create invoice", "error");
+      } finally {
+        toggleInlineLoader("invoicesLoading", false);
       }
     });
   }

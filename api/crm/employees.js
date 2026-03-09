@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth, requireRole } from "./_auth.js";
 
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Only super_admin/admin/hr can create / update employees
+  // Only super_admin/admin/hr can create / update / delete employees
   const writeAuth = requireRole(auth, ["super_admin", "admin", "hr"]);
   if (!writeAuth.ok) return json(res, writeAuth.status || 403, { success: false, message: writeAuth.message });
 
@@ -83,6 +83,18 @@ export default async function handler(req, res) {
       return json(res, 200, { success: true, employee: snap.exists() ? { id: snap.id, ...snap.data() } : null });
     } catch (err) {
       console.error("[crm employees PATCH] error", err);
+      return json(res, 500, { success: false, message: "Internal Server Error" });
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      const { id } = req.query || {};
+      if (!id) return json(res, 400, { success: false, message: "Missing id" });
+      await deleteDoc(doc(db, "employees", String(id)));
+      return json(res, 200, { success: true, message: "Deleted" });
+    } catch (err) {
+      console.error("[crm employees DELETE] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });
     }
   }

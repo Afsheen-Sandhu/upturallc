@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth } from "./_auth.js";
 
@@ -73,6 +73,18 @@ export default async function handler(req, res) {
       return json(res, 200, { success: true, meeting: snap.exists() ? { id: snap.id, ...snap.data() } : null });
     } catch (err) {
       console.error("[crm meetings PATCH] error", err);
+      return json(res, 500, { success: false, message: "Internal Server Error" });
+    }
+  }
+
+  if (req.method === "DELETE") {
+    try {
+      const { id } = req.query || {};
+      if (!id) return json(res, 400, { success: false, message: "Missing id" });
+      await deleteDoc(doc(db, "meetings", String(id)));
+      return json(res, 200, { success: true, message: "Deleted" });
+    } catch (err) {
+      console.error("[crm meetings DELETE] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });
     }
   }

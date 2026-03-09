@@ -110,7 +110,8 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
@@ -133,7 +134,8 @@
                             <h2 class="h2">Contact Super Admin</h2>
                             <div class="muted" id="superAdminContact">—</div>
                         </div>
-                        <a class="btn primary" id="superAdminEmailLink" href="#" target="_blank" rel="noopener noreferrer" style="display:none;">
+                        <a class="btn primary" id="superAdminEmailLink" href="#" target="_blank"
+                            rel="noopener noreferrer" style="display:none;">
                             <i class="fa-solid fa-envelope"></i><span>Email</span>
                         </a>
                     </div>
@@ -146,8 +148,42 @@
                             <div class="chat-threads">
                                 <div class="chat-threads-head" style="margin-bottom:6px;">
                                     <div style="font-weight:900;">Conversations</div>
+                                    <button class="btn primary" id="createGroupChatBtn"
+                                        style="display:none; padding: 6px 10px; font-size: 12px;">
+                                        <i class="fa-solid fa-plus"></i><span>Group Chat</span>
+                                    </button>
                                 </div>
-                                <div class="inline-loader" id="chatConversationsLoader" style="display:flex; padding:16px;">
+
+                                <!-- Group Chat Modal -->
+                                <div id="groupChatModal"
+                                    style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+                                    <div class="card"
+                                        style="width: 400px; max-height: 80vh; overflow: hidden; display: flex; flex-direction: column; margin-bottom: 0;">
+                                        <div class="card-head">
+                                            <h2 class="h2">Create Group Chat</h2>
+                                            <button class="icon-btn" id="closeGroupChatModal"
+                                                style="background:none; border:none; color:var(--text-dark); font-size:18px;">
+                                                <i class="fa-solid fa-xmark"></i>
+                                            </button>
+                                        </div>
+                                        <div class="form-group" style="margin-bottom: 12px;">
+                                            <label class="form-label">Group Name</label>
+                                            <input id="groupName" type="text" class="form-input"
+                                                placeholder="Team Discussion" required />
+                                        </div>
+                                        <div style="font-weight:700; font-size:13px; margin-bottom:8px;">Select Users
+                                        </div>
+                                        <div id="groupUsersList"
+                                            style="flex: 1; overflow-y: auto; margin-bottom: 16px; border: 1px solid var(--border); border-radius: 12px; padding: 8px;">
+                                            <!-- User Checkboxes will go here -->
+                                        </div>
+                                        <button class="btn primary" id="submitGroupChat">Create Group Chat</button>
+                                        <div id="groupChatError" class="error-msg" style="margin-top:10px;"></div>
+                                    </div>
+                                </div>
+
+                                <div class="inline-loader" id="chatConversationsLoader"
+                                    style="display:flex; padding:16px;">
                                     <div class="loader"></div>
                                     <span class="muted" style="margin-left:8px;">Loading conversations…</span>
                                 </div>
@@ -162,11 +198,11 @@
                                     <div class="muted" id="chatActiveMeta"></div>
                                 </div>
                                 <div class="chat-messages" id="chatMessages"></div>
-                        <form class="chat-form" id="chatForm">
-                            <input id="chatInput" placeholder="Type a message…" autocomplete="off" />
-                            <button class="btn primary" type="submit">Send</button>
-                        </form>
-                        <div class="msg error" id="chatMsg"></div>
+                                <form class="chat-form" id="chatForm">
+                                    <input id="chatInput" placeholder="Type a message…" autocomplete="off" />
+                                    <button class="btn primary" type="submit">Send</button>
+                                </form>
+                                <div class="msg error" id="chatMsg"></div>
                             </div>
                         </div>
                     </div>
@@ -179,4 +215,3 @@
 </body>
 
 </html>
-
