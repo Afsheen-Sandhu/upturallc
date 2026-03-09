@@ -1,6 +1,7 @@
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth, requireRole } from "./_auth.js";
+import { sendEmail } from "./_email.js";
 
 function json(res, status, body) {
   res.status(status).json(body);
@@ -51,6 +52,24 @@ export default async function handler(req, res) {
         updatedBy: writeAuth.userId,
         updatedByEmail: writeAuth.email || "",
       });
+
+      if (email && String(email).trim() !== "") {
+        const applicantName = name ? String(name).trim() : "Applicant";
+        const applicantRole = role ? String(role).trim() : "our open position";
+        const html = `
+          <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+            <h2>Hi ${applicantName},</h2>
+            <p>Thank you for applying for the <strong>${applicantRole}</strong> position at Uptura!</p>
+            <p>We have successfully received your application. Our hiring team will review your profile and get back to you soon regarding the next steps.</p>
+            <br />
+            <p>Best regards,</p>
+            <p><strong>The Uptura Team</strong></p>
+          </div>
+        `;
+        // Fire and forget (don't force the API to wait forever)
+        sendEmail({ to: email, subject: "Welcome to Uptura!", html }).catch(err => console.error(err));
+      }
+
       return json(res, 201, { success: true, id: docRef.id });
     } catch (err) {
       console.error("[crm applicants POST] error", err);

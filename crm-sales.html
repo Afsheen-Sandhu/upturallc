@@ -164,7 +164,22 @@
                             <h2 class="h2">Deals</h2>
                             <div class="muted">Latest first.</div>
                         </div>
-                        <button class="btn" id="refreshSalesBtn"><i class="fa-solid fa-rotate"></i></button>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="saleSearch" class="table-search"
+                                    placeholder="Search by agent, client, or amount..." />
+                            </div>
+                            <select class="table-filter" id="filterSaleStage">
+                                <option value="all">All Stages</option>
+                                <option value="lead">Lead</option>
+                                <option value="proposal_sent">Proposal Sent</option>
+                                <option value="negotiation">Negotiation</option>
+                                <option value="won">Won</option>
+                                <option value="lost">Lost</option>
+                            </select>
+                            <button class="btn" id="refreshSalesBtn"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table class="table">

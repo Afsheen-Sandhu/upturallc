@@ -110,7 +110,8 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
@@ -176,6 +177,19 @@
                             <h2 class="h2">Employees</h2>
                             <div class="muted">Mark onboarding complete with “Started Working”.</div>
                         </div>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="empSearch" class="table-search"
+                                    placeholder="Search by name, email, or role..." />
+                            </div>
+                            <select class="table-filter" id="filterEmpStatus">
+                                <option value="all">All Oboarding</option>
+                                <option value="pending">Pending</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                            <button class="btn" id="refreshEmployeesBtn"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table class="table" id="empTable">
@@ -207,4 +221,3 @@
 </body>
 
 </html>
-

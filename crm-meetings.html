@@ -99,7 +99,8 @@
                 <form id="loginForm">
                     <div class="form-group">
                         <label class="form-label">Email</label>
-                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email" required />
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email"
+                            required />
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
@@ -119,7 +120,8 @@
                     <div class="card-head">
                         <div>
                             <h2 class="h2">Google Calendar</h2>
-                            <div class="muted">View and manage your schedule. Open Calendar in a new tab to create events or see your week.</div>
+                            <div class="muted">View and manage your schedule. Open Calendar in a new tab to create
+                                events or see your week.</div>
                         </div>
                     </div>
                     <a class="btn primary" href="https://calendar.google.com" target="_blank" rel="noopener noreferrer">
@@ -132,7 +134,8 @@
                     <div class="card-head">
                         <div>
                             <h2 class="h2">Google Voice Calls</h2>
-                            <div class="muted">Opens the Google Voice UI. Configure your team’s Google Voice number later in settings.</div>
+                            <div class="muted">Opens the Google Voice UI. Configure your team’s Google Voice number
+                                later in settings.</div>
                         </div>
                     </div>
                     <a class="btn primary" href="https://voice.google.com" target="_blank" rel="noopener noreferrer">
@@ -195,7 +198,20 @@
                             <h2 class="h2">Meetings</h2>
                             <div class="muted">Latest first.</div>
                         </div>
-                        <button class="btn" id="refreshMeetingsBtn"><i class="fa-solid fa-rotate"></i></button>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="meetSearch" class="table-search"
+                                    placeholder="Search by title, related, or creator..." />
+                            </div>
+                            <select class="table-filter" id="filterMeetStatus">
+                                <option value="all">All Statuses</option>
+                                <option value="scheduled">Scheduled</option>
+                                <option value="completed">Completed</option>
+                                <option value="cancelled">Cancelled</option>
+                            </select>
+                            <button class="btn" id="refreshMeetingsBtn"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table class="table">
@@ -224,4 +240,3 @@
 </body>
 
 </html>
-

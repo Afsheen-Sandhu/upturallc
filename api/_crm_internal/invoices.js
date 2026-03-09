@@ -1,6 +1,7 @@
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth } from "./_auth.js";
+import { sendEmail } from "./_email.js";
 
 function json(res, status, body) {
   res.status(status).json(body);
@@ -46,6 +47,37 @@ export default async function handler(req, res) {
         updatedBy: auth.userId,
         updatedByEmail: auth.email || "",
       });
+
+      if (normalizeStatus(status) === "sent" && clientId) {
+        // Try to fetch client email
+        let email = String(clientId).includes("@") ? String(clientId) : null;
+        if (!email) {
+          try {
+            const clientSnap = await getDoc(doc(db, "clients", String(clientId).trim()));
+            if (clientSnap.exists() && clientSnap.data().email) {
+              email = clientSnap.data().email;
+            }
+          } catch (e) { }
+        }
+
+        if (email) {
+          const html = `
+            <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+              <h2>Invoice Notification</h2>
+              <p>A new invoice for <strong>$${amount != null ? Number(amount).toFixed(2) : "0.00"}</strong> has been issued to you by Uptura.</p>
+              <p>Due Date: <strong>${dueDate || "Upon Receipt"}</strong></p>
+              ${notes ? `<p>Notes: ${notes}</p>` : ""}
+              <br />
+              <p>Please log in to your portal or contact us to arrange payment.</p>
+              <br />
+              <p>Best regards,</p>
+              <p><strong>The Uptura Team</strong></p>
+            </div>
+          `;
+          sendEmail({ to: email, subject: "New Invoice from Uptura", html }).catch(e => console.error(e));
+        }
+      }
+
       return json(res, 201, { success: true, id: docRef.id });
     } catch (err) {
       console.error("[crm invoices POST] error", err);
@@ -67,8 +99,58 @@ export default async function handler(req, res) {
       updates.updatedAt = serverTimestamp();
       updates.updatedBy = auth.userId;
       updates.updatedByEmail = auth.email || "";
+
+      // Fetch old doc to check status transition
+      let oldStatus = null;
+      let finalClientId = updates.clientId;
+      let finalAmount = updates.amount;
+      let finalDueDate = updates.dueDate;
+      let finalNotes = updates.notes;
+
+      try {
+        const oldSnap = await getDoc(doc(db, "invoices", String(id)));
+        if (oldSnap.exists()) {
+          const oldData = oldSnap.data();
+          oldStatus = oldData.status;
+          if (finalClientId === undefined) finalClientId = oldData.clientId;
+          if (finalAmount === undefined) finalAmount = oldData.amount;
+          if (finalDueDate === undefined) finalDueDate = oldData.dueDate;
+          if (finalNotes === undefined) finalNotes = oldData.notes;
+        }
+      } catch (e) { }
+
       await updateDoc(doc(db, "invoices", String(id)), updates);
       const snap = await getDoc(doc(db, "invoices", String(id)));
+
+      if (updates.status === "sent" && oldStatus !== "sent" && finalClientId) {
+        let email = String(finalClientId).includes("@") ? String(finalClientId) : null;
+        if (!email) {
+          try {
+            const clientSnap = await getDoc(doc(db, "clients", String(finalClientId).trim()));
+            if (clientSnap.exists() && clientSnap.data().email) {
+              email = clientSnap.data().email;
+            }
+          } catch (e) { }
+        }
+
+        if (email) {
+          const html = `
+            <div style="font-family: sans-serif; line-height: 1.5; color: #333;">
+              <h2>Invoice Notification</h2>
+              <p>An invoice for <strong>$${finalAmount != null ? Number(finalAmount).toFixed(2) : "0.00"}</strong> has been marked as sent.</p>
+              <p>Due Date: <strong>${finalDueDate || "Upon Receipt"}</strong></p>
+              ${finalNotes ? `<p>Notes: ${finalNotes}</p>` : ""}
+              <br />
+              <p>Please log in to your portal or contact us to arrange payment.</p>
+              <br />
+              <p>Best regards,</p>
+              <p><strong>The Uptura Team</strong></p>
+            </div>
+          `;
+          sendEmail({ to: email, subject: "Invoice Update from Uptura", html }).catch(e => console.error(e));
+        }
+      }
+
       return json(res, 200, { success: true, invoice: snap.exists() ? { id: snap.id, ...snap.data() } : null });
     } catch (err) {
       console.error("[crm invoices PATCH] error", err);

@@ -596,11 +596,12 @@ function renderClientsTable(clients) {
   const tbody = qs("#clientsTbody");
   const empty = qs("#clientsEmpty");
   const search = (qs("#clientSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterClientStatus")?.value || "all";
 
   const filtered = clients.filter((c) => {
-    if (!search) return true;
-    const hay = `${c.name || ""} ${c.email || ""} ${c.company || ""}`.toLowerCase();
-    return hay.includes(search);
+    const matchesSearch = !search || `${c.name || ""} ${c.email || ""} ${c.company || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || c.pipelineStatus === filter;
+    return matchesSearch && matchesFilter;
   });
 
   tbody.innerHTML = "";
@@ -746,14 +747,25 @@ async function refreshEmployees() {
 function renderEmployeesTable(list) {
   const tbody = qs("#empTbody");
   const empty = qs("#empEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#empSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterEmpStatus")?.value || "all";
+
+  const filtered = list.filter((e) => {
+    const matchesSearch = !search || `${e.name || ""} ${e.email || ""} ${e.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || e.onboardingStatus === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const emp of list) {
+  for (const emp of filtered) {
     const tr = document.createElement("tr");
 
     const onboardingSelect = document.createElement("select");
@@ -877,14 +889,25 @@ async function refreshApplicants() {
 function renderApplicantsTable(list) {
   const tbody = qs("#appTbody");
   const empty = qs("#appEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#appSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterAppStage")?.value || "all";
+
+  const filtered = list.filter((a) => {
+    const matchesSearch = !search || `${a.name || ""} ${a.email || ""} ${a.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || a.stage === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const app of list) {
+  for (const app of filtered) {
     const tr = document.createElement("tr");
 
     const stageSelect = document.createElement("select");
@@ -986,14 +1009,24 @@ function renderMeetingsTable(list) {
   const tbody = qs("#meetTbody");
   const empty = qs("#meetEmpty");
   if (!tbody || !empty) return;
+
+  const search = (qs("#meetSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterMeetStatus")?.value || "all";
+
+  const filtered = list.filter((m) => {
+    const matchesSearch = !search || `${m.title || ""} ${m.relatedType || ""} ${m.relatedId || ""} ${getCreatorEmail(m)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || m.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const m of list) {
+  for (const m of filtered) {
     const tr = document.createElement("tr");
 
     const statusSelect = document.createElement("select");
@@ -1093,14 +1126,24 @@ function renderSalesTable(list) {
   const tbody = qs("#salesTbody");
   const empty = qs("#salesEmpty");
   if (!tbody || !empty) return;
+
+  const search = (qs("#saleSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterSaleStage")?.value || "all";
+
+  const filtered = list.filter((s) => {
+    const matchesSearch = !search || `${s.agentEmail || ""} ${s.clientId || ""} ${s.amount || ""} ${getCreatorEmail(s)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || s.stage === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const s of list) {
+  for (const s of filtered) {
     const tr = document.createElement("tr");
 
     const stageSelect = document.createElement("select");
@@ -1200,14 +1243,24 @@ function renderInvoicesTable(list) {
   const tbody = qs("#invTbody");
   const empty = qs("#invEmpty");
   if (!tbody || !empty) return;
+
+  const search = (qs("#invSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterInvStatus")?.value || "all";
+
+  const filtered = list.filter((inv) => {
+    const matchesSearch = !search || `${inv.clientId || ""} ${inv.amount || ""} ${inv.notes || ""} ${getCreatorEmail(inv)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || inv.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const inv of list) {
+  for (const inv of filtered) {
     const tr = document.createElement("tr");
 
     const statusSelect = document.createElement("select");
@@ -1449,14 +1502,24 @@ function renderUsersTable(list) {
   const tbody = qs("#usersTbody");
   const empty = qs("#usersEmpty");
   if (!tbody || !empty) return;
+
+  const search = (qs("#userSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterUserRole")?.value || "all";
+
+  const filtered = list.filter((u) => {
+    const matchesSearch = !search || `${u.email || ""} ${u.name || ""} ${u.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || u.role === filter;
+    return matchesSearch && matchesFilter;
+  });
+
   tbody.innerHTML = "";
-  if (!list.length) {
+  if (!filtered.length) {
     empty.style.display = "block";
     return;
   }
   empty.style.display = "none";
 
-  for (const u of list) {
+  for (const u of filtered) {
     const tr = document.createElement("tr");
 
     const roleSelect = document.createElement("select");
@@ -2241,6 +2304,7 @@ function boot() {
 
   if (page === "clients") {
     qs("#clientSearch")?.addEventListener("input", () => renderClientsTable(clientsCache));
+    qs("#filterClientStatus")?.addEventListener("change", () => renderClientsTable(clientsCache));
     qs("#refreshClientsBtn")?.addEventListener("click", refreshClients);
   }
 
@@ -2307,6 +2371,12 @@ function boot() {
     }
   });
 
+  if (page === "users") {
+    qs("#userSearch")?.addEventListener("input", () => renderUsersTable(usersCache));
+    qs("#filterUserRole")?.addEventListener("change", () => renderUsersTable(usersCache));
+    qs("#refreshUsersBtn")?.addEventListener("click", refreshUsers);
+  }
+
   if (page === "employees") qs("#createEmployeeForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#empMsg");
@@ -2345,6 +2415,12 @@ function boot() {
     }
   });
 
+  if (page === "employees") {
+    qs("#empSearch")?.addEventListener("input", () => renderEmployeesTable(employeesCache));
+    qs("#filterEmpStatus")?.addEventListener("change", () => renderEmployeesTable(employeesCache));
+    qs("#refreshEmployeesBtn")?.addEventListener("click", refreshEmployees);
+  }
+
   if (page === "applicants") qs("#createApplicantForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
     const msg = qs("#appMsg");
@@ -2369,7 +2445,15 @@ function boot() {
     }
   });
 
+  if (page === "applicants") {
+    qs("#appSearch")?.addEventListener("input", () => renderApplicantsTable(applicantsCache));
+    qs("#filterAppStage")?.addEventListener("change", () => renderApplicantsTable(applicantsCache));
+    qs("#refreshAppBtn")?.addEventListener("click", refreshApplicants);
+  }
+
   if (page === "meetings") {
+    qs("#meetSearch")?.addEventListener("input", () => renderMeetingsTable(meetingsCache));
+    qs("#filterMeetStatus")?.addEventListener("change", () => renderMeetingsTable(meetingsCache));
     qs("#refreshMeetingsBtn")?.addEventListener("click", refreshMeetings);
     qs("#createMeetingForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -2400,6 +2484,8 @@ function boot() {
   }
 
   if (page === "sales") {
+    qs("#saleSearch")?.addEventListener("input", () => renderSalesTable(salesCache));
+    qs("#filterSaleStage")?.addEventListener("change", () => renderSalesTable(salesCache));
     qs("#refreshSalesBtn")?.addEventListener("click", refreshSales);
     qs("#createSaleForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -2427,6 +2513,8 @@ function boot() {
   }
 
   if (page === "invoices") {
+    qs("#invSearch")?.addEventListener("input", () => renderInvoicesTable(invoicesCache));
+    qs("#filterInvStatus")?.addEventListener("change", () => renderInvoicesTable(invoicesCache));
     qs("#refreshInvoicesBtn")?.addEventListener("click", refreshInvoices);
     qs("#createInvoiceForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();

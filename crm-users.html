@@ -176,6 +176,22 @@
                             <h2 class="h2">Users</h2>
                             <div class="muted">Existing CRM logins (no passwords shown).</div>
                         </div>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="userSearch" class="table-search"
+                                    placeholder="Search by name, email, or role..." />
+                            </div>
+                            <select class="table-filter" id="filterUserRole">
+                                <option value="all">All Roles</option>
+                                <option value="super_admin">super_admin</option>
+                                <option value="admin">admin</option>
+                                <option value="manager">manager</option>
+                                <option value="employee">employee</option>
+                                <option value="hr">hr</option>
+                            </select>
+                            <button class="btn" id="refreshUsersBtn"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table class="table" id="usersTable">
