@@ -174,7 +174,7 @@ function applyRoleUI(role) {
   const allPages = ["clients", "meetings", "employees", "applicants", "sales", "invoices", "reports", "chat", "users", "dashboard"];
   const employeeAllowed = ["dashboard", "clients", "meetings", "sales", "invoices", "chat"];
 
-  if (page === "dashboard" && !["employee", "super_admin", "admin"].includes(role)) {
+  if (page === "dashboard" && role !== "employee") {
     window.location.href = "crm.html";
     return;
   }
@@ -207,9 +207,9 @@ function applyRoleUI(role) {
     links.forEach((link) => {
       link.style.display = "flex";
     });
-    const showDashboard = role === "super_admin" || role === "admin";
+    // Non-employees never see the Dashboard link
     document.querySelectorAll('a[href="crm-dashboard.html"]').forEach((el) => {
-      el.style.display = showDashboard ? "flex" : "none";
+      el.style.display = "none";
     });
   }
 }
@@ -306,6 +306,35 @@ async function fetchUsers() {
   const data = await resp.json().catch(() => ({}));
   if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch users");
   return data.users || [];
+}
+
+function buildUserEmailMap(list) {
+  for (const u of list || []) {
+    if (u.id && u.email) {
+      userEmailById[String(u.id)] = String(u.email);
+    }
+  }
+}
+
+async function primeUsersForCreatorLabels() {
+  const session = getSession();
+  const role = session?.role || "";
+  if (role !== "super_admin" && role !== "admin") return;
+  if (Object.keys(userEmailById).length) return;
+  try {
+    const users = await fetchUsers();
+    usersCache = users;
+    buildUserEmailMap(users);
+  } catch {
+    // non-fatal: creator labels will just fall back to createdByEmail / —
+  }
+}
+
+function getCreatorEmail(item) {
+  if (!item) return "—";
+  if (item.createdByEmail) return item.createdByEmail;
+  if (item.createdBy && userEmailById[item.createdBy]) return userEmailById[item.createdBy];
+  return "—";
 }
 
 function buildWelcomeMessage(email, password) {
@@ -510,7 +539,7 @@ function renderClientsTable(clients) {
     const tdStatus = document.createElement("td");
     tdStatus.appendChild(statusSelect);
     const tdCreator = document.createElement("td");
-    tdCreator.textContent = c.createdByEmail || "—";
+    tdCreator.textContent = getCreatorEmail(c);
     const tdAction = document.createElement("td");
     tdAction.appendChild(saveBtn);
     tr.appendChild(tdStatus);
@@ -537,6 +566,7 @@ let salesCache = [];
 let invoicesCache = [];
 let reportsCache = null;
 let usersCache = [];
+const userEmailById = {};
 
 async function refreshClients() {
   const msg = qs("#clientMsg");
@@ -636,7 +666,7 @@ function renderEmployeesTable(list) {
     const tdStarted = document.createElement("td");
     tdStarted.textContent = startedLabel;
     const tdCreator = document.createElement("td");
-    tdCreator.textContent = emp.createdByEmail || "—";
+    tdCreator.textContent = getCreatorEmail(emp);
     const tdAction = document.createElement("td");
     tdAction.appendChild(startedBtn);
     tr.appendChild(tdOnb);
@@ -700,7 +730,7 @@ function renderApplicantsTable(list) {
       <td>${escapeHtml(app.role || "—")}</td>
       <td></td>
       <td>${escapeHtml(app.source || "—")}</td>
-      <td>${escapeHtml(app.createdByEmail || "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(app))}</td>
     `;
     const tds = tr.querySelectorAll("td");
     tds[3].appendChild(stageSelect);
@@ -742,7 +772,7 @@ function renderMeetingsTable(list) {
       <td>${escapeHtml(when)}</td>
       <td>${escapeHtml(related)}</td>
       <td>${escapeHtml(m.status || "scheduled")}</td>
-      <td>${escapeHtml(m.createdByEmail || "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(m))}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -780,7 +810,7 @@ function renderSalesTable(list) {
       <td>${escapeHtml(s.clientId || "—")}</td>
       <td>${s.amount != null ? escapeHtml(s.amount) : "—"}</td>
       <td>${escapeHtml(s.stage || "lead")}</td>
-      <td>${escapeHtml(s.createdByEmail || "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(s))}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -818,7 +848,7 @@ function renderInvoicesTable(list) {
       <td>${inv.amount != null ? escapeHtml(inv.amount) : "—"}</td>
       <td>${escapeHtml(inv.status || "draft")}</td>
       <td>${escapeHtml(inv.dueDate || "—")}</td>
-      <td>${escapeHtml(inv.createdByEmail || "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(inv))}</td>
     `;
     tbody.appendChild(tr);
   }
@@ -1108,6 +1138,9 @@ function setupChat() {
     if (!text) return;
     if (!activeChatId) return setMsg(msg, "Select a conversation first.", "error");
 
+    // Clear immediately for snappier UX
+    input.value = "";
+
     try {
       await addDoc(collection(db, "chats", activeChatId, "messages"), {
         text,
@@ -1115,8 +1148,8 @@ function setupChat() {
         createdAt: serverTimestamp(),
       });
       await setDoc(doc(db, "chats", activeChatId), { updatedAt: serverTimestamp() }, { merge: true });
-      input.value = "";
     } catch (err) {
+      // If it fails, we won't restore the text for now; user can retype
       setMsg(msg, err.message || "Failed to send", "error");
     }
   });
@@ -1720,6 +1753,8 @@ function boot() {
   const session = getSession();
   if (session?.token) {
     applyRoleUI(session.role);
+    // Preload users for creator labels when admin/super_admin
+    primeUsersForCreatorLabels();
     showLoggedInUI();
     if (page === "clients") refreshClients();
     if (page === "meetings") refreshMeetings();
