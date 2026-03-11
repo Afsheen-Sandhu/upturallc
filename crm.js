@@ -2547,10 +2547,21 @@ function boot() {
       }
       const clientName = qs("#pdfClientName")?.value || "Client Name";
       const clientEmail = qs("#pdfClientEmail")?.value || "";
-      const amount = qs("#pdfAmount")?.value || "0.00";
       const date = qs("#pdfDate")?.value || new Date().toISOString().split("T")[0];
+      const time = qs("#pdfTime")?.value || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
       const serviceType = qs("#pdfService")?.value || "Consulting & Services";
+      const servicePrice = parseFloat(qs("#pdfServicePrice")?.value) || 0;
+      const serviceDuration = qs("#pdfServiceDuration")?.value || "1";
       const desc = qs("#pdfDescription")?.value || "";
+
+      // Gather Line Items
+      const items = [{ name: serviceType, price: servicePrice, duration: serviceDuration }];
+      document.querySelectorAll(".pdf-item-row").forEach(row => {
+        const name = row.querySelector(".pdf-item-name")?.value || "";
+        const price = parseFloat(row.querySelector(".pdf-item-price")?.value) || 0;
+        const duration = row.querySelector(".pdf-item-duration")?.value || "1";
+        if (name) items.push({ name, price, duration });
+      });
 
       const processPDF = (logoDataUrl, logoW, logoH) => {
         const doc = new window.jspdf.jsPDF();
@@ -2573,13 +2584,13 @@ function boot() {
         doc.setFontSize(10);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...textMuted);
-        doc.text(`Invoice Number:`, 150, 42);
-        doc.text(`Date of Issue:`, 150, 48);
+        doc.text(`Invoice Number:`, 130, 42);
+        doc.text(`Date & Time:`, 130, 48);
 
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...textMain);
         doc.text(invoiceId, 190, 42, null, null, "right");
-        doc.text(date, 190, 48, null, null, "right");
+        doc.text(`${date} ${time}`, 190, 48, null, null, "right");
 
         // COMPANY LOGO (Top Left)
         if (logoDataUrl) {
@@ -2624,37 +2635,47 @@ function boot() {
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...textMain);
         doc.text("SERVICE / DESCRIPTION", 25, yOffset + 8);
-        doc.text("QTY", 125, yOffset + 8);
-        doc.text("RATE", 145, yOffset + 8);
-        doc.text("AMOUNT", 190, yOffset + 8, null, null, "right");
+        doc.text("DUR", 125, yOffset + 8);
+        doc.text("PRICE", 145, yOffset + 8);
+        doc.text("TOTAL", 190, yOffset + 8, null, null, "right");
 
         yOffset += 20;
 
-        // TABLE BODY (Item 1)
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...textMain);
-        let currentY = yOffset;
-        let splitService = doc.splitTextToSize(serviceType, 90);
-        doc.text(splitService, 25, currentY);
+        // DYNAMIC ITEMS LOOOP
+        let subtotal = 0;
 
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...textMuted);
-
-        currentY += (splitService.length * 5);
-
+        // Render Service Details Section Header if descriptions exist
         if (desc) {
-          let splitDesc = doc.splitTextToSize(desc, 90);
-          doc.text(splitDesc, 25, currentY);
-          currentY += (splitDesc.length * 5);
+            doc.setFontSize(9);
+            doc.setFont("helvetica", "normal");
+            doc.setTextColor(...textMuted);
+            let splitDesc = doc.splitTextToSize(`Project Details: ${desc}`, 90);
+            doc.text(splitDesc, 25, yOffset);
+            yOffset += (splitDesc.length * 5) + 5;
         }
 
-        doc.setTextColor(...textMain);
-        doc.text("1", 125, yOffset);
-        doc.text(`$${Number(amount).toFixed(2)}`, 145, yOffset);
-        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+        yOffset = Math.max(yOffset, 120); // Ensure table space
 
-        yOffset = Math.max(currentY, yOffset) + 15;
+        // Render Individual Line Items
+        items.forEach(item => {
+            doc.setFont("helvetica", "bold");
+            doc.setTextColor(...textMain);
+            doc.text(item.name, 25, yOffset);
+
+            doc.setFont("helvetica", "normal");
+            doc.text(String(item.duration), 125, yOffset);
+            doc.text(`$${Number(item.price).toFixed(2)}`, 145, yOffset);
+            const lineTotal = item.price; // Duration is usually a label (e.g. "1 Month"), price is the total for that line in this simple logic
+            doc.text(`$${Number(lineTotal).toFixed(2)}`, 190, yOffset, null, null, "right");
+            
+            subtotal += lineTotal;
+            yOffset += 8;
+        });
+
+        // If no items, fallback to a single line or just the subtotal logic
+        if (items.length === 0) {
+            // we use the amount if it was passed, but since we removed the input, we rely on items
+        }
 
         // LINE UNDER TABLE
         doc.setDrawColor(220, 220, 220);
@@ -2667,7 +2688,7 @@ function boot() {
         doc.setTextColor(...textMuted);
         doc.text("Subtotal:", 145, yOffset, null, null, "right");
         doc.setTextColor(...textMain);
-        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+        doc.text(`$${Number(subtotal).toFixed(2)}`, 190, yOffset, null, null, "right");
 
         yOffset += 10;
 
@@ -2675,7 +2696,7 @@ function boot() {
         doc.setFont("helvetica", "bold");
         doc.setFontSize(14);
         doc.text("Total Due:", 145, yOffset, null, null, "right");
-        doc.text(`$${Number(amount).toFixed(2)}`, 190, yOffset, null, null, "right");
+        doc.text(`$${Number(subtotal).toFixed(2)}`, 190, yOffset, null, null, "right");
 
         // FOOTER
         doc.setFontSize(9);
@@ -2755,7 +2776,10 @@ function boot() {
     if (page === "employees") refreshEmployees();
     if (page === "applicants") refreshApplicants();
     if (page === "sales") refreshSales();
-    if (page === "invoices") refreshInvoices();
+    if (page === "invoices") {
+      refreshInvoices();
+      setupInvoicePdfGenerator();
+    }
     if (page === "reports") refreshReports();
     if (page === "users") refreshUsers();
     if (page === "chat") setupChat();
@@ -2770,6 +2794,59 @@ function boot() {
     window.gsap.to("#loginCard", { opacity: 1, y: 0, duration: 1, ease: "expo.out" });
   }
 }
+
+function setupInvoicePdfGenerator() {
+  const list = qs("#pdfItemsList");
+  const addBtn = qs("#addItemBtn");
+  const totalDisplay = qs("#pdfTotalDisplay");
+
+  if (!list || !addBtn) return;
+
+  // Initialize date/time
+  const now = new Date();
+  const dateInput = qs("#pdfDate");
+  const timeInput = qs("#pdfTime");
+  if (dateInput) dateInput.value = now.toISOString().split("T")[0];
+  if (timeInput) timeInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  const updatePdfTotal = () => {
+    let total = parseFloat(qs("#pdfServicePrice")?.value) || 0;
+    document.querySelectorAll(".pdf-item-price").forEach(inp => {
+      total += parseFloat(inp.value) || 0;
+    });
+    if (totalDisplay) totalDisplay.textContent = total.toFixed(2);
+  };
+
+  qs("#pdfServicePrice")?.addEventListener("input", updatePdfTotal);
+
+  const addRow = (nameText = "", priceVal = 0, durationVal = "1") => {
+    const div = document.createElement("div");
+    div.className = "pdf-item-row grid4";
+    div.style.marginBottom = "8px";
+    div.style.alignItems = "center";
+    div.innerHTML = `
+      <div class="field"><input class="pdf-item-name" placeholder="Item Name" value="${nameText}" /></div>
+      <div class="field"><input class="pdf-item-price" type="number" step="0.01" placeholder="Price" value="${priceVal}" /></div>
+      <div class="field"><input class="pdf-item-duration" placeholder="Duration (e.g. 1 Month)" value="${durationVal}" /></div>
+      <div class="field"><button class="btn remove-item-btn" style="color:red; border-color:red; padding:8px;"><i class="fa-solid fa-trash"></i></button></div>
+    `;
+
+    div.querySelector(".pdf-item-price").addEventListener("input", updatePdfTotal);
+    div.querySelector(".remove-item-btn").addEventListener("click", () => {
+      div.remove();
+      updatePdfTotal();
+    });
+
+    list.appendChild(div);
+    updatePdfTotal();
+  };
+
+  addBtn.addEventListener("click", () => addRow());
+
+  // Add one default row
+  addRow("Standard Package", 0, "1 Month");
+}
+
 
 document.addEventListener("DOMContentLoaded", boot);
 

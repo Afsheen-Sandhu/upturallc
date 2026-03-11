@@ -35,45 +35,61 @@ export default async function handler(req, res) {
     const db = getDb();
 
     const pipelineStatuses = [
-      "lead",
-      "contacted",
-      "discovery",
-      "proposal_sent",
-      "negotiation",
-      "approved",
-      "onboarding",
-      "active",
-      "invoice_sent",
-      "payment_received",
-      "completed",
-      "lost",
+      "lead", "contacted", "discovery", "proposal_sent", "negotiation",
+      "approved", "onboarding", "active", "invoice_sent", "payment_received",
+      "completed", "lost",
     ];
 
+    // Build an array of promises for all counts
+    const promises = [
+      // Client Pipeline
+      ...pipelineStatuses.map(s => safeCount(db, "clients", "pipelineStatus", "==", s)),
+      // Employees
+      safeCount(db, "employees"),
+      safeCount(db, "employees", "onboardingStatus", "==", "completed"),
+      // Applicants
+      safeCount(db, "jobApplicants"),
+      safeCount(db, "jobApplicants", "stage", "==", "applied"),
+      safeCount(db, "jobApplicants", "stage", "==", "interview"),
+      safeCount(db, "jobApplicants", "stage", "==", "hired"),
+      // Meetings, Invoices, Sales
+      safeCount(db, "meetings"),
+      safeCount(db, "invoices"),
+      safeCount(db, "invoices", "status", "==", "draft"),
+      safeCount(db, "invoices", "status", "==", "sent"),
+      safeCount(db, "invoices", "status", "==", "paid"),
+      safeCount(db, "invoices", "status", "==", "void"),
+      safeCount(db, "sales")
+    ];
+
+    const results = await Promise.all(promises);
+    let idx = 0;
+
     const clientPipeline = {};
-    for (const s of pipelineStatuses) {
-      clientPipeline[s] = await safeCount(db, "clients", "pipelineStatus", "==", s);
-    }
+    pipelineStatuses.forEach(s => {
+      clientPipeline[s] = results[idx++];
+    });
 
-    const employeesTotal = await safeCount(db, "employees");
-    const employeesOnboarded = await safeCount(db, "employees", "onboardingStatus", "==", "completed");
+    const employeesTotal = results[idx++];
+    const employeesOnboarded = results[idx++];
 
-    const applicantsTotal = await safeCount(db, "jobApplicants");
+    const applicantsTotal = results[idx++];
     const applicantsByStage = {
-      applied: await safeCount(db, "jobApplicants", "stage", "==", "applied"),
-      interview: await safeCount(db, "jobApplicants", "stage", "==", "interview"),
-      hired: await safeCount(db, "jobApplicants", "stage", "==", "hired"),
+      applied: results[idx++],
+      interview: results[idx++],
+      hired: results[idx++],
     };
 
-    const meetingsTotal = await safeCount(db, "meetings");
-    const invoicesTotal = await safeCount(db, "invoices");
+    const meetingsTotal = results[idx++];
+    const invoicesTotal = results[idx++];
     const invoicesByStatus = {
-      draft: await safeCount(db, "invoices", "status", "==", "draft"),
-      sent: await safeCount(db, "invoices", "status", "==", "sent"),
-      paid: await safeCount(db, "invoices", "status", "==", "paid"),
-      void: await safeCount(db, "invoices", "status", "==", "void"),
+      draft: results[idx++],
+      sent: results[idx++],
+      paid: results[idx++],
+      void: results[idx++],
     };
 
-    const salesTotal = await safeCount(db, "sales");
+    const salesTotal = results[idx++];
 
     return json(res, 200, {
       success: true,
