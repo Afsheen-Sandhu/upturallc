@@ -2540,171 +2540,236 @@ function boot() {
       }
     });
 
-    qs("#generatePdfBtn")?.addEventListener("click", () => {
+    document.getElementById("generatePdfBtn")?.addEventListener("click", () => {
       if (!window.jspdf) {
         alert("PDF generator not ready. Please check connection.");
         return;
       }
-      const clientName = qs("#pdfClientName")?.value || "Client Name";
-      const clientEmail = qs("#pdfClientEmail")?.value || "";
-      const date = qs("#pdfDate")?.value || new Date().toISOString().split("T")[0];
-      const time = qs("#pdfTime")?.value || new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-      const serviceType = qs("#pdfService")?.value || "Consulting & Services";
-      const servicePrice = parseFloat(qs("#pdfServicePrice")?.value) || 0;
-      const serviceDuration = qs("#pdfServiceDuration")?.value || "1";
-      const desc = qs("#pdfDescription")?.value || "";
 
-      // Gather Line Items
-      const items = [{ name: serviceType, price: servicePrice, duration: serviceDuration }];
-      document.querySelectorAll(".pdf-item-row").forEach(row => {
-        const name = row.querySelector(".pdf-item-name")?.value || "";
-        const price = parseFloat(row.querySelector(".pdf-item-price")?.value) || 0;
-        const duration = row.querySelector(".pdf-item-duration")?.value || "1";
-        if (name) items.push({ name, price, duration });
+      // ── Collect form values ──────────────────────
+      const clientName    = document.getElementById("pdfClientName")?.value.trim()    || "Client Name";
+      const clientEmail   = document.getElementById("pdfClientEmail")?.value.trim()   || "";
+      const dateVal       = document.getElementById("pdfDate")?.value                 || "";
+      const timeVal       = document.getElementById("pdfTime")?.value                 || "";
+      const serviceType   = document.getElementById("pdfService")?.value              || "Service";
+      const servicePrice  = parseFloat(document.getElementById("pdfServicePrice")?.value) || 0;
+      const serviceDur    = document.getElementById("pdfServiceDuration")?.value.trim()|| "1 Month";
+      const description   = document.getElementById("pdfDescription")?.value.trim()   || "";
+
+      // Line items
+      const itemRows = document.querySelectorAll("#pdfItemsList .pdf-item-row");
+      const lineItems = [];
+      itemRows.forEach(row => {
+        const name  = row.querySelector(".item-name")?.value.trim();
+        const price = parseFloat(row.querySelector(".item-price")?.value) || 0;
+        const dur   = row.querySelector(".item-dur")?.value.trim() || "1 Month";
+        if (name) lineItems.push({ name, price, dur });
       });
 
-      const processPDF = (logoDataUrl, logoW, logoH) => {
-        const doc = new window.jspdf.jsPDF();
+      // Build all items including main service
+      const allItems = [{ name: serviceType, price: servicePrice, dur: serviceDur, desc: description }, ...lineItems];
+      const subtotal = allItems.reduce((s, i) => s + i.price, 0);
 
-        // Define formal colors
-        const textMain = [30, 30, 30];
-        const textMuted = [100, 100, 100];
-        const accentColor = [59, 130, 246]; // Brand blue
+      // Invoice number & date
+      const invoiceNum = "INV-" + Math.floor(1000 + Math.random() * 9000);
+      const issueDate  = dateVal ? new Date(dateVal).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" }) : new Date().toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
+      const issueTime  = timeVal || new Date().toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit" });
 
-        let yOffset = 20;
+      const processPDF = (logoDataUrl, watermarkDataUrl, logoW, logoH) => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
 
-        // INVOICE TITLE (Top Right)
-        doc.setFontSize(32);
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...textMain);
-        doc.text("INVOICE", 190, 30, null, null, "right");
+        const PW = doc.internal.pageSize.getWidth();   // 595
+        const PH = doc.internal.pageSize.getHeight();  // 842
 
-        // SETUP ID AND DATES
-        const invoiceId = "INV-" + Math.floor(1000 + Math.random() * 9000);
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...textMuted);
-        doc.text(`Invoice Number:`, 130, 42);
-        doc.text(`Date & Time:`, 130, 48);
+        // ── Colours & fonts ──────────────────────────
+        const BRAND_ORANGE = [255, 90, 0]; // Brand orange
+        const LIGHT_GREY = [242, 242, 242];
+        const MUTED = [100, 100, 100];
+        const TEXT = [0, 0, 0];
+        const WHITE = [255, 255, 255];
 
-        doc.setFont("helvetica", "bold");
-        doc.setTextColor(...textMain);
-        doc.text(invoiceId, 190, 42, null, null, "right");
-        doc.text(`${date} ${time}`, 190, 48, null, null, "right");
+        let cy = 40;
 
-        // COMPANY LOGO (Top Left)
+        // Draw Watermark (center of page)
+        if (watermarkDataUrl) {
+          const wmWidth = 400; // Large width for watermark
+          const wmHeight = Math.floor(wmWidth * logoH / logoW);
+          const wmX = (PW - wmWidth) / 2;
+          const wmY = (PH - wmHeight) / 2; 
+          doc.addImage(watermarkDataUrl, "PNG", wmX, wmY, wmWidth, wmHeight);
+        }
+
+        // Company Logo (Left side)
         if (logoDataUrl) {
-          doc.addImage(logoDataUrl, "PNG", 20, 18, logoW, logoH);
-          yOffset = 18 + logoH + 10;
+          doc.addImage(logoDataUrl, "PNG", 40, cy, logoW, logoH);
         } else {
-          doc.setFontSize(26);
-          doc.setTextColor(...accentColor);
           doc.setFont("helvetica", "bold");
-          doc.text("Uptura", 20, 30);
-          yOffset = 45;
+          doc.setFontSize(36);
+          doc.setTextColor(...BRAND_ORANGE);
+          doc.text("Uptura", 40, cy + 25);
         }
 
-        // COMPANY INFO
+        // Top Right Info
+        doc.setFontSize(28);
+        doc.setTextColor(...TEXT);
+        doc.text("INVOICE", PW - 40, cy + 15, { align: "right" });
+
         doc.setFontSize(10);
-        doc.setTextColor(...textMuted);
-        doc.setFont("helvetica", "normal");
-        doc.text("Uptura LLC", 20, yOffset);
-        doc.text("info@uptura.net", 20, yOffset + 5);
-        doc.text("uptura.net", 20, yOffset + 10);
-
-        yOffset += 25;
-
-        // BILL TO
-        doc.setFontSize(11);
-        doc.setTextColor(...textMain);
         doc.setFont("helvetica", "bold");
-        doc.text("BILLED TO:", 20, yOffset);
+        doc.text("UPTURA LLC", PW - 40, cy + 35, { align: "right" });
 
         doc.setFont("helvetica", "normal");
-        doc.text(clientName, 20, yOffset + 6);
-        doc.setTextColor(...textMuted);
-        if (clientEmail) doc.text(clientEmail, 20, yOffset + 11);
-
-        yOffset += 25;
-
-        // TABLE HEADER
-        doc.setFillColor(248, 249, 250); // Very light grey
-        doc.rect(20, yOffset, 170, 12, "F");
-
         doc.setFontSize(9);
+        doc.text("1001 S. Main Street", PW - 40, cy + 47, { align: "right" });
+        doc.text("Kalispell, MT 59901", PW - 40, cy + 59, { align: "right" });
+        doc.text("United States", PW - 40, cy + 71, { align: "right" });
+        doc.text("info@uptura.net", PW - 40, cy + 83, { align: "right" });
+        
+        cy = Math.max(cy + 105, cy + logoH + 20); // adapt based on logo height
+
+        cy += 15;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(40, cy, PW - 40, cy);
+        cy += 20;
+
+        // BILL TO (Left) & Invoice Meta (Right)
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...MUTED);
+        doc.text("BILL TO", 40, cy);
+
+        doc.setFontSize(10);
         doc.setFont("helvetica", "bold");
-        doc.setTextColor(...textMain);
-        doc.text("SERVICE / DESCRIPTION", 25, yOffset + 8);
-        doc.text("DUR", 125, yOffset + 8);
-        doc.text("PRICE", 145, yOffset + 8);
-        doc.text("TOTAL", 190, yOffset + 8, null, null, "right");
+        doc.setTextColor(...TEXT);
+        doc.text(clientName.toUpperCase(), 40, cy + 12);
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        if (clientEmail) doc.text(clientEmail, 40, cy + 40);
 
-        yOffset += 20;
+        // Meta Right
+        const rightColLabel = PW - 180;
+        const rightColValue = PW - 40;
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...TEXT);
+        doc.text("Invoice Number:", rightColLabel, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(invoiceNum, rightColValue, cy, { align: "right" });
 
-        // DYNAMIC ITEMS LOOOP
-        let subtotal = 0;
+        doc.setFont("helvetica", "bold");
+        doc.text("Invoice Date:", rightColLabel, cy + 14, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(issueDate, rightColValue, cy + 14, { align: "right" });
 
-        // Render Service Details Section Header if descriptions exist
-        if (desc) {
+        doc.setFont("helvetica", "bold");
+        doc.text("Payment Due:", rightColLabel, cy + 28, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(issueDate, rightColValue, cy + 28, { align: "right" });
+
+        // Amount Due highlighted
+        doc.setFillColor(...LIGHT_GREY);
+        doc.rect(PW - 260, cy + 34, 220, 16, "F");
+        
+        doc.setFont("helvetica", "bold");
+        doc.text("Amount Due (USD):", rightColLabel, cy + 45, { align: "right" });
+        doc.text("$" + subtotal.toFixed(2), rightColValue, cy + 45, { align: "right" });
+
+        cy += 65;
+
+        // TABLE HEADER (Orange band)
+        const COL = { service: 45, fee: 400, amount: PW - 45 };
+        const rowH = 22;
+
+        doc.setFillColor(...BRAND_ORANGE);
+        doc.rect(40, cy, PW - 80, rowH, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...WHITE);
+        doc.text("Services", COL.service, cy + 15);
+        doc.text("Fee", COL.fee, cy + 15, { align: "right" });
+        doc.text("Amount", COL.amount, cy + 15, { align: "right" });
+
+        cy += rowH + 10;
+
+        // TABLE ROWS
+        doc.setTextColor(...TEXT);
+        allItems.forEach((item, i) => {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text(item.name, COL.service, cy);
+
+          doc.setFont("helvetica", "normal");
+          doc.text("$" + item.price.toFixed(2), COL.fee, cy, { align: "right" });
+          doc.text("$" + item.price.toFixed(2), COL.amount, cy, { align: "right" });
+
+          cy += 12;
+
+          if (item.desc || item.dur) {
             doc.setFontSize(9);
-            doc.setFont("helvetica", "normal");
-            doc.setTextColor(...textMuted);
-            let splitDesc = doc.splitTextToSize(`Project Details: ${desc}`, 90);
-            doc.text(splitDesc, 25, yOffset);
-            yOffset += (splitDesc.length * 5) + 5;
-        }
-
-        yOffset = Math.max(yOffset, 120); // Ensure table space
-
-        // Render Individual Line Items
-        items.forEach(item => {
-            doc.setFont("helvetica", "bold");
-            doc.setTextColor(...textMain);
-            doc.text(item.name, 25, yOffset);
-
-            doc.setFont("helvetica", "normal");
-            doc.text(String(item.duration), 125, yOffset);
-            doc.text(`$${Number(item.price).toFixed(2)}`, 145, yOffset);
-            const lineTotal = item.price; // Duration is usually a label (e.g. "1 Month"), price is the total for that line in this simple logic
-            doc.text(`$${Number(lineTotal).toFixed(2)}`, 190, yOffset, null, null, "right");
-            
-            subtotal += lineTotal;
-            yOffset += 8;
+            doc.setTextColor(...TEXT);
+            let extra = item.desc ? item.desc : `Duration: ${item.dur}`;
+            doc.text(extra, COL.service, cy);
+            cy += 20;
+          } else {
+            cy += 8;
+          }
         });
 
-        // If no items, fallback to a single line or just the subtotal logic
-        if (items.length === 0) {
-            // we use the amount if it was passed, but since we removed the input, we rely on items
-        }
+        // Bottom line
+        cy += 5;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(40, cy, PW - 40, cy);
+        cy += 15;
 
-        // LINE UNDER TABLE
-        doc.setDrawColor(220, 220, 220);
-        doc.line(20, yOffset, 190, yOffset);
-        yOffset += 10;
-
-        // TOTALS SECTION
-        doc.setFontSize(10);
-        doc.setFont("helvetica", "normal");
-        doc.setTextColor(...textMuted);
-        doc.text("Subtotal:", 145, yOffset, null, null, "right");
-        doc.setTextColor(...textMain);
-        doc.text(`$${Number(subtotal).toFixed(2)}`, 190, yOffset, null, null, "right");
-
-        yOffset += 10;
-
-        // BOLD TOTAL
+        // TOTALS
+        doc.setFontSize(9);
         doc.setFont("helvetica", "bold");
-        doc.setFontSize(14);
-        doc.text("Total Due:", 145, yOffset, null, null, "right");
-        doc.text(`$${Number(subtotal).toFixed(2)}`, 190, yOffset, null, null, "right");
+        doc.setTextColor(...TEXT);
+        doc.text("Total:", COL.fee, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text("$" + subtotal.toFixed(2), COL.amount, cy, { align: "right" });
+
+        cy += 14;
+        doc.setFont("helvetica", "bold");
+        doc.text(`Payment on ${issueDate}:`, COL.fee, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text("$0.00", COL.amount, cy, { align: "right" });
+
+        cy += 10;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(PW - 260, cy, PW - 40, cy);
+        cy += 18;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Amount Due (USD):", COL.fee, cy, { align: "right" });
+        doc.text("$" + subtotal.toFixed(2), COL.amount, cy, { align: "right" });
+
+        cy += 50;
+
+        // NOTES / TERMS
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("Notes / Terms", 40, cy);
+        doc.setFont("helvetica", "normal");
+        
+        cy += 14;
+        doc.text(`Total Amount: $${subtotal.toFixed(2)}`, 40, cy);
+        cy += 14;
+        doc.text(`Service Fee: $0.00 (Non-refundable)`, 40, cy);
 
         // FOOTER
-        doc.setFontSize(9);
-        doc.setFont("helvetica", "italic");
-        doc.setTextColor(150, 150, 150);
-        doc.text("Thank you for choosing Uptura. We appreciate your business.", 105, 275, null, null, "center");
+        const footerY = PH - 40;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(...BRAND_ORANGE);
+        doc.text("Powered by Uptura", PW / 2, footerY, { align: "center" });
 
-        doc.save(`${invoiceId}.pdf`);
+        // ── SAVE ────────────────────────────────────
+        doc.save(`Uptura-${invoiceNum}-${clientName.replace(/\s+/g, "-")}.pdf`);
       };
 
       const img = new Image();
@@ -2718,15 +2783,24 @@ function boot() {
         ctx.drawImage(img, 0, 0);
         const dataUrl = canvas.toDataURL("image/png");
 
-        // Define smaller logo size for formal aesthetic
-        let targetW = 26;
-        let targetH = Math.floor(26 * img.height / img.width);
+        // Create dull watermark image
+        const wCanvas = document.createElement("canvas");
+        wCanvas.width = img.width;
+        wCanvas.height = img.height;
+        const wCtx = wCanvas.getContext("2d");
+        wCtx.globalAlpha = 0.08; // Very light/faint 8% opacity
+        wCtx.drawImage(img, 0, 0);
+        const watermarkDataUrl = wCanvas.toDataURL("image/png");
 
-        processPDF(dataUrl, targetW, targetH);
+        // Define larger logo size for header
+        let targetW = 150;
+        let targetH = Math.floor(150 * img.height / img.width);
+
+        processPDF(dataUrl, watermarkDataUrl, targetW, targetH);
       };
 
       img.onerror = () => {
-        processPDF(null, 0, 0);
+        processPDF(null, null, 0, 0);
       };
     });
   }
