@@ -59,8 +59,7 @@ body.crm-logged-out .content {
 
 body.crm-logged-out .sidebar,
 body.crm-logged-out .topbar {
-  opacity: 0.6;
-  pointer-events: none;
+  display: none !important;
 }
 
 

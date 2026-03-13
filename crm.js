@@ -263,8 +263,8 @@ function showLoggedOutUI() {
   document.body.classList.add("crm-logged-out");
 
   if (loginCard) loginCard.style.display = "block";
-  if (sidebar) sidebar.style.display = "flex"; // Keep it flex
-  if (topbar) topbar.style.display = "flex";   // Keep it flex
+  if (sidebar) sidebar.style.display = "none";
+  if (topbar) topbar.style.display = "none";
 
   document.querySelectorAll(".tab").forEach((t) => {
     t.style.display = "none";
