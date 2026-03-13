@@ -17,7 +17,7 @@ function isStrongEnough(password) {
 }
 
 export default async function handler(req, res) {
-  const auth = requireRole(requireCrmAuth(req), ["super_admin", "admin"]);
+  const auth = requireRole(requireCrmAuth(req), ["super_admin"]);
   if (!auth.ok) return json(res, auth.status || 401, { success: false, message: auth.message });
 
   const db = getDb();

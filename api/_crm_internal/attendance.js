@@ -16,7 +16,7 @@ export default async function handler(req, res) {
     try {
       const all = req.query?.all === "1" || req.query?.all === "true";
       if (all) {
-        const adminAuth = requireRole(auth, ["super_admin", "admin"]);
+        const adminAuth = requireRole(auth, ["super_admin"]);
         if (!adminAuth.ok) return json(res, 403, { success: false, message: "Forbidden" });
         const q = query(
           collection(db, "attendance"),
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       const snap = await getDoc(ref);
       if (!snap.exists()) return json(res, 404, { success: false, message: "Not found" });
       const data = snap.data();
-      const isAdmin = ["super_admin", "admin"].includes(auth.role);
+      const isAdmin = auth.role === "super_admin";
       const isOwn = data.userId === auth.userId;
       if (!isAdmin && !isOwn) return json(res, 403, { success: false, message: "Forbidden" });
       const { remark } = req.body || {};

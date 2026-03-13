@@ -20,6 +20,12 @@ export default async function handler(req, res) {
         parts.push(where("relatedType", "==", String(relatedType)));
         parts.push(where("relatedId", "==", String(relatedId)));
       }
+
+      // Role-based visibility
+      if (auth.role !== "super_admin") {
+        parts.push(where("createdByEmail", "==", auth.email.toLowerCase()));
+      }
+
       parts.push(orderBy("scheduledAt", "desc"));
       parts.push(limit(200));
       const snap = await getDocs(query(...parts));

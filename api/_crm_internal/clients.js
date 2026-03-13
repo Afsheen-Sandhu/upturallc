@@ -45,6 +45,12 @@ export default async function handler(req, res) {
       const qParts = [collection(db, "clients")];
       const s = status ? normalizeStatus(status) : null;
       if (s) qParts.push(where("pipelineStatus", "==", s));
+
+      // Role-based visibility: only super_admin sees everything
+      if (auth.role !== "super_admin") {
+        qParts.push(where("createdByEmail", "==", auth.email.toLowerCase()));
+      }
+
       qParts.push(orderBy("createdAt", "desc"));
       qParts.push(limit(Math.min(Number(take || 50) || 50, 200)));
 

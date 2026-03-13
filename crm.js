@@ -236,8 +236,8 @@ function showLoggedOutUI() {
   document.body.classList.add("crm-logged-out");
 
   if (loginCard) loginCard.style.display = "block";
-  if (sidebar) sidebar.style.display = "none";
-  if (topbar) topbar.style.display = "none";
+  if (sidebar) sidebar.style.display = "flex"; // Keep it flex
+  if (topbar) topbar.style.display = "flex";   // Keep it flex
 
   document.querySelectorAll(".tab").forEach((t) => {
     t.style.display = "none";
@@ -1662,7 +1662,13 @@ function setupChat() {
           const btn = document.createElement("button");
           btn.type = "button";
           btn.className = "chat-thread chat-people-item";
-          btn.innerHTML = `<div class="chat-thread-title">Chat with Admin</div><div class="chat-thread-sub">${escapeHtml(superAdminEmail)}</div>`;
+          btn.innerHTML = `
+            <div class="chat-thread-avatar" style="background:var(--primary); color:#fff;"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="chat-thread-info">
+              <div class="chat-thread-title">Chat with Admin</div>
+              <div class="chat-thread-sub">${escapeHtml(superAdminEmail)}</div>
+            </div>
+          `;
           btn.addEventListener("click", () => openOrCreateChat(superAdminEmail, "Admin"));
           listEl.appendChild(btn);
         }
@@ -1705,29 +1711,54 @@ function setupChat() {
     }).catch((err) => setMsg(msg, err.message || "Failed to start chat", "error"));
   }
 
+  function getInitials(name) {
+    if (!name) return "?";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+  }
+
   function renderThreads(threads) {
     threadsList = threads;
     threadsEl.innerHTML = "";
     if (!threads.length) {
-      threadsEl.innerHTML = '<div class="muted" style="padding:10px;">No conversations yet.</div>';
+      threadsEl.innerHTML = '<div class="muted" style="padding:24px; text-align:center;">No conversations yet.</div>';
       return;
     }
+    
+    // Track seen state
+    const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+
     for (const t of threads) {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "chat-thread" + (activeChatId === t.id ? " active" : "");
+      
+      const isUnread = t.updatedAt && (!seenState[t.id] || Number(t.updatedAt.seconds) > Number(seenState[t.id]));
+      btn.className = `chat-thread ${activeChatId === t.id ? "active" : ""} ${isUnread ? "unread" : ""}`.trim();
 
       let title = t.name || (t.type === 'group' ? "Unnamed Group" : "Direct Chat");
       let sub = "";
+      let initials = "?";
+
       if (t.type === "direct") {
         const others = (t.participantEmails || []).filter(e => e !== myEmail);
         title = others[0] || title;
         sub = "One-on-one";
+        initials = getInitials(title);
       } else {
         sub = `${(t.participantEmails || []).length} participants`;
+        initials = getInitials(t.name);
       }
 
-      btn.innerHTML = `<div class="chat-thread-title">${escapeHtml(title)}</div><div class="chat-thread-sub">${escapeHtml(sub)}</div>`;
+      btn.innerHTML = `
+        <div class="chat-thread-avatar">${escapeHtml(initials)}</div>
+        <div class="chat-thread-info">
+          <div class="chat-thread-title">
+            ${escapeHtml(title)}
+            <span class="chat-type-tag ${t.type}">${t.type}</span>
+          </div>
+          <div class="chat-thread-sub">${escapeHtml(sub)}</div>
+        </div>
+        <div class="chat-thread-dot"></div>
+      `;
       btn.addEventListener("click", () => selectThread(t));
       threadsEl.appendChild(btn);
     }
@@ -1737,11 +1768,20 @@ function setupChat() {
     list.innerHTML = "";
     for (const m of items) {
       const row = document.createElement("div");
-      row.className = "chat-row";
+      const isOwn = (m.senderEmail || "").toLowerCase() === myEmail;
+      row.className = "chat-row" + (isOwn ? " own" : "");
+      
       const when = m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000) : null;
+      const timeStr = when ? when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+      
       row.innerHTML = `
-        <div class="chat-meta">${escapeHtml(m.senderEmail || "User")} <span>${when ? when.toLocaleString() : ""}</span></div>
-        <div class="chat-text">${escapeHtml(m.text || "")}</div>
+        <div class="chat-meta">
+          ${isOwn ? "" : `<strong>${escapeHtml(m.senderEmail)}</strong>`}
+          <span>${timeStr}</span>
+        </div>
+        <div class="chat-bubble">
+          ${escapeHtml(m.text || "")}
+        </div>
       `;
       list.appendChild(row);
     }
@@ -1750,28 +1790,28 @@ function setupChat() {
 
   function selectThread(thread) {
     activeChatId = thread.id;
+    window.activeChatId = thread.id;
+
+    // Mark as seen
+    const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+    seenState[thread.id] = Math.floor(Date.now() / 1000);
+    localStorage.setItem(`uptura_chat_seen_${myEmail}`, JSON.stringify(seenState));
+
     if (thread.type === "group") {
       activeTitle.textContent = thread.name || "Group Chat";
       activeMeta.textContent = (thread.participantEmails || []).length + " members";
     } else {
       const others = (thread.participantEmails || []).filter((e) => e !== myEmail);
       const otherEmail = others[0] || "";
-      activeTitle.textContent = thread.name ? `Chat with ${thread.name}` : (otherEmail ? `Chat with ${otherEmail}` : "Conversation");
-      activeMeta.textContent = otherEmail;
+      activeTitle.textContent = thread.name ? thread.name : (otherEmail ? otherEmail : "Conversation");
+      activeMeta.textContent = "Direct Message";
     }
     setMsg(msg, "", "");
 
-    // Highlight active thread
-    const all = threadsEl.querySelectorAll('.chat-thread');
-    all.forEach(el => el.classList.remove('active'));
-    for (const el of all) {
-      // Small hack: identify by title or simplified comparison if possible.
-      // Better: find by a stored data-id. But we can just use the fact that renderThreads will hit soon.
-      // Actually, let's just re-render threadsList to be sure, or just leave it since Snapshot will likely trigger anyway on message send.
-      // But if we just click, Snapshot might NOT trigger.
+    // Immediate re-render threads to clear unread dot
+    if (typeof renderThreads === 'function') {
+      renderThreads(threadsList);
     }
-    // Let's just re-run renderThreads with current list
-    renderThreads(threadsList);
 
     if (unsubMessages) {
       try { unsubMessages(); } catch (_) { }
@@ -1886,9 +1926,13 @@ function setupChat() {
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "chat-thread chat-people-item";
+            const initials = getInitials(p.name || p.email);
             btn.innerHTML = `
-              <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
-              <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+              <div class="chat-thread-avatar" style="background:var(--bg-light); color:var(--text-dark); border:1px solid var(--border);">${escapeHtml(initials)}</div>
+              <div class="chat-thread-info">
+                <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+                <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+              </div>
             `;
             btn.addEventListener("click", () => openOrCreateChat(p.email, p.name || p.email));
             listEl.appendChild(btn);
@@ -2282,6 +2326,7 @@ function boot() {
   setupSidebar();
   applyPageTitleFromBody();
   setupTopbarScroll();
+  setupNotifications();
 
   document.addEventListener(
     "click",
@@ -2300,7 +2345,15 @@ function boot() {
     clearSession();
     applyRoleUI("");
     showLoggedOutUI();
+    // Clear notifications on logout
+    notifications = [];
+    if (qs("#notificationsList")) qs("#notificationsList").innerHTML = '<div class="muted" style="padding: 20px; text-align: center;">No new notifications</div>';
+    if (qs("#notificationBadge")) {
+        qs("#notificationBadge").textContent = "0";
+        qs("#notificationBadge").classList.remove("show");
+    }
   });
+
 
   if (page === "clients") {
     qs("#clientSearch")?.addEventListener("input", () => renderClientsTable(clientsCache));
@@ -2922,5 +2975,188 @@ function setupInvoicePdfGenerator() {
 }
 
 
+
+
+// Global notification state
+let notifications = [];
+
+function saveNotifications() {
+  const session = getSession();
+  if (session?.email) {
+    localStorage.setItem(`uptura_notifs_${session.email.toLowerCase()}`, JSON.stringify(notifications));
+  }
+}
+
+function loadNotifications() {
+  const session = getSession();
+  if (session?.email) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`uptura_notifs_${session.email.toLowerCase()}`) || "[]");
+      notifications = saved.map(n => ({ ...n, time: new Date(n.time) }));
+    } catch (e) {
+      notifications = [];
+    }
+  }
+}
+
+function setupNotifications() {
+  const bell = qs("#notificationBell");
+  const dropdown = qs("#notificationsDropdown");
+  const list = qs("#notificationsList");
+  const badge = qs("#notificationBadge");
+  const clearBtn = qs("#clearNotifications");
+
+  if (!bell || !dropdown || !list || !badge) return;
+
+  bell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("active");
+    if (dropdown.classList.contains("active")) {
+        markAllNotificationsAsRead();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown || !bell) return;
+    if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+      dropdown.classList.remove("active");
+    }
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    notifications = [];
+    renderNotifications();
+  });
+
+  // Listen for chat updates globally if logged in
+  const session = getSession();
+  if (!session?.email) return;
+
+  const myEmail = session.email.toLowerCase();
+  loadNotifications();
+  renderNotifications();
+
+  const chatsRef = collection(db, "chats");
+  const q = query(chatsRef, where("participantEmails", "array-contains", myEmail));
+
+  onSnapshot(q, (snap) => {
+    const unreadChats = [];
+    snap.docs.forEach((doc) => {
+      const chat = { id: doc.id, ...doc.data() };
+      const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+      const isUnread = chat.updatedAt && (!seenState[chat.id] || chat.updatedAt.seconds > seenState[chat.id]);
+      if (isUnread) unreadChats.push(chat);
+    });
+
+    // Update sidebar chat count if it exists
+    const count = unreadChats.length;
+    const chatNavCount = qs("#chatNavCount");
+    if (chatNavCount) {
+      chatNavCount.textContent = count;
+      chatNavCount.style.display = count > 0 ? "flex" : "none";
+    }
+
+    // Handle modified changes for toast-like notifications
+    snap.docChanges().forEach((change) => {
+      if (change.type === "modified") {
+        const chat = { id: change.doc.id, ...change.doc.data() };
+        const isChatPage = document.body.getAttribute("data-crm-page") === "chat";
+        const currentChatId = window.activeChatId;
+        
+        if (isChatPage && currentChatId === chat.id) return;
+
+        const title = chat.type === "group" ? (chat.name || "Group") : "New Message";
+        addNotification({
+          id: `chat_${chat.id}_${chat.updatedAt?.seconds || Date.now()}`,
+          title: title,
+          text: "You have a new message",
+          time: new Date(),
+          link: "crm-chat.html"
+        });
+      }
+    });
+  });
+
+  // Admin global notifications
+  if (session.role === "super_admin" || session.role === "admin") {
+    const adminTargets = [
+      { col: "clients", label: "Client", link: "crm.html", field: "name" },
+      { col: "meetings", label: "Meeting", link: "crm-meetings.html", field: "title" },
+      { col: "sales", label: "Sale", link: "crm-sales.html", field: "amount" },
+      { col: "invoices", label: "Invoice", link: "crm-invoices.html", field: "amount" },
+      { col: "jobApplicants", label: "Applicant", link: "crm-applicants.html", field: "name" },
+      { col: "chats", label: "New Chat", link: "crm-chat.html", field: "name" }
+    ];
+
+    adminTargets.forEach(target => {
+      const colRef = collection(db, target.col);
+      const qAdmin = query(colRef, orderBy("createdAt", "desc"), limit(5));
+      let initial = true;
+
+      onSnapshot(qAdmin, (snap) => {
+        if (initial) { initial = false; return; }
+        snap.docChanges().forEach(change => {
+          if (change.type === "added") {
+            const data = change.doc.data();
+            // Ignore if created by self
+            if (data.createdByEmail?.toLowerCase() === myEmail) return;
+
+            let desc = data[target.field] || "New Entry";
+            if (target.col === "sales" || target.col === "invoices") desc = `$${Number(data.amount || 0).toFixed(2)}`;
+
+            addNotification({
+              id: `admin_${target.col}_${change.doc.id}`,
+              title: `New ${target.label}`,
+              text: `${desc} created by ${data.createdByEmail || "user"}`,
+              time: new Date(),
+              link: target.link
+            });
+          }
+        });
+      });
+    });
+  }
+}
+
+function addNotification(n) {
+  // Avoid duplicates
+  if (notifications.find(existing => existing.id === n.id)) return;
+  
+  notifications.unshift({ ...n, unread: true });
+  if (notifications.length > 50) notifications.pop();
+  saveNotifications();
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const list = qs("#notificationsList");
+  const badge = qs("#notificationBadge");
+  if (!list || !badge) return;
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+  badge.textContent = unreadCount;
+  badge.classList.toggle("show", unreadCount > 0);
+
+  if (!notifications.length) {
+    list.innerHTML = '<div class="muted" style="padding: 20px; text-align: center;">No new notifications</div>';
+    return;
+  }
+
+  list.innerHTML = notifications.map(n => `
+    <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="window.location.href='${n.link}'">
+      <div class="notification-item-title">${escapeHtml(n.title)}</div>
+      <div class="notification-item-text">${escapeHtml(n.text)}</div>
+      <div class="notification-item-time">${n.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+    </div>
+  `).join('');
+}
+
+function markAllNotificationsAsRead() {
+    notifications.forEach(n => n.unread = false);
+    saveNotifications();
+    renderNotifications();
+}
+
 document.addEventListener("DOMContentLoaded", boot);
+
 

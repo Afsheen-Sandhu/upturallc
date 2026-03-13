@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore";
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth } from "./_auth.js";
 import { sendEmail } from "./_email.js";
@@ -22,7 +22,17 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const snap = await getDocs(query(collection(db, "invoices"), orderBy("createdAt", "desc"), limit(200)));
+      const qParts = [collection(db, "invoices")];
+
+      // Role-based visibility
+      if (auth.role !== "super_admin") {
+        qParts.push(where("createdByEmail", "==", auth.email.toLowerCase()));
+      }
+
+      qParts.push(orderBy("createdAt", "desc"));
+      qParts.push(limit(200));
+
+      const snap = await getDocs(query(...qParts));
       const invoices = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
       return json(res, 200, { success: true, invoices });
     } catch (err) {

@@ -6,17 +6,30 @@ function json(res, status, body) {
   res.status(status).json(body);
 }
 
-async function safeCount(db, col, whereField, op, value) {
+async function safeCount(db, col, whereField, op, value, authFilter) {
   try {
     const base = collection(db, col);
-    const q = whereField ? query(base, where(whereField, op, value)) : query(base);
+    let q = base;
+    if (whereField) {
+      q = query(q, where(whereField, op, value));
+    }
+    if (authFilter) {
+      q = query(q, where("createdByEmail", "==", authFilter));
+    }
     const snap = await getCountFromServer(q);
     return snap.data().count || 0;
   } catch (e) {
     // Fallback for older emulator / rule constraints
     try {
       const base = collection(db, col);
-      const q = whereField ? query(base, where(whereField, op, value), limit(1000)) : query(base, limit(1000));
+      let q = base;
+      if (whereField) {
+        q = query(q, where(whereField, op, value));
+      }
+      if (authFilter) {
+        q = query(q, where("createdByEmail", "==", authFilter));
+      }
+      q = query(q, limit(1000));
       const snap = await getDocs(q);
       return snap.size;
     } catch (_) {
@@ -33,6 +46,7 @@ export default async function handler(req, res) {
 
   try {
     const db = getDb();
+    const authFilter = auth.role !== "super_admin" ? auth.email.toLowerCase() : null;
 
     const pipelineStatuses = [
       "lead", "contacted", "discovery", "proposal_sent", "negotiation",
@@ -43,23 +57,23 @@ export default async function handler(req, res) {
     // Build an array of promises for all counts
     const promises = [
       // Client Pipeline
-      ...pipelineStatuses.map(s => safeCount(db, "clients", "pipelineStatus", "==", s)),
+      ...pipelineStatuses.map(s => safeCount(db, "clients", "pipelineStatus", "==", s, authFilter)),
       // Employees
-      safeCount(db, "employees"),
-      safeCount(db, "employees", "onboardingStatus", "==", "completed"),
+      safeCount(db, "employees", null, null, null, authFilter),
+      safeCount(db, "employees", "onboardingStatus", "==", "completed", authFilter),
       // Applicants
-      safeCount(db, "jobApplicants"),
-      safeCount(db, "jobApplicants", "stage", "==", "applied"),
-      safeCount(db, "jobApplicants", "stage", "==", "interview"),
-      safeCount(db, "jobApplicants", "stage", "==", "hired"),
+      safeCount(db, "jobApplicants", null, null, null, authFilter),
+      safeCount(db, "jobApplicants", "stage", "==", "applied", authFilter),
+      safeCount(db, "jobApplicants", "stage", "==", "interview", authFilter),
+      safeCount(db, "jobApplicants", "stage", "==", "hired", authFilter),
       // Meetings, Invoices, Sales
-      safeCount(db, "meetings"),
-      safeCount(db, "invoices"),
-      safeCount(db, "invoices", "status", "==", "draft"),
-      safeCount(db, "invoices", "status", "==", "sent"),
-      safeCount(db, "invoices", "status", "==", "paid"),
-      safeCount(db, "invoices", "status", "==", "void"),
-      safeCount(db, "sales")
+      safeCount(db, "meetings", null, null, null, authFilter),
+      safeCount(db, "invoices", null, null, null, authFilter),
+      safeCount(db, "invoices", "status", "==", "draft", authFilter),
+      safeCount(db, "invoices", "status", "==", "sent", authFilter),
+      safeCount(db, "invoices", "status", "==", "paid", authFilter),
+      safeCount(db, "invoices", "status", "==", "void", authFilter),
+      safeCount(db, "sales", null, null, null, authFilter)
     ];
 
     const results = await Promise.all(promises);
