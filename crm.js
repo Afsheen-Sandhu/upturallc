@@ -73,7 +73,34 @@ function setMsg(el, text, kind) {
   el.classList.remove("ok", "error");
   if (kind) el.classList.add(kind);
   el.textContent = text || "";
+  
+  if (text) {
+    if (kind === "error") window.showToast?.(text, "error");
+    else if (kind === "ok") window.showToast?.(text, "success");
+  }
 }
+
+window.showToast = (text, type = "success") => {
+  if (typeof Toastify !== "undefined") {
+    Toastify({
+      text: text,
+      duration: 4000,
+      close: true,
+      gravity: "top",
+      position: "right",
+      stopOnFocus: true,
+      style: {
+        background: type === "success" ? "linear-gradient(to right, #10b981, #059669)" : "linear-gradient(to right, #ef4444, #dc2626)",
+        borderRadius: "12px",
+        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+        fontWeight: "600",
+        padding: "12px 24px"
+      }
+    }).showToast();
+  } else {
+    console.log(`[Toast Fallback] ${type.toUpperCase()}: ${text}`);
+  }
+};
 
 function toggleInlineLoader(id, show) {
   const el = qs(`#${id}`);
@@ -172,7 +199,7 @@ function applyRoleUI(role) {
   // Restrict sidebar tabs for employees; non-employees on dashboard go to clients
   const page = getCurrentPage();
   const allPages = ["clients", "meetings", "employees", "applicants", "sales", "invoices", "reports", "chat", "users", "dashboard"];
-  const employeeAllowed = ["dashboard", "clients", "meetings", "sales", "invoices", "chat"];
+  const employeeAllowed = ["dashboard", "clients", "meetings", "sales", "chat"];
 
   if (page === "dashboard" && role !== "employee") {
     window.location.href = "crm.html";
@@ -649,7 +676,7 @@ function renderClientsTable(clients) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Update failed");
+        window.showToast?.(e.message || "Update failed", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -670,7 +697,7 @@ function renderClientsTable(clients) {
         clientsCache = clientsCache.filter(item => item.id !== c.id);
         if (!clientsCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -803,7 +830,7 @@ function renderEmployeesTable(list) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -824,7 +851,7 @@ function renderEmployeesTable(list) {
         employeesCache = employeesCache.filter(e => e.id !== emp.id);
         if (!employeesCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -844,7 +871,7 @@ function renderEmployeesTable(list) {
         Object.assign(emp, updated);
         renderEmployeesTable(employeesCache);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         startedBtn.textContent = "Started Working";
         startedBtn.disabled = false;
       }
@@ -945,7 +972,7 @@ function renderApplicantsTable(list) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -966,7 +993,7 @@ function renderApplicantsTable(list) {
         applicantsCache = applicantsCache.filter(a => a.id !== app.id);
         if (!applicantsCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -1061,7 +1088,7 @@ function renderMeetingsTable(list) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -1082,7 +1109,7 @@ function renderMeetingsTable(list) {
         meetingsCache = meetingsCache.filter(item => item.id !== m.id);
         if (!meetingsCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -1180,7 +1207,7 @@ function renderSalesTable(list) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -1201,7 +1228,7 @@ function renderSalesTable(list) {
         salesCache = salesCache.filter(item => item.id !== s.id);
         if (!salesCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -1297,7 +1324,7 @@ function renderInvoicesTable(list) {
         saveBtn.textContent = "Saved";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -1318,7 +1345,7 @@ function renderInvoicesTable(list) {
         invoicesCache = invoicesCache.filter(item => item.id !== inv.id);
         if (!invoicesCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -1571,7 +1598,7 @@ function renderUsersTable(list) {
         tr.querySelector(".user-pwd").value = "";
         setTimeout(() => (saveBtn.textContent = "Save"), 1000);
       } catch (e) {
-        alert(e.message || "Failed to update");
+        window.showToast?.(e.message || "Failed to update", "error");
         saveBtn.textContent = "Save";
       } finally {
         saveBtn.disabled = false;
@@ -1592,7 +1619,7 @@ function renderUsersTable(list) {
         usersCache = usersCache.filter(item => item.id !== u.id);
         if (!usersCache.length) empty.style.display = "block";
       } catch (e) {
-        alert(e.message || "Failed to delete");
+        window.showToast?.(e.message || "Failed to delete", "error");
         delBtn.disabled = false;
       }
     });
@@ -2125,8 +2152,12 @@ function setupDashboard() {
         }),
       });
       const data = await resp.json();
-      if (resp.ok && data.success) setMsg("Session saved.", "ok");
-      else setMsg(data.message || "Failed to save", "error");
+      if (resp.ok && data.success) {
+        setMsg("Session saved.", "ok");
+        loadAttendance();
+      } else {
+        setMsg(data.message || "Failed to save", "error");
+      }
     } catch (e) {
       setMsg(e.message || "Failed to save session", "error");
     }
@@ -2216,12 +2247,15 @@ function setupDashboard() {
             else throw new Error(d.message);
           } catch (e) {
             saveRemarkBtn.textContent = "Save";
-            alert(e.message || "Failed to save remark");
+            window.showToast?.(e.message || "Failed to save remark", "error");
           } finally {
             saveRemarkBtn.disabled = false;
             setTimeout(() => (saveRemarkBtn.textContent = "Save"), 1500);
           }
         });
+        remarkCell.style.display = "flex";
+        remarkCell.style.alignItems = "center";
+        remarkCell.style.gap = "8px";
         remarkCell.appendChild(remarkInput);
         remarkCell.appendChild(saveRemarkBtn);
         tr.innerHTML = `
@@ -2595,7 +2629,7 @@ function boot() {
 
     document.getElementById("generatePdfBtn")?.addEventListener("click", () => {
       if (!window.jspdf) {
-        alert("PDF generator not ready. Please check connection.");
+        window.showToast?.("PDF generator not ready. Please check connection.", "error");
         return;
       }
 
@@ -3080,29 +3114,67 @@ function setupNotifications() {
   // Admin global notifications
   if (session.role === "super_admin" || session.role === "admin") {
     const adminTargets = [
-      { col: "clients", label: "Client", link: "crm.html", field: "name" },
-      { col: "meetings", label: "Meeting", link: "crm-meetings.html", field: "title" },
-      { col: "sales", label: "Sale", link: "crm-sales.html", field: "amount" },
-      { col: "invoices", label: "Invoice", link: "crm-invoices.html", field: "amount" },
+      { col: "clients", label: "Client", link: "crm.html", field: "name", navBadgeId: "clientsNavCount" },
+      { col: "meetings", label: "Meeting", link: "crm-meetings.html", field: "title", navBadgeId: "meetingsNavCount" },
+      { col: "sales", label: "Sale", link: "crm-sales.html", field: "amount", navBadgeId: "salesNavCount" },
+      { col: "invoices", label: "Invoice", link: "crm-invoices.html", field: "amount", navBadgeId: "invoicesNavCount" },
       { col: "jobApplicants", label: "Applicant", link: "crm-applicants.html", field: "name" },
       { col: "chats", label: "New Chat", link: "crm-chat.html", field: "name" }
     ];
+
+    // Clear badge for current page
+    const currentPage = getCurrentPage();
+    const currentTarget = adminTargets.find(t => t.link.startsWith("crm-" + currentPage) || (currentPage === "clients" && t.link === "crm.html"));
+    if (currentTarget && currentTarget.navBadgeId) {
+        localStorage.setItem(`uptura_nav_unread_${currentTarget.navBadgeId}`, "0");
+    }
 
     adminTargets.forEach(target => {
       const colRef = collection(db, target.col);
       const qAdmin = query(colRef, orderBy("createdAt", "desc"), limit(5));
       let initial = true;
 
+      // Initial badge render from storage
+      if (target.navBadgeId) {
+        const badge = qs(`#${target.navBadgeId}`);
+        const count = parseInt(localStorage.getItem(`uptura_nav_unread_${target.navBadgeId}`) || "0");
+        if (badge && count > 0) {
+          badge.textContent = count > 9 ? "9+" : count;
+          badge.style.display = "flex";
+        }
+      }
+
       onSnapshot(qAdmin, (snap) => {
-        if (initial) { initial = false; return; }
+        if (initial) {
+          initial = false;
+          return;
+        }
         snap.docChanges().forEach(change => {
           if (change.type === "added") {
             const data = change.doc.data();
-            // Ignore if created by self
             if (data.createdByEmail?.toLowerCase() === myEmail) return;
 
+            // Notify via Toast
             let desc = data[target.field] || "New Entry";
             if (target.col === "sales" || target.col === "invoices") desc = `$${Number(data.amount || 0).toFixed(2)}`;
+            
+            window.showToast?.(`New ${target.label}: ${desc}`, "success");
+
+            // Update badge in storage and UI
+            if (target.navBadgeId) {
+                const isCurrentPage = target.link.startsWith("crm-" + currentPage) || (currentPage === "clients" && target.link === "crm.html");
+                if (!isCurrentPage) {
+                    let count = parseInt(localStorage.getItem(`uptura_nav_unread_${target.navBadgeId}`) || "0");
+                    count++;
+                    localStorage.setItem(`uptura_nav_unread_${target.navBadgeId}`, String(count));
+                    
+                    const badge = qs(`#${target.navBadgeId}`);
+                    if (badge) {
+                        badge.textContent = count > 9 ? "9+" : count;
+                        badge.style.display = "flex";
+                    }
+                }
+            }
 
             addNotification({
               id: `admin_${target.col}_${change.doc.id}`,
@@ -3113,6 +3185,8 @@ function setupNotifications() {
             });
           }
         });
+      }, (err) => {
+        console.error(`[Admin Notification Error - ${target.col}]`, err);
       });
     });
   }

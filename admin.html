@@ -11,6 +11,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <style>
         :root {
             --primary: #FF3C00;
@@ -253,7 +255,18 @@
                     }
                 } catch (err) {
                     console.error('Login error:', err);
-                    alert('An error occurred during login. Please try again.');
+                    if (typeof Toastify !== 'undefined') {
+                        Toastify({
+                            text: "An error occurred during login. Please try again.",
+                            duration: 4000,
+                            close: true,
+                            gravity: "top",
+                            position: "right",
+                            style: { background: "linear-gradient(to right, #ef4444, #dc2626)" }
+                        }).showToast();
+                    } else {
+                        alert('An error occurred during login. Please try again.');
+                    }
                     loginBtn.innerHTML = originalBtnText;
                     loginBtn.disabled = false;
                 }

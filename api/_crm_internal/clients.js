@@ -65,7 +65,7 @@ export default async function handler(req, res) {
 
   // POST /api/crm/clients
   if (req.method === "POST" || req.method === "PATCH" || req.method === "DELETE") {
-    const writeAuth = requireRole(auth, ["super_admin", "admin", "manager", "hr"]);
+    const writeAuth = requireRole(auth, ["super_admin", "admin", "manager", "hr", "employee"]);
     if (!writeAuth.ok) return json(res, writeAuth.status || 403, { success: false, message: writeAuth.message });
   }
 

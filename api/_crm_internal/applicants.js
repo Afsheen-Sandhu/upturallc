@@ -41,8 +41,8 @@ export default async function handler(req, res) {
     }
   }
 
-  // Only super_admin/admin/hr can create / update / delete applicants
-  const writeAuth = requireRole(auth, ["super_admin", "admin", "hr"]);
+  // Only super_admin/admin/hr/manager/employee can create / update / delete applicants
+  const writeAuth = requireRole(auth, ["super_admin", "admin", "hr", "manager", "employee"]);
   if (!writeAuth.ok) return json(res, writeAuth.status || 403, { success: false, message: writeAuth.message });
 
   if (req.method === "POST") {

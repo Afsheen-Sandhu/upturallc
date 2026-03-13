@@ -1,6 +1,6 @@
 import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore";
 import { getDb } from "./_firebase.js";
-import { requireCrmAuth } from "./_auth.js";
+import { requireCrmAuth, requireRole } from "./_auth.js";
 import { sendEmail } from "./_email.js";
 
 function json(res, status, body) {
@@ -16,7 +16,8 @@ function normalizeStatus(status) {
 
 export default async function handler(req, res) {
   const auth = requireCrmAuth(req);
-  if (!auth.ok) return json(res, auth.status || 401, { success: false, message: auth.message });
+  const roleAuth = requireRole(auth, ["super_admin", "admin", "manager", "hr"]);
+  if (!roleAuth.ok) return json(res, roleAuth.status || 403, { success: false, message: roleAuth.message });
 
   const db = getDb();
 
