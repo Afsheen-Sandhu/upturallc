@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore/lite";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth, requireRole } from "./_auth.js";
 
@@ -15,9 +15,10 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
       const qParts = [collection(db, "employees")];
+      const forChat = req.query?.list === "chat";
 
-      // Role-based visibility
-      if (auth.role !== "super_admin") {
+      // Role-based visibility (skip for chat contact list so employees can see other employees)
+      if (auth.role !== "super_admin" && !forChat) {
         qParts.push(where("createdByEmail", "==", auth.email.toLowerCase()));
       }
 
@@ -89,8 +90,7 @@ export default async function handler(req, res) {
       updates.updatedByEmail = writeAuth.email || "";
 
       await updateDoc(doc(db, "employees", String(id)), updates);
-      const snap = await getDoc(doc(db, "employees", String(id)));
-      return json(res, 200, { success: true, employee: snap.exists() ? { id: snap.id, ...snap.data() } : null });
+      return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm employees PATCH] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });

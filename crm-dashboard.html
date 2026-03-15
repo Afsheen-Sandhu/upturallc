@@ -120,7 +120,12 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                        <div class="password-input-wrap">
+                            <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                            <button type="button" class="password-toggle" id="loginPasswordToggle" title="Show password" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button class="login-btn" type="submit" id="loginBtn">
                         <span>Login</span>
@@ -135,7 +140,7 @@
                     <div class="card-head">
                         <div>
                             <h2 class="h2">Time tracking</h2>
-                            <div class="muted">Check in when you start. Check out when you leave. Timer survives refresh; closing the tab pauses it so you can resume later.</div>
+                            <div class="muted">Check in when you start, check out when you leave. Timer pauses when you switch tabs or close the browser; click Resume to continue. Pauses and resumes are recorded as work segments.</div>
                         </div>
                     </div>
                     <div class="dashboard-timer-wrap">
@@ -152,6 +157,9 @@
                             </button>
                         </div>
                         <div class="msg" id="dashboardMsg"></div>
+                        <p class="dashboard-timer-warning" style="margin:12px 0 0; font-size:13px; color:var(--primary); font-weight:600;">
+                            <i class="fa-solid fa-triangle-exclamation" aria-hidden="true"></i> Logout will reset your timer.
+                        </p>
                     </div>
                 </div>
 

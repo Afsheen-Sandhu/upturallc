@@ -133,7 +133,12 @@
                     </div>
                     <div class="form-group">
                         <label class="form-label">Password</label>
-                        <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                        <div class="password-input-wrap">
+                            <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                            <button type="button" class="password-toggle" id="loginPasswordToggle" title="Show password" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
                     </div>
                     <button class="login-btn" type="submit" id="loginBtn">
                         <span>Login</span>
@@ -147,10 +152,31 @@
                 <div class="card">
                     <div class="card-head">
                         <div>
-                            <h2 class="h2">All employees — work hours</h2>
-                            <div class="muted">Date-wise check-in / check-out and hours. Shows employee name and optional remark.</div>
+                            <h2 class="h2">Daily totals — work hours per employee per day</h2>
+                            <div class="muted">Unified total hours for each employee per day (all check-in/check-out sessions combined).</div>
                         </div>
                         <button class="btn" id="refreshAttendanceAllBtn"><i class="fa-solid fa-rotate"></i></button>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Employee</th>
+                                    <th>Total hours</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceDailyTotalsTbody"></tbody>
+                        </table>
+                        <div class="empty muted" id="attendanceDailyTotalsEmpty" style="display:none;">No attendance records.</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">All sessions — raw check-in / check-out</h2>
+                            <div class="muted">Individual sessions with optional remark. Pause/resume segments are stored per session.</div>
+                        </div>
                     </div>
                     <div class="table-wrap">
                         <table class="table">

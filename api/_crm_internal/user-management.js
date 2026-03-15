@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore/lite";
+import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc } from "firebase/firestore/lite";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth, requireRole } from "./_auth.js";
 import { sendEmail } from "./_email.js";
@@ -24,7 +24,8 @@ export default async function handler(req, res) {
 
   if (req.method === "GET") {
     try {
-      const snap = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(200)));
+      const take = Math.min(Number(req.query?.take) || 100, 200);
+      const snap = await getDocs(query(collection(db, "users"), orderBy("createdAt", "desc"), limit(take)));
       const users = snap.docs.map((d) => {
         const data = d.data() || {};
         return {
@@ -121,8 +122,7 @@ export default async function handler(req, res) {
       updates.updatedBy = auth.userId;
 
       await updateDoc(doc(db, "users", String(id)), updates);
-      const snap = await getDoc(doc(db, "users", String(id)));
-      return json(res, 200, { success: true, user: snap.exists() ? { id: snap.id, ...snap.data() } : null });
+      return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm user-management PATCH] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });

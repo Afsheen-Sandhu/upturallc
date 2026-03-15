@@ -1,4 +1,4 @@
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore/lite";
+import { addDoc, collection, deleteDoc, doc, getDocs, limit, orderBy, query, serverTimestamp, updateDoc, where } from "firebase/firestore/lite";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth } from "./_auth.js";
 
@@ -78,8 +78,7 @@ export default async function handler(req, res) {
       updates.updatedBy = auth.userId;
       updates.updatedByEmail = auth.email || "";
       await updateDoc(doc(db, "sales", String(id)), updates);
-      const snap = await getDoc(doc(db, "sales", String(id)));
-      return json(res, 200, { success: true, sale: snap.exists() ? { id: snap.id, ...snap.data() } : null });
+      return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm sales PATCH] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });

@@ -154,6 +154,48 @@ body.crm-logged-out .topbar {
   background: #fff;
 }
 
+/* Password field with inline actions (show/hide, generate) */
+.password-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+}
+
+.password-input-wrap .form-input,
+.password-input-wrap input {
+  flex: 1;
+  min-width: 0;
+}
+
+.password-toggle {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.password-toggle:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.password-generate-btn {
+  flex-shrink: 0;
+  white-space: nowrap;
+  padding: 0 14px;
+  height: 44px;
+  font-size: 13px;
+}
+
 .login-btn {
   width: 100%;
   padding: 16px;
@@ -1285,7 +1327,7 @@ html[data-crm-role="employee"] a.nav-link[href="crm-users.html"] {
 }
 
 .inline-loader::after {
-  content: "Updating table...";
+  content: "Loading…";
   font-size: 13px;
   font-weight: 600;
   color: var(--text-muted);

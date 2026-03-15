@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   const ADMIN_PASSWORD = String(process.env.ADMIN_PASSWORD || "qamaruptura12!");
   if (e === ADMIN_EMAIL && p === ADMIN_PASSWORD) {
     const token = signCrmToken({ userId: "env_admin", email: e, role: "super_admin" });
-    return json(res, 200, { success: true, token, role: "super_admin", userId: "env_admin" });
+    return json(res, 200, { success: true, token, role: "super_admin", userId: "env_admin", name: "Admin" });
   }
 
   try {
@@ -48,6 +48,7 @@ export default async function handler(req, res) {
     if (!ok) return json(res, 401, { success: false, message: "Invalid credentials" });
 
     const role = String(user.role || "employee");
+    const name = String(user.name || "").trim() || null;
     const token = signCrmToken({ userId: userDoc.id, email: e, role });
 
     // Lightweight last-login tracking (best-effort)
@@ -59,7 +60,7 @@ export default async function handler(req, res) {
       );
     } catch (_) { }
 
-    return json(res, 200, { success: true, token, role, userId: userDoc.id });
+    return json(res, 200, { success: true, token, role, userId: userDoc.id, name: name || undefined });
   } catch (err) {
     console.error("[crm-auth] error", err);
     return json(res, 500, { success: false, message: "Internal Server Error" });

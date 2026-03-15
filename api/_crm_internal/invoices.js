@@ -131,7 +131,6 @@ export default async function handler(req, res) {
       } catch (e) { }
 
       await updateDoc(doc(db, "invoices", String(id)), updates);
-      const snap = await getDoc(doc(db, "invoices", String(id)));
 
       if (updates.status === "sent" && oldStatus !== "sent" && finalClientId) {
         let email = String(finalClientId).includes("@") ? String(finalClientId) : null;
@@ -162,7 +161,7 @@ export default async function handler(req, res) {
         }
       }
 
-      return json(res, 200, { success: true, invoice: snap.exists() ? { id: snap.id, ...snap.data() } : null });
+      return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm invoices PATCH] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });

@@ -63,8 +63,7 @@ export default async function handler(req, res) {
         remark: typeof remark === "string" ? remark.trim() : (data.remark || ""),
         updatedAt: serverTimestamp(),
       });
-      const updated = await getDoc(ref);
-      return json(res, 200, { success: true, session: updated.exists() ? { id: updated.id, ...updated.data() } : null });
+      return json(res, 200, { success: true });
     } catch (err) {
       console.error("[crm attendance PATCH] error", err);
       return json(res, 500, { success: false, message: "Internal Server Error" });
@@ -73,12 +72,27 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { startTime, endTime, totalSeconds } = req.body || {};
+      const { startTime, endTime, totalSeconds, segments } = req.body || {};
       const start = startTime ? new Date(startTime).getTime() : 0;
       const end = endTime ? new Date(endTime).getTime() : 0;
-      const seconds = typeof totalSeconds === "number" ? totalSeconds : 0;
+      let seconds = typeof totalSeconds === "number" ? totalSeconds : 0;
       if (!start || !end || seconds < 0) {
         return json(res, 400, { success: false, message: "startTime, endTime, and totalSeconds required" });
+      }
+      const segmentsArr = Array.isArray(segments)
+        ? segments
+            .filter((s) => s && s.startTime && s.endTime)
+            .map((s) => ({
+              startTime: new Date(s.startTime).toISOString(),
+              endTime: new Date(s.endTime).toISOString(),
+            }))
+        : [];
+      if (segmentsArr.length > 0) {
+        seconds = segmentsArr.reduce((sum, seg) => {
+          const a = new Date(seg.startTime).getTime();
+          const b = new Date(seg.endTime).getTime();
+          return sum + (b - a) / 1000;
+        }, 0);
       }
       const docRef = await addDoc(collection(db, "attendance"), {
         userId: auth.userId,
@@ -86,6 +100,7 @@ export default async function handler(req, res) {
         startTime: new Date(start).toISOString(),
         endTime: new Date(end).toISOString(),
         totalSeconds: Math.round(seconds),
+        segments: segmentsArr,
         createdAt: serverTimestamp(),
       });
       return json(res, 201, { success: true, id: docRef.id });

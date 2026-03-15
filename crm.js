@@ -2,7 +2,8 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebas
 import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const STORAGE_KEY = "uptura_crm_session_v1";
-const CHECKIN_STORAGE_KEY = "uptura_checkin_v1";
+const CHECKIN_STORAGE_KEY = "uptura_checkin_v2";
+const CHECKIN_RUNNING_SESSION_KEY = "uptura_checkin_running_v2";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
@@ -274,53 +275,61 @@ function setupModalSaveBtn() {
     const id = modal.dataset.id;
     const form = qs("#crmModalForm");
     const remarks = qs("#crmModalRemarks").value;
-    
+
     const formData = new FormData(form);
     const patch = Object.fromEntries(formData.entries());
     patch.remarks = remarks;
 
+    if (type === "meeting" && patch.scheduledAt) {
+      patch.scheduledAt = new Date(patch.scheduledAt).toISOString();
+    }
+
+    let cache = [];
+    let renderFn = null;
+    if (type === "client") { cache = clientsCache; renderFn = renderClientsTable; }
+    else if (type === "employee") { cache = employeesCache; renderFn = renderEmployeesTable; }
+    else if (type === "applicant") { cache = applicantsCache; renderFn = renderApplicantsTable; }
+    else if (type === "meeting") { cache = meetingsCache; renderFn = renderMeetingsTable; }
+    else if (type === "sale") { cache = salesCache; renderFn = renderSalesTable; }
+    else if (type === "invoice") { cache = invoicesCache; renderFn = renderInvoicesTable; }
+    else if (type === "user") { cache = usersCache; renderFn = renderUsersTable; }
+
+    const idx = cache.findIndex((item) => item.id === id);
+    if (idx < 0) return;
+
+    const previous = { ...cache[idx] };
+
+    // 1. Optimistic update: show change immediately (don't put password in cache)
+    const patchForCache = type === "user" ? (() => { const p = { ...patch }; delete p.password; return p; })() : patch;
+    cache[idx] = { ...cache[idx], ...patchForCache };
+    if (renderFn) renderFn(cache);
+    closeCRMModal();
+    window.showToast?.("Saved", "success");
+
     const originalText = newBtn.textContent;
     newBtn.disabled = true;
     newBtn.textContent = "Saving...";
-    
-    try {
-      if (type === 'meeting' && patch.scheduledAt) {
-          patch.scheduledAt = new Date(patch.scheduledAt).toISOString();
-      }
 
-      // 1. Send update to server
-      if (type === 'client') await updateClient(id, patch);
-      else if (type === 'employee') await updateEmployee(id, patch);
-      else if (type === 'applicant') await updateApplicant(id, patch);
-      else if (type === 'meeting') await updateMeeting(id, patch);
-      else if (type === 'sale') await updateSale(id, patch);
-      else if (type === 'invoice') await updateInvoice(id, patch);
-      else if (type === 'user') await updateUser(id, patch);
-      
-      // 2. Update cache LOCAL-ONLY to be instant
-      let cache = [];
-      let renderFn = null;
-      if (type === 'client') { cache = clientsCache; renderFn = renderClientsTable; }
-      else if (type === 'employee') { cache = employeesCache; renderFn = renderEmployeesTable; }
-      else if (type === 'applicant') { cache = applicantsCache; renderFn = renderApplicantsTable; }
-      else if (type === 'meeting') { cache = meetingsCache; renderFn = renderMeetingsTable; }
-      else if (type === 'sale') { cache = salesCache; renderFn = renderSalesTable; }
-      else if (type === 'invoice') { cache = invoicesCache; renderFn = renderInvoicesTable; }
-      else if (type === 'user') { cache = usersCache; renderFn = renderUsersTable; }
-
-      const idx = cache.findIndex(item => item.id === id);
-      if (idx > -1) {
-          cache[idx] = { ...cache[idx], ...patch };
-          if (renderFn) renderFn(cache);
-      }
-      
-      window.showToast?.("Saved successfully", "success");
-      closeCRMModal();
-    } catch (err) {
-      window.showToast?.(err.message || "Save failed", "error");
-    } finally {
+    const done = () => {
       newBtn.disabled = false;
       newBtn.textContent = originalText;
+    };
+
+    // 2. Persist in background; revert on failure
+    try {
+      if (type === "client") await updateClient(id, patch);
+      else if (type === "employee") await updateEmployee(id, patch);
+      else if (type === "applicant") await updateApplicant(id, patch);
+      else if (type === "meeting") await updateMeeting(id, patch);
+      else if (type === "sale") await updateSale(id, patch);
+      else if (type === "invoice") await updateInvoice(id, patch);
+      else if (type === "user") await updateUser(id, patch);
+    } catch (err) {
+      cache[idx] = previous;
+      if (renderFn) renderFn(cache);
+      window.showToast?.(err.message || "Save failed", "error");
+    } finally {
+      done();
     }
   });
 }
@@ -429,6 +438,49 @@ function setupModalSaveBtn() {
       addField("Email", data.email, "email", "email");
       addField("Name", data.name, "name");
       addField("Role", data.role, "role", "select", ["super_admin", "admin", "manager", "employee", "hr"]);
+      if (edit) {
+        const div = document.createElement("div");
+        div.className = "modal-field";
+        div.innerHTML = `<label>New password (leave blank to keep current)</label>`;
+        const wrap = document.createElement("div");
+        wrap.className = "password-input-wrap";
+        const input = document.createElement("input");
+        input.type = "password";
+        input.name = "password";
+        input.placeholder = "Min 8 characters";
+        const genBtn = document.createElement("button");
+        genBtn.type = "button";
+        genBtn.className = "btn secondary password-generate-btn";
+        genBtn.textContent = "Generate";
+        genBtn.title = "Generate password";
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "password-toggle";
+        toggleBtn.title = "Show password";
+        toggleBtn.setAttribute("aria-label", "Show password");
+        toggleBtn.innerHTML = "<i class=\"fa-solid fa-eye\"></i>";
+        wrap.appendChild(input);
+        wrap.appendChild(genBtn);
+        wrap.appendChild(toggleBtn);
+        div.appendChild(wrap);
+        form.appendChild(div);
+        genBtn.addEventListener("click", () => {
+          input.value = generatePassword(12);
+          input.type = "text";
+          const icon = toggleBtn.querySelector("i");
+          if (icon) icon.classList.replace("fa-eye", "fa-eye-slash");
+          toggleBtn.title = "Hide password";
+          toggleBtn.setAttribute("aria-label", toggleBtn.title);
+        });
+        toggleBtn.addEventListener("click", () => {
+          const isPass = input.type === "password";
+          input.type = isPass ? "text" : "password";
+          const icon = toggleBtn.querySelector("i");
+          if (icon) icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+          toggleBtn.title = isPass ? "Hide password" : "Show password";
+          toggleBtn.setAttribute("aria-label", toggleBtn.title);
+        });
+      }
   }
   
   modal.classList.add("active");
@@ -499,7 +551,9 @@ function applyPageTitleFromBody() {
     title.textContent = "User Management";
     subtitle.textContent = "Create CRM logins";
   } else if (page === "dashboard") {
-    title.textContent = "Dashboard";
+    const session = getSession();
+    const displayName = session?.name || session?.email?.split("@")[0] || "there";
+    title.textContent = `Welcome, ${displayName}`;
     subtitle.textContent = "Check in & track your time";
   } else if (page === "attendance") {
     title.textContent = "Attendance";
@@ -612,6 +666,13 @@ async function crmLogin(email, password) {
   return data;
 }
 
+async function fetchBootstrap() {
+  const resp = await fetch("/api/crm/bootstrap", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Bootstrap failed");
+  return { clients: data.clients || [], users: data.users || [] };
+}
+
 async function fetchClients() {
   const resp = await fetch("/api/crm/clients", { headers: { ...authHeader() } });
   const data = await resp.json().catch(() => ({}));
@@ -699,6 +760,19 @@ function getCreatorEmail(item) {
   if (item.createdByEmail) return item.createdByEmail;
   if (item.createdBy && userEmailById[item.createdBy]) return userEmailById[item.createdBy];
   return "—";
+}
+
+function generatePassword(length = 12) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  let out = "";
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const arr = new Uint8Array(length);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < length; i++) out += chars[arr[i] % chars.length];
+  } else {
+    for (let i = 0; i < length; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
 }
 
 function buildWelcomeMessage(email, password) {
@@ -992,9 +1066,14 @@ function escapeHtml(str) {
 }
 
 
-async function refreshClients() {
+async function refreshClients(showCacheFirst = true) {
   const msg = qs("#clientMsg");
-  setMsg(msg, "Loading clients…", "");
+  if (showCacheFirst && clientsCache.length > 0) {
+    renderClientsTable(clientsCache);
+    setMsg(msg, "Refreshing…", "");
+  } else {
+    setMsg(msg, "Loading clients…", "");
+  }
   try {
     toggleInlineLoader("clientsLoading", true);
     clientsCache = await fetchClients();
@@ -1404,11 +1483,18 @@ function renderReports(reports) {
   }
 }
 
-async function refreshUsers() {
+async function refreshUsers(showCacheFirst = true) {
   const msg = qs("#userMsg");
+  if (showCacheFirst && usersCache.length > 0) {
+    renderUsersTable(usersCache);
+    setMsg(msg, "Refreshing…", "");
+  } else {
+    setMsg(msg, "", "");
+  }
   toggleInlineLoader("usersLoading", true);
   try {
     usersCache = await fetchUsers();
+    buildUserEmailMap(usersCache);
     renderUsersTable(usersCache);
     setMsg(msg, `Loaded ${usersCache.length} user(s).`, "ok");
   } catch (e) {
@@ -1488,27 +1574,53 @@ function setupChat() {
         if (contactEl) contactEl.textContent = data.superAdmin.name ? `${data.superAdmin.name} — ${data.superAdmin.email}` : data.superAdmin.email;
         if (linkEl) { linkEl.href = `mailto:${data.superAdmin.email}`; linkEl.style.display = "inline-flex"; }
       }
-      if (sessionRole !== "super_admin" && sessionRole !== "admin" && superAdminEmail) {
+      if (sessionRole !== "super_admin" && sessionRole !== "admin") {
         const wrap = qs("#chatPeopleWrap");
         const listEl = qs("#chatPeopleList");
         if (wrap && listEl) {
           wrap.style.display = "block";
           listEl.innerHTML = "";
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = "chat-thread chat-people-item";
-          btn.innerHTML = `
+          const byEmail = new Map();
+          if (superAdminEmail && superAdminEmail !== myEmail) {
+            byEmail.set(superAdminEmail, { name: "Admin", email: superAdminEmail, isAdmin: true });
+          }
+          try {
+            const empResp = await fetch("/api/crm/employees?list=chat", { headers: authHeader() });
+            const empData = empResp.ok ? await empResp.json() : {};
+            const employees = empData.employees || [];
+            for (const emp of employees) {
+              const e = (emp.email || "").toLowerCase();
+              if (e && e !== myEmail && !byEmail.has(e)) {
+                byEmail.set(e, { name: emp.name || emp.email || e, email: e, isAdmin: false });
+              }
+            }
+          } catch (_) {}
+          const people = Array.from(byEmail.values()).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
+          for (const p of people) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "chat-thread chat-people-item";
+            btn.innerHTML = p.isAdmin
+              ? `
             <div class="chat-thread-avatar" style="background:var(--primary); color:#fff;"><i class="fa-solid fa-user-shield"></i></div>
             <div class="chat-thread-info">
-              <div class="chat-thread-title">Chat with Admin</div>
-              <div class="chat-thread-sub">${escapeHtml(superAdminEmail)}</div>
+              <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+              <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+            </div>
+          `
+              : `
+            <div class="chat-thread-avatar" style="background:var(--bg-light); color:var(--text-dark); border:1px solid var(--border);">${escapeHtml(getInitials(p.name || p.email))}</div>
+            <div class="chat-thread-info">
+              <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+              <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
             </div>
           `;
-          btn.addEventListener("click", () => openOrCreateChat(superAdminEmail, "Admin"));
-          listEl.appendChild(btn);
+            btn.addEventListener("click", () => openOrCreateChat(p.email, p.name || p.email));
+            listEl.appendChild(btn);
+          }
         }
+        if (conversationsLoader) conversationsLoader.style.display = "none";
       }
-      if (sessionRole !== "super_admin" && sessionRole !== "admin" && conversationsLoader) conversationsLoader.style.display = "none";
     } catch (_) {
       if (conversationsLoader) conversationsLoader.style.display = "none";
     }
@@ -1575,9 +1687,11 @@ function setupChat() {
 
       if (t.type === "direct") {
         const others = (t.participantEmails || []).filter(e => e !== myEmail);
-        title = others[0] || title;
+        const otherEmail = (others[0] || "").toLowerCase();
+        const isSuperAdminThread = superAdminEmail && otherEmail === superAdminEmail.toLowerCase();
+        title = isSuperAdminThread ? "Admin" : (others[0] || title);
         sub = "One-on-one";
-        initials = getInitials(title);
+        initials = isSuperAdminThread ? "A" : getInitials(title);
       } else {
         sub = `${(t.participantEmails || []).length} participants`;
         initials = getInitials(t.name);
@@ -1637,8 +1751,9 @@ function setupChat() {
       activeMeta.textContent = (thread.participantEmails || []).length + " members";
     } else {
       const others = (thread.participantEmails || []).filter((e) => e !== myEmail);
-      const otherEmail = others[0] || "";
-      activeTitle.textContent = thread.name ? thread.name : (otherEmail ? otherEmail : "Conversation");
+      const otherEmail = (others[0] || "").toLowerCase();
+      const isSuperAdmin = superAdminEmail && otherEmail === superAdminEmail.toLowerCase();
+      activeTitle.textContent = isSuperAdmin ? "Admin" : (thread.name || otherEmail || "Conversation");
       activeMeta.textContent = "Direct Message";
     }
     setMsg(msg, "", "");
@@ -1848,18 +1963,28 @@ function getCheckinState() {
   try {
     const raw = localStorage.getItem(CHECKIN_STORAGE_KEY) || "{}";
     const o = JSON.parse(raw);
+    const segments = Array.isArray(o.segments) ? o.segments : [];
     return {
-      startTime: typeof o.startTime === "number" ? o.startTime : null,
       totalElapsedSeconds: typeof o.totalElapsedSeconds === "number" ? o.totalElapsedSeconds : 0,
       sessionStartTime: typeof o.sessionStartTime === "number" ? o.sessionStartTime : null,
+      segments,
     };
   } catch {
-    return { startTime: null, totalElapsedSeconds: 0, sessionStartTime: null };
+    return { totalElapsedSeconds: 0, sessionStartTime: null, segments: [] };
   }
 }
 
 function setCheckinState(state) {
-  localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify(state));
+  const toStore = {
+    totalElapsedSeconds: state.totalElapsedSeconds,
+    sessionStartTime: state.sessionStartTime,
+    segments: state.segments || [],
+  };
+  localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify(toStore));
+}
+
+function clearCheckinState() {
+  localStorage.removeItem(CHECKIN_STORAGE_KEY);
 }
 
 function formatTimer(seconds) {
@@ -1881,6 +2006,7 @@ function setupDashboard() {
   tab.style.display = "block";
 
   let tickInterval = null;
+  let currentSegmentStart = null;
 
   function setMsg(text, kind) {
     if (!msgEl) return;
@@ -1891,7 +2017,7 @@ function setupDashboard() {
   function currentElapsed() {
     const state = getCheckinState();
     let total = state.totalElapsedSeconds;
-    if (state.startTime) total += (Date.now() - state.startTime) / 1000;
+    if (currentSegmentStart != null) total += (Date.now() - currentSegmentStart) / 1000;
     return total;
   }
 
@@ -1901,25 +2027,38 @@ function setupDashboard() {
   }
 
   function savePause() {
+    if (currentSegmentStart == null) return;
     const state = getCheckinState();
-    if (state.startTime) {
-      state.totalElapsedSeconds += (Date.now() - state.startTime) / 1000;
-      state.startTime = null;
-      setCheckinState(state);
-    }
+    const end = Date.now();
+    const segmentSeconds = (end - currentSegmentStart) / 1000;
+    state.totalElapsedSeconds += segmentSeconds;
+    state.segments = state.segments || [];
+    state.segments.push({ start: currentSegmentStart, end });
+    currentSegmentStart = null;
+    setRunningStart(null);
+    setCheckinState(state);
   }
 
   function applyButtons() {
     const state = getCheckinState();
-    const running = state.startTime != null;
+    const running = currentSegmentStart != null;
     checkInBtn.style.display = !state.sessionStartTime && !running ? "inline-flex" : "none";
     resumeBtn.style.display = state.sessionStartTime != null && !running ? "inline-flex" : "none";
     checkOutBtn.style.display = running ? "inline-flex" : "none";
   }
 
+  function setRunningStart(ts) {
+    try {
+      if (ts != null) sessionStorage.setItem(CHECKIN_RUNNING_SESSION_KEY, String(ts));
+      else sessionStorage.removeItem(CHECKIN_RUNNING_SESSION_KEY);
+    } catch (_) {}
+  }
+
   checkInBtn?.addEventListener("click", () => {
     const now = Date.now();
-    setCheckinState({ startTime: now, totalElapsedSeconds: 0, sessionStartTime: now });
+    setCheckinState({ totalElapsedSeconds: 0, sessionStartTime: now, segments: [] });
+    currentSegmentStart = now;
+    setRunningStart(now);
     applyButtons();
     if (!tickInterval) tickInterval = setInterval(render, 1000);
     render();
@@ -1927,8 +2066,9 @@ function setupDashboard() {
   });
 
   resumeBtn?.addEventListener("click", () => {
-    const state = getCheckinState();
-    setCheckinState({ ...state, startTime: Date.now() });
+    const now = Date.now();
+    currentSegmentStart = now;
+    setRunningStart(now);
     applyButtons();
     if (!tickInterval) tickInterval = setInterval(render, 1000);
     render();
@@ -1941,7 +2081,13 @@ function setupDashboard() {
     const sessionStart = state.sessionStartTime || Date.now();
     const endTime = Date.now();
     const totalSeconds = state.totalElapsedSeconds;
-    setCheckinState({ startTime: null, totalElapsedSeconds: 0, sessionStartTime: null });
+    const segmentsForApi = (state.segments || []).map((seg) => ({
+      startTime: new Date(seg.start).toISOString(),
+      endTime: new Date(seg.end).toISOString(),
+    }));
+    setCheckinState({ totalElapsedSeconds: 0, sessionStartTime: null, segments: [] });
+    currentSegmentStart = null;
+    setRunningStart(null);
     applyButtons();
     if (tickInterval) {
       clearInterval(tickInterval);
@@ -1957,6 +2103,7 @@ function setupDashboard() {
           startTime: new Date(sessionStart).toISOString(),
           endTime: new Date(endTime).toISOString(),
           totalSeconds: Math.round(totalSeconds),
+          segments: segmentsForApi,
         }),
       });
       const data = await resp.json();
@@ -1972,28 +2119,38 @@ function setupDashboard() {
   });
 
   window.addEventListener("beforeunload", () => {
-    if (sessionStorage.getItem("uptura_checkin_navigating")) {
-      sessionStorage.removeItem("uptura_checkin_navigating");
-      return;
+    if (currentSegmentStart != null) {
+      try {
+        sessionStorage.setItem(CHECKIN_RUNNING_SESSION_KEY, String(currentSegmentStart));
+      } catch (_) {}
     }
-    sessionStorage.setItem("uptura_checkin_refresh", String(Date.now()));
   });
 
-  if (getCheckinState().startTime) {
-    const returning = sessionStorage.getItem("uptura_checkin_returning");
-    const refreshAt = sessionStorage.getItem("uptura_checkin_refresh");
-    if (returning) sessionStorage.removeItem("uptura_checkin_returning");
-    else if (refreshAt) {
-      const age = Date.now() - Number(refreshAt);
-      if (age < 2500) sessionStorage.removeItem("uptura_checkin_refresh");
-    } else savePause();
+  const runningStartRaw = sessionStorage.getItem(CHECKIN_RUNNING_SESSION_KEY);
+  if (runningStartRaw != null && runningStartRaw !== "") {
+    const runningStart = Number(runningStartRaw);
+    if (Number.isFinite(runningStart)) {
+      const state = getCheckinState();
+      if (state.sessionStartTime != null) {
+        const now = Date.now();
+        const segmentSeconds = (now - runningStart) / 1000;
+        state.totalElapsedSeconds += segmentSeconds;
+        state.segments = state.segments || [];
+        state.segments.push({ start: runningStart, end: now });
+        setCheckinState(state);
+        currentSegmentStart = now;
+        setRunningStart(now);
+      } else {
+        try {
+          sessionStorage.removeItem(CHECKIN_RUNNING_SESSION_KEY);
+        } catch (_) {}
+      }
+    }
   }
 
   applyButtons();
   render();
-  if (getCheckinState().startTime) {
-    if (!tickInterval) tickInterval = setInterval(render, 1000);
-  }
+  if (currentSegmentStart != null && !tickInterval) tickInterval = setInterval(render, 1000);
 
   const tbody = qs("#dashboardAttendanceTbody");
   const emptyEl = qs("#dashboardAttendanceEmpty");
@@ -2090,6 +2247,8 @@ function setupAttendance() {
   const tbody = qs("#attendanceAllTbody");
   const emptyEl = qs("#attendanceAllEmpty");
   const loadingEl = qs("#attendanceAllLoading");
+  const dailyTbody = qs("#attendanceDailyTotalsTbody");
+  const dailyEmpty = qs("#attendanceDailyTotalsEmpty");
   const tab = qs("#tab-attendance");
   if (!tbody || !emptyEl || !loadingEl || !tab) return;
 
@@ -2107,6 +2266,8 @@ function setupAttendance() {
     loadingEl.style.display = "flex";
     emptyEl.style.display = "none";
     tbody.innerHTML = "";
+    if (dailyTbody) dailyTbody.innerHTML = "";
+    if (dailyEmpty) dailyEmpty.style.display = "none";
     try {
       const [attResp, empResp] = await Promise.all([
         fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
@@ -2128,6 +2289,45 @@ function setupAttendance() {
       for (const e of employees) if (e.email) emailToName.set(e.email.toLowerCase(), e.name || e.email);
       for (const u of users) if (u.email) emailToName.set(u.email.toLowerCase(), u.name || u.email);
       loadingEl.style.display = "none";
+
+      const byDayUser = new Map();
+      for (const s of sessions) {
+        const start = s.startTime ? new Date(s.startTime) : null;
+        const dateKey = start ? start.toISOString().slice(0, 10) : "";
+        const email = (s.userEmail || "").toLowerCase();
+        const key = `${dateKey}|${email}`;
+        const prev = byDayUser.get(key) || 0;
+        byDayUser.set(key, prev + (s.totalSeconds || 0));
+      }
+      const dailyRows = Array.from(byDayUser.entries())
+        .map(([key, totalSeconds]) => {
+          const [dateKey, email] = key.split("|");
+          const date = dateKey ? new Date(dateKey + "T12:00:00") : null;
+          const dateStr = date ? date.toLocaleDateString() : "—";
+          const name = emailToName.get(email) || email || "—";
+          return { dateStr, dateKey, name, email, totalSeconds };
+        })
+        .sort((a, b) => {
+          const d = (b.dateKey || "").localeCompare(a.dateKey || "");
+          return d !== 0 ? d : (a.name || "").localeCompare(b.name || "");
+        });
+
+      if (dailyTbody && dailyEmpty) {
+        if (!dailyRows.length) {
+          dailyEmpty.style.display = "block";
+        } else {
+          for (const row of dailyRows) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${escapeHtml(row.dateStr)}</td>
+              <td><div style="font-weight:700">${escapeHtml(row.name)}</div><div class="muted" style="font-size:12px">${escapeHtml(row.email || "—")}</div></td>
+              <td>${formatHours(row.totalSeconds)}</td>
+            `;
+            dailyTbody.appendChild(tr);
+          }
+        }
+      }
+
       if (!sessions.length) {
         emptyEl.style.display = "block";
         return;
@@ -2186,6 +2386,7 @@ function boot() {
 
   const logoutBtn = qs("#logoutBtn");
   logoutBtn?.addEventListener("click", () => {
+    clearCheckinState();
     clearSession();
     applyRoleUI("");
     showLoggedOutUI();
@@ -2766,7 +2967,7 @@ function boot() {
       const email = qs("#loginEmail").value;
       const password = qs("#loginPassword").value;
       const data = await crmLogin(email, password);
-      setSession({ token: data.token, role: data.role, userId: data.userId, email });
+      setSession({ token: data.token, role: data.role, userId: data.userId, email, name: data.name });
       applyRoleUI(data.role);
       showLoggedInUI();
       if (data.role === "employee") {
@@ -2784,27 +2985,101 @@ function boot() {
     }
   });
 
+  // Password: show/hide on login
+  (function () {
+    const loginToggle = qs("#loginPasswordToggle");
+    const loginInput = qs("#loginPassword");
+    if (loginToggle && loginInput) {
+      loginToggle.addEventListener("click", () => {
+        const isPass = loginInput.type === "password";
+        loginInput.type = isPass ? "text" : "password";
+        const icon = loginToggle.querySelector("i");
+        if (icon) {
+          icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+        }
+        loginToggle.title = isPass ? "Hide password" : "Show password";
+        loginToggle.setAttribute("aria-label", loginToggle.title);
+      });
+    }
+  })();
+
+  // Password: generate + show/hide on user management create form
+  (function () {
+    const genBtn = qs("#userPasswordGenerate");
+    const userToggle = qs("#userPasswordToggle");
+    const userInput = qs("#userPassword");
+    if (genBtn && userInput) {
+      genBtn.addEventListener("click", () => {
+        userInput.value = generatePassword(12);
+        userInput.type = "text";
+        const icon = userToggle?.querySelector("i");
+        if (icon) {
+          icon.classList.replace("fa-eye", "fa-eye-slash");
+        }
+        if (userToggle) {
+          userToggle.title = "Hide password";
+          userToggle.setAttribute("aria-label", userToggle.title);
+        }
+      });
+    }
+    if (userToggle && userInput) {
+      userToggle.addEventListener("click", () => {
+        const isPass = userInput.type === "password";
+        userInput.type = isPass ? "text" : "password";
+        const icon = userToggle.querySelector("i");
+        if (icon) {
+          icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+        }
+        userToggle.title = isPass ? "Hide password" : "Show password";
+        userToggle.setAttribute("aria-label", userToggle.title);
+      });
+    }
+  })();
+
   // Session restore
   const session = getSession();
   if (session?.token) {
     applyRoleUI(session.role);
-    // Preload users for creator labels when admin/super_admin
-    primeUsersForCreatorLabels();
     showLoggedInUI();
-    if (page === "clients") refreshClients();
-    if (page === "meetings") refreshMeetings();
-    if (page === "employees") refreshEmployees();
-    if (page === "applicants") refreshApplicants();
-    if (page === "sales") refreshSales();
-    if (page === "invoices") {
-      refreshInvoices();
-      setupInvoicePdfGenerator();
+    const useBootstrap = page === "clients" || page === "users";
+    if (useBootstrap) {
+      const msg = page === "clients" ? qs("#clientMsg") : qs("#userMsg");
+      const loaderId = page === "clients" ? "clientsLoading" : "usersLoading";
+      setMsg(msg, page === "clients" ? "Loading clients…" : "", "");
+      toggleInlineLoader(loaderId, true);
+      fetchBootstrap()
+        .then(({ clients, users }) => {
+          clientsCache = clients;
+          usersCache = users;
+          buildUserEmailMap(usersCache);
+          if (page === "clients") {
+            renderClientsTable(clientsCache);
+            setMsg(msg, `Loaded ${clientsCache.length} client(s).`, "ok");
+          } else {
+            renderUsersTable(usersCache);
+            setMsg(msg, `Loaded ${usersCache.length} user(s).`, "ok");
+          }
+        })
+        .catch(() => {
+          if (page === "clients") refreshClients(false);
+          else refreshUsers(false);
+        })
+        .finally(() => toggleInlineLoader(loaderId, false));
+    } else {
+      if (page !== "users") primeUsersForCreatorLabels();
+      if (page === "meetings") refreshMeetings();
+      if (page === "employees") refreshEmployees();
+      if (page === "applicants") refreshApplicants();
+      if (page === "sales") refreshSales();
+      if (page === "invoices") {
+        refreshInvoices();
+        setupInvoicePdfGenerator();
+      }
+      if (page === "reports") refreshReports();
+      if (page === "chat") setupChat();
+      if (page === "dashboard") setupDashboard();
+      if (page === "attendance") setupAttendance();
     }
-    if (page === "reports") refreshReports();
-    if (page === "users") refreshUsers();
-    if (page === "chat") setupChat();
-    if (page === "dashboard") setupDashboard();
-    if (page === "attendance") setupAttendance();
   } else {
     showLoggedOutUI();
   }
