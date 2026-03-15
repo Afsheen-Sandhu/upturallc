@@ -239,7 +239,7 @@
                                     <th>Phone</th>
                                     <th>Status</th>
                                     <th>Created by</th>
-                                    <th>Action</th>
+                                    <th class="text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody id="clientsTbody"></tbody>
@@ -254,6 +254,29 @@
 
         </section>
     </main>
+
+    <!-- Generic CRM Modal -->
+    <div class="crm-modal-overlay" id="crmModal">
+        <div class="crm-modal-card">
+            <div class="crm-modal-head">
+                <h3 class="crm-modal-title" id="crmModalTitle">Details</h3>
+                <button class="crm-modal-close" onclick="closeCRMModal()">&times;</button>
+            </div>
+            <div class="crm-modal-body">
+                <form id="crmModalForm" class="modal-grid">
+                    <!-- Dynamic Fields -->
+                </form>
+                <div class="modal-field full" style="margin-top: 20px; border-top: 1px solid var(--border); padding-top: 20px;">
+                    <label>Internal Remarks / Comments</label>
+                    <textarea id="crmModalRemarks" placeholder="Add a note..."></textarea>
+                </div>
+            </div>
+            <div class="crm-modal-footer">
+                <button class="btn" onclick="closeCRMModal()">Close</button>
+                <button class="btn primary" id="crmModalSaveBtn">Save Changes</button>
+            </div>
+        </div>
+    </div>
 
     <script src="crm.js" type="module"></script>
 </body>

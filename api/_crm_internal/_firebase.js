@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getFirestore } from "firebase/firestore";
+import { getFirestore } from "firebase/firestore/lite";
 
 // Client-config style Firebase initialization (not secret).
 // This repo already uses this config on the frontend (admin-dashboard.html, etc.).

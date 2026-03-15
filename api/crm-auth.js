@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { collection, getDocs, limit, query, serverTimestamp, setDoc, where, doc } from "firebase/firestore";
+import { collection, getDocs, limit, query, serverTimestamp, setDoc, where, doc } from "firebase/firestore/lite";
 import { getDb } from "./_crm_internal/_firebase.js";
 import { signCrmToken } from "./_crm_internal/_auth.js";
 

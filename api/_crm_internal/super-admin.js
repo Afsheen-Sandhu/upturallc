@@ -1,4 +1,4 @@
-import { collection, getDocs, limit, query, where } from "firebase/firestore";
+import { collection, getDocs, limit, query, where } from "firebase/firestore/lite";
 import { getDb } from "./_firebase.js";
 import { requireCrmAuth } from "./_auth.js";
 

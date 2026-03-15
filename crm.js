@@ -17,6 +17,16 @@ const firebaseConfig = {
 const firebaseApp = initializeApp(firebaseConfig);
 const db = getFirestore(firebaseApp);
 
+// --- CRM CACHE ---
+let clientsCache = [];
+let employeesCache = [];
+let applicantsCache = [];
+let meetingsCache = [];
+let salesCache = [];
+let invoicesCache = [];
+let usersCache = [];
+const userEmailById = {};
+
 const PIPELINE_STATUSES = [
   { id: "lead", label: "Lead" },
   { id: "contacted", label: "Contacted" },
@@ -106,6 +116,323 @@ function toggleInlineLoader(id, show) {
   const el = qs(`#${id}`);
   if (el) el.style.display = show ? "flex" : "none";
 }
+
+window.customConfirm = (text, title = "Are you sure?") => {
+  return new Promise((resolve) => {
+    let overlay = qs(".confirm-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <div class="confirm-card">
+          <div class="confirm-icon"><i class="fa-solid fa-trash-can"></i></div>
+          <div class="confirm-title"></div>
+          <div class="confirm-text"></div>
+          <div class="confirm-actions">
+            <button class="confirm-btn btn-cancel">Cancel</button>
+            <button class="confirm-btn btn-confirm">Delete</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    const titleEl = overlay.querySelector(".confirm-title");
+    const textEl = overlay.querySelector(".confirm-text");
+    const cancelBtn = overlay.querySelector(".btn-cancel");
+    const confirmBtn = overlay.querySelector(".btn-confirm");
+
+    titleEl.textContent = title;
+    textEl.textContent = text;
+
+    const close = (result) => {
+      overlay.classList.remove("active");
+      // Use a timeout to match CSS transition
+      setTimeout(() => {
+        resolve(result);
+      }, 200);
+    };
+
+    cancelBtn.onclick = (e) => { e.stopPropagation(); close(false); };
+    confirmBtn.onclick = (e) => { e.stopPropagation(); close(true); };
+    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+
+    // Set initial state
+    overlay.classList.add("active");
+  });
+};
+
+/* --- ACTION MENU & DROPDOWN --- */
+window.toggleDropdown = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  const menu = btn.nextElementSibling;
+  const tr = btn.closest("tr");
+  const isActive = menu.classList.contains("active");
+  
+  // Close all other menus and reset rows
+  document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("active"));
+  document.querySelectorAll("tr.row-active").forEach(r => r.classList.remove("row-active"));
+  
+  if (!isActive) {
+    menu.classList.add("active");
+    if (tr) tr.classList.add("row-active");
+  }
+};
+
+// Global click to close dropdowns
+document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("active"));
+    document.querySelectorAll("tr.row-active").forEach(r => r.classList.remove("row-active"));
+});
+
+window.closeCRMModal = () => {
+  qs("#crmModal").classList.remove("active");
+};
+
+const getStatusPill = (id, list) => {
+  const s = (list || []).find(x => x.id === id) || { label: id, id: 'default' };
+  return `<span class="status-pill ${s.id}">${s.label}</span>`;
+};
+
+const createActionMenu = (id, type) => {
+  return `
+    <div class="action-menu">
+      <button class="dot-btn" onclick="toggleDropdown(event)">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+      <div class="dropdown-menu">
+        <div class="dropdown-item" onclick="openCRMModal('${type}', '${id}', false)">
+          <i class="fa-solid fa-eye"></i> View
+        </div>
+        <div class="dropdown-item" onclick="openCRMModal('${type}', '${id}', true)">
+          <i class="fa-solid fa-pencil"></i> Edit
+        </div>
+        <div class="dropdown-item delete" onclick="handleTableDelete('${type}', '${id}')">
+          <i class="fa-solid fa-trash"></i> Delete
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.handleTableDelete = async (type, id) => {
+  const confirmText = `Are you sure you want to delete this ${type}?`;
+  if (!await window.customConfirm(confirmText)) return;
+  
+  try {
+    if (type === 'client') { await deleteClient(id); clientsCache = clientsCache.filter(c => c.id !== id); renderClientsTable(clientsCache); }
+    else if (type === 'employee') { await deleteEmployee(id); employeesCache = employeesCache.filter(e => e.id !== id); renderEmployeesTable(employeesCache); }
+    else if (type === 'applicant') { await deleteApplicant(id); applicantsCache = applicantsCache.filter(a => a.id !== id); renderApplicantsTable(applicantsCache); }
+    else if (type === 'meeting') { await deleteMeeting(id); meetingsCache = meetingsCache.filter(m => m.id !== id); renderMeetingsTable(meetingsCache); }
+    else if (type === 'sale') { await deleteSale(id); salesCache = salesCache.filter(s => s.id !== id); renderSalesTable(salesCache); }
+    else if (type === 'invoice') { await deleteInvoice(id); invoicesCache = invoicesCache.filter(i => i.id !== id); renderInvoicesTable(invoicesCache); }
+    else if (type === 'user') { await deleteUser(id); usersCache = usersCache.filter(u => u.id !== id); renderUsersTable(usersCache); }
+    
+    window.showToast?.("Successfully deleted", "success");
+  } catch (err) {
+    window.showToast?.(err.message || "Delete failed", "error");
+  }
+};
+
+function injectCRMModal() {
+  if (qs("#crmModal")) return;
+  const modalHtml = `
+  <div class="crm-modal-overlay" id="crmModal">
+      <div class="crm-modal-card">
+          <div class="crm-modal-head">
+              <h2 class="crm-modal-title" id="crmModalTitle">Details</h2>
+              <button class="crm-modal-close" onclick="closeCRMModal()">&times;</button>
+          </div>
+          <div class="crm-modal-body">
+              <form id="crmModalForm" class="modal-grid"></form>
+              <div class="modal-field full remarks-section" style="margin-top:24px; border-top:1px solid var(--border); padding-top:24px;">
+                  <label>Internal Remarks / Comments</label>
+                  <textarea id="crmModalRemarks" placeholder="Add remarks for admin..."></textarea>
+              </div>
+          </div>
+          <div class="crm-modal-footer">
+              <button class="btn" onclick="closeCRMModal()">Close</button>
+              <button class="btn primary" id="crmModalSaveBtn">Save Changes</button>
+          </div>
+      </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function setupModalSaveBtn() {
+  const btn = qs("#crmModalSaveBtn");
+  if (!btn) return;
+  
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  
+  newBtn.addEventListener("click", async () => {
+    const modal = qs("#crmModal");
+    const type = modal.dataset.type;
+    const id = modal.dataset.id;
+    const form = qs("#crmModalForm");
+    const remarks = qs("#crmModalRemarks").value;
+    
+    const formData = new FormData(form);
+    const patch = Object.fromEntries(formData.entries());
+    patch.remarks = remarks;
+
+    const originalText = newBtn.textContent;
+    newBtn.disabled = true;
+    newBtn.textContent = "Saving...";
+    
+    try {
+      if (type === 'meeting' && patch.scheduledAt) {
+          patch.scheduledAt = new Date(patch.scheduledAt).toISOString();
+      }
+
+      // 1. Send update to server
+      if (type === 'client') await updateClient(id, patch);
+      else if (type === 'employee') await updateEmployee(id, patch);
+      else if (type === 'applicant') await updateApplicant(id, patch);
+      else if (type === 'meeting') await updateMeeting(id, patch);
+      else if (type === 'sale') await updateSale(id, patch);
+      else if (type === 'invoice') await updateInvoice(id, patch);
+      else if (type === 'user') await updateUser(id, patch);
+      
+      // 2. Update cache LOCAL-ONLY to be instant
+      let cache = [];
+      let renderFn = null;
+      if (type === 'client') { cache = clientsCache; renderFn = renderClientsTable; }
+      else if (type === 'employee') { cache = employeesCache; renderFn = renderEmployeesTable; }
+      else if (type === 'applicant') { cache = applicantsCache; renderFn = renderApplicantsTable; }
+      else if (type === 'meeting') { cache = meetingsCache; renderFn = renderMeetingsTable; }
+      else if (type === 'sale') { cache = salesCache; renderFn = renderSalesTable; }
+      else if (type === 'invoice') { cache = invoicesCache; renderFn = renderInvoicesTable; }
+      else if (type === 'user') { cache = usersCache; renderFn = renderUsersTable; }
+
+      const idx = cache.findIndex(item => item.id === id);
+      if (idx > -1) {
+          cache[idx] = { ...cache[idx], ...patch };
+          if (renderFn) renderFn(cache);
+      }
+      
+      window.showToast?.("Saved successfully", "success");
+      closeCRMModal();
+    } catch (err) {
+      window.showToast?.(err.message || "Save failed", "error");
+    } finally {
+      newBtn.disabled = false;
+      newBtn.textContent = originalText;
+    }
+  });
+}
+
+  window.openCRMModal = (type, id, edit) => {
+  const modal = qs("#crmModal");
+  const form = qs("#crmModalForm");
+  const title = qs("#crmModalTitle");
+  const remarks = qs("#crmModalRemarks");
+  const saveBtn = qs("#crmModalSaveBtn");
+  
+  modal.dataset.type = type;
+  modal.dataset.id = id;
+  modal.dataset.edit = edit ? "1" : "0";
+  
+  let data = null;
+  if (type === 'client') data = clientsCache.find(c => c.id === id);
+  else if (type === 'employee') data = employeesCache.find(e => e.id === id);
+  else if (type === 'applicant') data = applicantsCache.find(a => a.id === id);
+  else if (type === 'meeting') data = meetingsCache.find(m => m.id === id);
+  else if (type === 'sale') data = salesCache.find(s => s.id === id);
+  else if (type === 'invoice') data = invoicesCache.find(i => i.id === id);
+  else if (type === 'user') data = usersCache.find(u => u.id === id);
+  
+  if (!data) return;
+  
+  title.textContent = `${edit ? 'Edit' : 'View'} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  remarks.value = data.remarks || "";
+  remarks.readOnly = !edit;
+  saveBtn.style.display = edit ? "block" : "none";
+  
+  form.innerHTML = "";
+  
+  const addField = (label, value, key, fieldType = "text", options = null, isFull = false) => {
+    const div = document.createElement("div");
+    div.className = "modal-field";
+    
+    // Detect status fields for special styling
+    if (key.toLowerCase().includes("status") || key.toLowerCase().includes("stage")) {
+      div.classList.add("status-field");
+    }
+
+    if (fieldType === 'textarea' || isFull) div.classList.add("full");
+    if (!edit) div.classList.add("view-only");
+    
+    div.innerHTML = `<label>${label}</label>`;
+    let input;
+    if (fieldType === 'select' && options) {
+      input = document.createElement("select");
+      input.disabled = !edit;
+      options.forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt.id || opt;
+        o.textContent = opt.label || opt;
+        if (o.value === value) o.selected = true;
+        input.appendChild(o);
+      });
+    } else if (fieldType === 'textarea') {
+      input = document.createElement("textarea");
+      input.value = value || "";
+      input.readOnly = !edit;
+    } else {
+      input = document.createElement("input");
+      input.type = fieldType;
+      input.value = value || "";
+      input.readOnly = !edit;
+    }
+    input.name = key;
+    div.appendChild(input);
+    form.appendChild(div);
+  };
+  
+  if (type === 'client') {
+    addField("Name", data.name, "name");
+    addField("Company", data.company, "company");
+    addField("Email", data.email, "email", "email");
+    addField("Phone", data.phone, "phone");
+    addField("Status", data.pipelineStatus, "pipelineStatus", "select", PIPELINE_STATUSES);
+  } else if (type === 'employee') {
+    addField("Name", data.name, "name");
+    addField("Email", data.email, "email", "email");
+    addField("Role", data.role, "role");
+    addField("Daily Hours", data.dailyHours, "dailyHours", "number");
+    addField("Status", data.onboardingStatus, "onboardingStatus", "select", EMP_ONBOARDING);
+  } else if (type === 'applicant') {
+    addField("Name", data.name, "name");
+    addField("Email", data.email, "email", "email");
+    addField("Role", data.role, "role");
+    addField("Source", data.source, "source");
+    addField("Stage", data.stage, "stage", "select", APP_STAGES);
+  } else if (type === 'meeting') {
+      addField("Title", data.title, "title");
+      addField("Date", data.scheduledAt ? data.scheduledAt.slice(0,16) : "", "scheduledAt", "datetime-local");
+      addField("Status", data.status, "status", "select", ["scheduled", "completed", "cancelled"]);
+  } else if (type === 'sale') {
+      addField("Agent", data.agentEmail, "agentEmail");
+      addField("Client", data.clientId, "clientId");
+      addField("Amount", data.amount, "amount", "number");
+      addField("Stage", data.stage, "stage", "select", ["lead", "proposal_sent", "negotiation", "won", "lost"]);
+  } else if (type === 'invoice') {
+      addField("Client", data.clientId, "clientId");
+      addField("Amount", data.amount, "amount", "number");
+      addField("Due Date", data.dueDate, "dueDate", "date");
+      addField("Status", data.status, "status", "select", ["draft", "sent", "paid", "void"]);
+  } else if (type === 'user') {
+      addField("Email", data.email, "email", "email");
+      addField("Name", data.name, "name");
+      addField("Role", data.role, "role", "select", ["super_admin", "admin", "manager", "employee", "hr"]);
+  }
+  
+  modal.classList.add("active");
+};
 
 function setupTopbarScroll() {
   const scroller = qs(".content");
@@ -622,6 +949,8 @@ async function fetchReports() {
 function renderClientsTable(clients) {
   const tbody = qs("#clientsTbody");
   const empty = qs("#clientsEmpty");
+  if (!tbody || !empty) return;
+
   const search = (qs("#clientSearch")?.value || "").toLowerCase().trim();
   const filter = qs("#filterClientStatus")?.value || "all";
 
@@ -640,83 +969,15 @@ function renderClientsTable(clients) {
 
   for (const c of filtered) {
     const tr = document.createElement("tr");
-
-    const statusSelect = document.createElement("select");
-    statusSelect.style.padding = "8px 10px";
-    statusSelect.style.borderRadius = "10px";
-    statusSelect.style.border = "1px solid var(--border)";
-    for (const s of PIPELINE_STATUSES) {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.label;
-      if (c.pipelineStatus === s.id) opt.selected = true;
-      statusSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const name = tr.querySelector(".client-name").value;
-      const company = tr.querySelector(".client-company").value;
-      const email = tr.querySelector(".client-email").value;
-      const phone = tr.querySelector(".client-phone").value;
-      try {
-        await updateClient(c.id, {
-          name,
-          company,
-          email,
-          phone,
-          pipelineStatus: statusSelect.value
-        });
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Update failed", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this client?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteClient(c.id);
-        tr.remove();
-        clientsCache = clientsCache.filter(item => item.id !== c.id);
-        if (!clientsCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
-      <td><input class="field client-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(c.name || "")}" /></td>
-      <td><input class="field client-company" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.company || "")}" /></td>
-      <td><input class="field client-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.email || "")}" /></td>
-      <td><input class="field client-phone" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(c.phone || "")}" /></td>
-      <td class="td-status"></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(c.name || "—")}</td>
+      <td>${escapeHtml(c.company || "—")}</td>
+      <td>${escapeHtml(c.email || "—")}</td>
+      <td>${escapeHtml(c.phone || "—")}</td>
+      <td>${getStatusPill(c.pipelineStatus, PIPELINE_STATUSES)}</td>
       <td>${escapeHtml(getCreatorEmail(c))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(c.id, 'client')}</td>
     `;
-
-    tr.querySelector(".td-status").appendChild(statusSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -730,16 +991,6 @@ function escapeHtml(str) {
     .replaceAll("'", "&#039;");
 }
 
-let clientsCache = [];
-let employeesCache = [];
-let applicantsCache = [];
-let meetingsCache = [];
-let salesCache = [];
-let invoicesCache = [];
-let reportsCache = null;
-let reportCharts = {};
-let usersCache = [];
-const userEmailById = {};
 
 async function refreshClients() {
   const msg = qs("#clientMsg");
@@ -794,106 +1045,16 @@ function renderEmployeesTable(list) {
 
   for (const emp of filtered) {
     const tr = document.createElement("tr");
-
-    const onboardingSelect = document.createElement("select");
-    onboardingSelect.style.padding = "8px 10px";
-    onboardingSelect.style.borderRadius = "10px";
-    onboardingSelect.style.border = "1px solid var(--border)";
-    for (const s of EMP_ONBOARDING) {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.label;
-      if (emp.onboardingStatus === s.id) opt.selected = true;
-      onboardingSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const name = tr.querySelector(".emp-name").value;
-      const email = tr.querySelector(".emp-email").value;
-      const role = tr.querySelector(".emp-role").value;
-      const dailyHours = tr.querySelector(".emp-hours").value;
-      try {
-        const updated = await updateEmployee(emp.id, {
-          name,
-          email,
-          role,
-          dailyHours,
-          onboardingStatus: onboardingSelect.value
-        });
-        Object.assign(emp, updated);
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this employee?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteEmployee(emp.id);
-        tr.remove();
-        employeesCache = employeesCache.filter(e => e.id !== emp.id);
-        if (!employeesCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
-    const startedBtn = document.createElement("button");
-    startedBtn.className = "btn";
-    startedBtn.textContent = emp.startedWorking ? "Started" : "Started Working";
-    startedBtn.disabled = !!emp.startedWorking;
-    startedBtn.style.padding = "8px 10px";
-
-    startedBtn.addEventListener("click", async () => {
-      if (emp.startedWorking) return;
-      startedBtn.disabled = true;
-      startedBtn.textContent = "…";
-      try {
-        const updated = await updateEmployee(emp.id, { markStartedWorking: true });
-        Object.assign(emp, updated);
-        renderEmployeesTable(employeesCache);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        startedBtn.textContent = "Started Working";
-        startedBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
-      <td><input class="field emp-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.name || "")}" /></td>
-      <td><input class="field emp-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.email || "")}" /></td>
-      <td><input class="field emp-role" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(emp.role || "")}" /></td>
-      <td><input class="field emp-hours" type="number" style="background:transparent; border:none; padding:4px;" value="${emp.dailyHours || ""}" /></td>
-      <td class="td-onboarding"></td>
-      <td class="td-started"></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(emp.name || "—")}</td>
+      <td>${escapeHtml(emp.email || "—")}</td>
+      <td>${escapeHtml(emp.role || "—")}</td>
+      <td>${emp.dailyHours || "—"}</td>
+      <td>${getStatusPill(emp.onboardingStatus, EMP_ONBOARDING)}</td>
+      <td>${emp.startedWorking ? '<span class="status-pill active">Started</span>' : '<span class="status-pill default">Pending</span>'}</td>
       <td>${escapeHtml(getCreatorEmail(emp))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(emp.id, 'employee')}</td>
     `;
-
-    tr.querySelector(".td-onboarding").appendChild(onboardingSelect);
-    tr.querySelector(".td-started").appendChild(startedBtn);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -936,83 +1097,15 @@ function renderApplicantsTable(list) {
 
   for (const app of filtered) {
     const tr = document.createElement("tr");
-
-    const stageSelect = document.createElement("select");
-    stageSelect.style.padding = "8px 10px";
-    stageSelect.style.borderRadius = "10px";
-    stageSelect.style.border = "1px solid var(--border)";
-    for (const s of APP_STAGES) {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = s.label;
-      if (app.stage === s.id) opt.selected = true;
-      stageSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const name = tr.querySelector(".app-name").value;
-      const email = tr.querySelector(".app-email").value;
-      const role = tr.querySelector(".app-role").value;
-      const source = tr.querySelector(".app-source").value;
-      try {
-        const updated = await updateApplicant(app.id, {
-          name,
-          email,
-          role,
-          source,
-          stage: stageSelect.value
-        });
-        Object.assign(app, updated);
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this applicant?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteApplicant(app.id);
-        tr.remove();
-        applicantsCache = applicantsCache.filter(a => a.id !== app.id);
-        if (!applicantsCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
-      <td><input class="field app-name" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(app.name || "")}" /></td>
-      <td><input class="field app-email" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.email || "")}" /></td>
-      <td><input class="field app-role" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.role || "")}" /></td>
-      <td class="td-stage"></td>
-      <td><input class="field app-source" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(app.source || "")}" /></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(app.name || "—")}</td>
+      <td>${escapeHtml(app.email || "—")}</td>
+      <td>${escapeHtml(app.role || "—")}</td>
+      <td>${getStatusPill(app.stage, APP_STAGES)}</td>
+      <td>${escapeHtml(app.source || "—")}</td>
       <td>${escapeHtml(getCreatorEmail(app))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(app.id, 'applicant')}</td>
     `;
-
-    tr.querySelector(".td-stage").appendChild(stageSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -1055,81 +1148,15 @@ function renderMeetingsTable(list) {
 
   for (const m of filtered) {
     const tr = document.createElement("tr");
-
-    const statusSelect = document.createElement("select");
-    statusSelect.style.padding = "8px 10px";
-    statusSelect.style.borderRadius = "10px";
-    statusSelect.style.border = "1px solid var(--border)";
-    const statuses = ["scheduled", "completed", "cancelled"];
-    for (const st of statuses) {
-      const opt = document.createElement("option");
-      opt.value = st;
-      opt.textContent = st.charAt(0).toUpperCase() + st.slice(1);
-      if (m.status === st) opt.selected = true;
-      statusSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const title = tr.querySelector(".meet-title").value;
-      const scheduledAt = tr.querySelector(".meet-when").value;
-      try {
-        const updated = await updateMeeting(m.id, {
-          title,
-          scheduledAt,
-          status: statusSelect.value
-        });
-        Object.assign(m, updated);
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this meeting?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteMeeting(m.id);
-        tr.remove();
-        meetingsCache = meetingsCache.filter(item => item.id !== m.id);
-        if (!meetingsCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
-    const whenVal = m.scheduledAt ? new Date(m.scheduledAt).toISOString().slice(0, 16) : "";
-
+    const dateStr = m.scheduledAt ? new Date(m.scheduledAt).toLocaleString() : "—";
     tr.innerHTML = `
-      <td><input class="field meet-title" style="font-weight:900; background:transparent; border:none; padding:4px;" value="${escapeHtml(m.title || "")}" /></td>
-      <td><input class="field meet-when" type="datetime-local" style="background:transparent; border:none; padding:4px;" value="${whenVal}" /></td>
-      <td class="td-status"></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(m.title || "—")}</td>
+      <td>${dateStr}</td>
+      <td>${getStatusPill(m.status, [{id:"scheduled", label:"Scheduled"}, {id:"completed", label:"Completed"}, {id:"cancelled", label:"Cancelled"}])}</td>
       <td>${escapeHtml(m.relatedType && m.relatedId ? `${m.relatedType}:${m.relatedId}` : "—")}</td>
       <td>${escapeHtml(getCreatorEmail(m))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(m.id, 'meeting')}</td>
     `;
-
-    tr.querySelector(".td-status").appendChild(statusSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -1172,81 +1199,14 @@ function renderSalesTable(list) {
 
   for (const s of filtered) {
     const tr = document.createElement("tr");
-
-    const stageSelect = document.createElement("select");
-    stageSelect.style.padding = "8px 10px";
-    stageSelect.style.borderRadius = "10px";
-    stageSelect.style.border = "1px solid var(--border)";
-    const stages = ["lead", "proposal_sent", "negotiation", "won", "lost"];
-    for (const st of stages) {
-      const opt = document.createElement("option");
-      opt.value = st;
-      opt.textContent = st.replace(/_/g, " ").charAt(0).toUpperCase() + st.replace(/_/g, " ").slice(1);
-      if (s.stage === st) opt.selected = true;
-      stageSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const agentEmail = tr.querySelector(".sale-agent").value;
-      const clientId = tr.querySelector(".sale-client").value;
-      const amount = tr.querySelector(".sale-amount").value;
-      try {
-        const updated = await updateSale(s.id, {
-          agentEmail,
-          clientId,
-          amount,
-          stage: stageSelect.value
-        });
-        Object.assign(s, updated);
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this deal?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteSale(s.id);
-        tr.remove();
-        salesCache = salesCache.filter(item => item.id !== s.id);
-        if (!salesCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
-      <td><input class="field sale-agent" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(s.agentEmail || "")}" /></td>
-      <td><input class="field sale-client" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(s.clientId || "")}" /></td>
-      <td><input class="field sale-amount" type="number" step="0.01" style="background:transparent; border:none; padding:4px;" value="${s.amount != null ? s.amount : ""}" /></td>
-      <td class="td-stage"></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(s.agentEmail || "—")}</td>
+      <td>${escapeHtml(s.clientId || "—")}</td>
+      <td>$${s.amount != null ? s.amount.toLocaleString() : "0"}</td>
+      <td>${getStatusPill(s.stage, [{id:"lead", label:"Lead"}, {id:"proposal_sent", label:"Proposal Sent"}, {id:"negotiation", label:"Negotiation"}, {id:"won", label:"Won"}, {id:"lost", label:"Lost"}])}</td>
       <td>${escapeHtml(getCreatorEmail(s))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(s.id, 'sale')}</td>
     `;
-
-    tr.querySelector(".td-stage").appendChild(stageSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -1289,81 +1249,14 @@ function renderInvoicesTable(list) {
 
   for (const inv of filtered) {
     const tr = document.createElement("tr");
-
-    const statusSelect = document.createElement("select");
-    statusSelect.style.padding = "8px 10px";
-    statusSelect.style.borderRadius = "10px";
-    statusSelect.style.border = "1px solid var(--border)";
-    const statuses = ["draft", "sent", "paid", "void"];
-    for (const st of statuses) {
-      const opt = document.createElement("option");
-      opt.value = st;
-      opt.textContent = st.charAt(0).toUpperCase() + st.slice(1);
-      if (inv.status === st) opt.selected = true;
-      statusSelect.appendChild(opt);
-    }
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const clientId = tr.querySelector(".inv-client").value;
-      const amount = tr.querySelector(".inv-amount").value;
-      const dueDate = tr.querySelector(".inv-due").value;
-      try {
-        const updated = await updateInvoice(inv.id, {
-          clientId,
-          amount,
-          dueDate,
-          status: statusSelect.value
-        });
-        Object.assign(inv, updated);
-        saveBtn.textContent = "Saved";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm("Delete this invoice?")) return;
-      delBtn.disabled = true;
-      try {
-        await deleteInvoice(inv.id);
-        tr.remove();
-        invoicesCache = invoicesCache.filter(item => item.id !== inv.id);
-        if (!invoicesCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
-      <td><input class="field inv-client" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(inv.clientId || "")}" /></td>
-      <td><input class="field inv-amount" type="number" step="0.01" style="background:transparent; border:none; padding:4px;" value="${inv.amount != null ? inv.amount : ""}" /></td>
-      <td class="td-status"></td>
-      <td><input class="field inv-due" type="date" style="background:transparent; border:none; padding:4px;" value="${inv.dueDate || ""}" /></td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(inv.clientId || "—")}</td>
+      <td>$${inv.amount != null ? inv.amount.toLocaleString() : "0"}</td>
+      <td>${inv.dueDate || "—"}</td>
+      <td>${getStatusPill(inv.status, [{id:"draft", label:"Draft"}, {id:"sent", label:"Sent"}, {id:"paid", label:"Paid"}, {id:"void", label:"Void"}])}</td>
       <td>${escapeHtml(getCreatorEmail(inv))}</td>
-      <td class="td-action" style="display:flex; gap:6px;"></td>
+      <td class="td-action">${createActionMenu(inv.id, 'invoice')}</td>
     `;
-
-    tr.querySelector(".td-status").appendChild(statusSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -1548,99 +1441,14 @@ function renderUsersTable(list) {
 
   for (const u of filtered) {
     const tr = document.createElement("tr");
-
-    const roleSelect = document.createElement("select");
-    roleSelect.style.padding = "8px 10px";
-    roleSelect.style.borderRadius = "10px";
-    roleSelect.style.border = "1px solid var(--border)";
-    const roles = ["super_admin", "admin", "manager", "employee", "hr"];
-    for (const r of roles) {
-      const opt = document.createElement("option");
-      opt.value = r;
-      opt.textContent = r;
-      if (u.role === r) opt.selected = true;
-      roleSelect.appendChild(opt);
-    }
-
-    const statusSelect = document.createElement("select");
-    statusSelect.style.padding = "8px 10px";
-    statusSelect.style.borderRadius = "10px";
-    statusSelect.style.border = "1px solid var(--border)";
-    [{ v: false, l: "Active" }, { v: true, l: "Disabled" }].forEach(o => {
-      const opt = document.createElement("option");
-      opt.value = o.v;
-      opt.textContent = o.l;
-      if (!!u.disabled === o.v) opt.selected = true;
-      statusSelect.appendChild(opt);
-    });
-
-    const saveBtn = document.createElement("button");
-    saveBtn.className = "btn";
-    saveBtn.textContent = "Save";
-    saveBtn.style.padding = "8px 10px";
-    saveBtn.addEventListener("click", async () => {
-      saveBtn.disabled = true;
-      saveBtn.textContent = "…";
-      const name = tr.querySelector(".user-name").value;
-      const employeeId = tr.querySelector(".user-emp-id").value;
-      const pwd = tr.querySelector(".user-pwd").value;
-      try {
-        const patch = {
-          name,
-          employeeId,
-          role: roleSelect.value,
-          disabled: statusSelect.value === "true"
-        };
-        if (pwd) patch.password = pwd;
-        const updated = await updateUser(u.id, patch);
-        Object.assign(u, updated);
-        saveBtn.textContent = "Saved";
-        tr.querySelector(".user-pwd").value = "";
-        setTimeout(() => (saveBtn.textContent = "Save"), 1000);
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to update", "error");
-        saveBtn.textContent = "Save";
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-
-    const delBtn = document.createElement("button");
-    delBtn.className = "btn";
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.style.padding = "8px";
-    delBtn.style.color = "#ff3c00";
-    delBtn.addEventListener("click", async () => {
-      if (!confirm(`Delete user ${u.email}?`)) return;
-      delBtn.disabled = true;
-      try {
-        await deleteUser(u.id);
-        tr.remove();
-        usersCache = usersCache.filter(item => item.id !== u.id);
-        if (!usersCache.length) empty.style.display = "block";
-      } catch (e) {
-        window.showToast?.(e.message || "Failed to delete", "error");
-        delBtn.disabled = false;
-      }
-    });
-
     tr.innerHTML = `
       <td>${escapeHtml(u.email || "—")}</td>
-      <td><input class="field user-name" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(u.name || "")}" /></td>
-      <td class="td-role"></td>
-      <td><input class="field user-emp-id" style="background:transparent; border:none; padding:4px;" value="${escapeHtml(u.employeeId || "")}" /></td>
-      <td class="td-status"></td>
-      <td class="td-action" style="display:flex; gap:6px; align-items:center;">
-        <input class="field user-pwd" type="password" placeholder="Reset pwd" style="width:80px; font-size:10px; padding:4px;" />
-      </td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(u.name || "—")}</td>
+      <td>${getStatusPill(u.role, [{id:"super_admin", label:"Super Admin"}, {id:"admin", label:"Admin"}, {id:"manager", label:"Manager"}, {id:"employee", label:"Employee"}, {id:"hr", label:"HR"}])}</td>
+      <td>${escapeHtml(u.employeeId || "—")}</td>
+      <td>${u.disabled ? '<span class="status-pill lost">Disabled</span>' : '<span class="status-pill active">Active</span>'}</td>
+      <td class="td-action">${createActionMenu(u.id, 'user')}</td>
     `;
-
-    tr.querySelector(".td-role").appendChild(roleSelect);
-    tr.querySelector(".td-status").appendChild(statusSelect);
-    const actionTd = tr.querySelector(".td-action");
-    actionTd.appendChild(saveBtn);
-    actionTd.appendChild(delBtn);
-
     tbody.appendChild(tr);
   }
 }
@@ -2355,6 +2163,8 @@ function setupAttendance() {
 }
 
 function boot() {
+  injectCRMModal();
+  setupModalSaveBtn();
   const page = getCurrentPage();
 
   setupSidebar();
@@ -2397,6 +2207,11 @@ function boot() {
 
   if (page === "clients") qs("#createClientForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Creating...";
+
     const msg = qs("#clientMsg");
     setMsg(msg, "Creating client…", "");
     toggleInlineLoader("clientsLoading", true);
@@ -2416,11 +2231,18 @@ function boot() {
       setMsg(msg, err.message || "Failed to create client", "error");
     } finally {
       toggleInlineLoader("clientsLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
     }
   });
 
   if (page === "users") qs("#createUserForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Creating...";
+
     const msg = qs("#userMsg");
     setMsg(msg, "Creating user…", "");
     toggleInlineLoader("usersLoading", true);
@@ -2455,6 +2277,8 @@ function boot() {
       setMsg(msg, err.message || "Failed to create user", "error");
     } finally {
       toggleInlineLoader("usersLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
     }
   });
 
@@ -2466,6 +2290,11 @@ function boot() {
 
   if (page === "employees") qs("#createEmployeeForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Adding...";
+
     const msg = qs("#empMsg");
     setMsg(msg, "Adding employee…", "");
     toggleInlineLoader("empLoading", true);
@@ -2499,6 +2328,8 @@ function boot() {
       setMsg(msg, err.message || "Failed to add employee", "error");
     } finally {
       toggleInlineLoader("empLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
     }
   });
 
@@ -2510,6 +2341,11 @@ function boot() {
 
   if (page === "applicants") qs("#createApplicantForm")?.addEventListener("submit", async (e) => {
     e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Adding...";
+
     const msg = qs("#appMsg");
     setMsg(msg, "Adding applicant…", "");
     toggleInlineLoader("appLoading", true);
@@ -2529,6 +2365,8 @@ function boot() {
       setMsg(msg, err.message || "Failed to add applicant", "error");
     } finally {
       toggleInlineLoader("appLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
     }
   });
 
@@ -2544,6 +2382,11 @@ function boot() {
     qs("#refreshMeetingsBtn")?.addEventListener("click", refreshMeetings);
     qs("#createMeetingForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
       const msg = qs("#meetMsg");
       setMsg(msg, "Creating meeting…", "");
       toggleInlineLoader("meetLoading", true);
@@ -2566,6 +2409,8 @@ function boot() {
         setMsg(msg, err.message || "Failed to create meeting", "error");
       } finally {
         toggleInlineLoader("meetLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
       }
     });
   }
@@ -2576,6 +2421,11 @@ function boot() {
     qs("#refreshSalesBtn")?.addEventListener("click", refreshSales);
     qs("#createSaleForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
       const msg = qs("#saleMsg");
       setMsg(msg, "Creating deal…", "");
       toggleInlineLoader("salesLoading", true);
@@ -2595,6 +2445,8 @@ function boot() {
         setMsg(msg, err.message || "Failed to create deal", "error");
       } finally {
         toggleInlineLoader("salesLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
       }
     });
   }
@@ -2605,6 +2457,11 @@ function boot() {
     qs("#refreshInvoicesBtn")?.addEventListener("click", refreshInvoices);
     qs("#createInvoiceForm")?.addEventListener("submit", async (e) => {
       e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
       const msg = qs("#invMsg");
       setMsg(msg, "Creating invoice…", "");
       toggleInlineLoader("invoicesLoading", true);
@@ -2624,6 +2481,8 @@ function boot() {
         setMsg(msg, err.message || "Failed to create invoice", "error");
       } finally {
         toggleInlineLoader("invoicesLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
       }
     });
 
