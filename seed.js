@@ -23,7 +23,6 @@ const dummyLeads = [
 ];
 
 async function seed() {
-    console.log("Starting seeding process...");
     try {
         for (const lead of dummyLeads) {
             await addDoc(collection(db, "leads"), {
@@ -32,9 +31,7 @@ async function seed() {
                 pageUrl: "local-seed-script",
                 userAgent: "Node.js Seeder Script"
             });
-            console.log(`Added lead: ${lead.name}`);
         }
-        console.log("Success! 5 leads seeded.");
         process.exit(0);
     } catch (error) {
         console.error("Seeding failed:", error);

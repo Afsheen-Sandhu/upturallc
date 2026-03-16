@@ -110,8 +110,6 @@ window.showToast = (text, type = "success") => {
         padding: "12px 24px"
       }
     }).showToast();
-  } else {
-    console.log(`[Toast Fallback] ${type.toUpperCase()}: ${text}`);
   }
 };
 

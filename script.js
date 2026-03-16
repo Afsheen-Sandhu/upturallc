@@ -119,7 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
                 window.openBookingModal(e);
             } else {
                 // Modal not loaded yet? Force load it and then open
-                console.log("Booking modal not ready, initializing...");
                 initBookingModal();
                 // Wait a bit for the load and then try again
                 setTimeout(() => window.openBookingModal?.(e), 500);

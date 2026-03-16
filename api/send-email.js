@@ -12,8 +12,6 @@ export default async function handler(req, res) {
         return res.status(500).json({ success: false, message: "Configuration error." });
     }
 
-    console.log(`[Email] Attempting to send from: ${SENDER} to: ${to} (CC: ${cc || 'none'})`);
-
     try {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -33,7 +31,6 @@ export default async function handler(req, res) {
         const data = await response.json();
 
         if (response.ok) {
-            console.log(`[Email] Success! ID: ${data.id}`);
             return res.status(200).json({ success: true, id: data.id });
         } else {
             console.error("[Email] Resend API Error Response:", JSON.stringify(data, null, 2));

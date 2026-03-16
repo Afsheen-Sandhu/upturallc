@@ -3,4 +3,3 @@ const url = "https://console.firebase.google.com/v1/r/project/uptura-leads/fires
 const { execSync } = require("child_process");
 const cmd = process.platform === "win32" ? `start "" "${url}"` : process.platform === "darwin" ? `open "${url}"` : `xdg-open "${url}"`;
 execSync(cmd, { stdio: "inherit", shell: true });
-console.log("Opened Firebase Console. Click 'Create index' on the page.");

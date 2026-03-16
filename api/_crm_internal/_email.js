@@ -16,8 +16,6 @@ export async function sendEmail({ to, subject, html }) {
         return false;
     }
 
-    console.log(`[Email] Attempting to send from: ${SENDER} to: ${validRecipients.join(', ')}`);
-
     try {
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
@@ -34,8 +32,7 @@ export async function sendEmail({ to, subject, html }) {
         });
 
         if (response.ok) {
-            const data = await response.json();
-            console.log(`[Email] Success! ID: ${data.id}`);
+            await response.json();
             return true;
         } else {
             const data = await response.json();
