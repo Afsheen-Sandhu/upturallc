@@ -1,4 +1,11 @@
 {
+    "redirects": [
+        {
+            "source": "/:path*",
+            "destination": "https://uptura.net/:path*",
+            "permanent": true
+        }
+    ],
     "headers": [
         {
             "source": "/images/(.*)",
