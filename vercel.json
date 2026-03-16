@@ -1,8 +1,8 @@
 {
     "redirects": [
         {
-            "source": "/:path*",
-            "destination": "https://uptura.net/:path*",
+            "source": "/((?!api/).*)",
+            "destination": "https://uptura.net/$1",
             "permanent": true
         }
     ],
