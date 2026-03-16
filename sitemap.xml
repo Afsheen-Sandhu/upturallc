@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <!-- Main marketing pages -->
   <url>
     <loc>https://uptura.net/index.html</loc>
     <lastmod>2026-02-08</lastmod>
@@ -29,5 +30,99 @@
     <loc>https://uptura.net/contact.html</loc>
     <lastmod>2026-02-08</lastmod>
     <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/checkout.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/seed.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.4</priority>
+  </url>
+
+  <!-- CRM application -->
+  <url>
+    <loc>https://uptura.net/crm.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-dashboard.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-meetings.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-sales.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-reports.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-chat.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-employees.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-applicants.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-invoices.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-users.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.4</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/crm-attendance.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Admin / utility pages -->
+  <url>
+    <loc>https://uptura.net/admin.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/admin-dashboard.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.3</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/navbar.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/footer.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.2</priority>
+  </url>
+  <url>
+    <loc>https://uptura.net/booking-modal.html</loc>
+    <lastmod>2026-02-08</lastmod>
+    <priority>0.2</priority>
   </url>
 </urlset>
