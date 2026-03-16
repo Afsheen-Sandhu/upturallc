@@ -26,6 +26,8 @@ let meetingsCache = [];
 let salesCache = [];
 let invoicesCache = [];
 let usersCache = [];
+let reportsCache = null;
+const reportCharts = {};
 const userEmailById = {};
 
 const PIPELINE_STATUSES = [
@@ -1020,6 +1022,72 @@ async function fetchReports() {
   return data.reports;
 }
 
+async function fetchAttendanceSummary() {
+  try {
+    const [attResp, empResp] = await Promise.all([
+      fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
+      fetch("/api/crm/employees", { headers: authHeader() }),
+    ]);
+    const attData = attResp.ok ? await attResp.json() : {};
+    const empData = empResp.ok ? await empResp.json() : {};
+    if (!attResp.ok || !attData.success) throw new Error(attData.message || "Failed to load attendance");
+    const sessions = attData.sessions || [];
+    const employees = empData.employees || [];
+    const users = await (async () => {
+      try {
+        const r = await fetch("/api/crm/user-management", { headers: authHeader() });
+        const d = await r.json();
+        return (r.ok && d.users) ? d.users : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    const emailToName = new Map();
+    for (const e of employees) {
+      if (e.email) emailToName.set(e.email.toLowerCase(), e.name || e.email);
+    }
+    for (const u of users) {
+      if (u.email) emailToName.set(u.email.toLowerCase(), u.name || u.email);
+    }
+
+    const byDate = new Map();
+    const byEmployee = new Map();
+
+    for (const s of sessions) {
+      const start = s.startTime ? new Date(s.startTime) : null;
+      const dateKey = start ? start.toISOString().slice(0, 10) : "";
+      const email = (s.userEmail || "").toLowerCase();
+      const seconds = s.totalSeconds || 0;
+      if (dateKey) {
+        byDate.set(dateKey, (byDate.get(dateKey) || 0) + seconds);
+      }
+      if (email) {
+        byEmployee.set(email, (byEmployee.get(email) || 0) + seconds);
+      }
+    }
+
+    const byDateArr = Array.from(byDate.entries())
+      .map(([dateKey, totalSeconds]) => {
+        const date = dateKey ? new Date(dateKey + "T12:00:00") : null;
+        const dateStr = date ? date.toLocaleDateString() : "—";
+        return { dateKey, dateStr, totalSeconds };
+      })
+      .sort((a, b) => (a.dateKey || "").localeCompare(b.dateKey || ""));
+
+    const byEmployeeArr = Array.from(byEmployee.entries())
+      .map(([email, totalSeconds]) => {
+        const name = emailToName.get(email) || email || "—";
+        return { email, name, totalSeconds };
+      })
+      .sort((a, b) => (b.totalSeconds || 0) - (a.totalSeconds || 0));
+
+    return { byDate: byDateArr, byEmployee: byEmployeeArr };
+  } catch {
+    return null;
+  }
+}
+
 function renderClientsTable(clients) {
   const tbody = qs("#clientsTbody");
   const empty = qs("#clientsEmpty");
@@ -1345,7 +1413,8 @@ async function refreshReports() {
   setMsg(msg, "Loading reports…", "");
   try {
     reportsCache = await fetchReports();
-    renderReports(reportsCache);
+    const attendanceSummary = await fetchAttendanceSummary();
+    renderReports(reportsCache, attendanceSummary);
     setMsg(msg, "Updated.", "ok");
   } catch (e) {
     setMsg(msg, e.message || "Failed to load reports", "error");
@@ -1366,7 +1435,7 @@ function statCard(label, value) {
   return div;
 }
 
-function renderReports(reports) {
+function renderReports(reports, attendanceSummary) {
   const grid = qs("#reportsGrid");
   if (!grid) return;
   grid.innerHTML = "";
@@ -1398,7 +1467,9 @@ function renderReports(reports) {
   if (!window.Chart) return;
 
   // Destroy old charts
-  Object.values(reportCharts).forEach(c => c.destroy());
+  Object.values(reportCharts).forEach((c) => {
+    if (c && typeof c.destroy === "function") c.destroy();
+  });
 
   // 1. Pipeline Distribution (Horizontal Bar)
   const ctxP = document.getElementById('pipelineChart')?.getContext('2d');
@@ -1479,6 +1550,106 @@ function renderReports(reports) {
         plugins: { legend: { position: 'bottom' } },
         scales: { r: { ticks: { display: false } } }
       }
+    });
+  }
+
+  // 4. Attendance – Daily Total Hours (line chart)
+  const att = attendanceSummary || {};
+  const byDate = Array.isArray(att.byDate) ? att.byDate : [];
+  const byEmployee = Array.isArray(att.byEmployee) ? att.byEmployee : [];
+
+  const ctxAttTrend = document.getElementById('attendanceTrendChart')?.getContext('2d');
+  if (ctxAttTrend && byDate.length) {
+    reportCharts.attendanceTrend = new Chart(ctxAttTrend, {
+      type: 'line',
+      data: {
+        labels: byDate.map((d) => d.dateStr),
+        datasets: [{
+          label: 'Total hours (all employees)',
+          data: byDate.map((d) => (d.totalSeconds || 0) / 3600),
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.15)',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const h = ctx.parsed.y || 0;
+                const hours = Math.floor(h);
+                const minutes = Math.round((h - hours) * 60);
+                return `${hours}h ${minutes}m`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            grid: { display: true },
+            ticks: {
+              callback: (v) => `${v}h`,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // 5. Attendance – Hours by Employee (top 10)
+  const ctxAttEmp = document.getElementById('attendanceEmployeeChart')?.getContext('2d');
+  if (ctxAttEmp && byEmployee.length) {
+    const top = byEmployee.slice(0, 10);
+    reportCharts.attendanceEmployees = new Chart(ctxAttEmp, {
+      type: 'bar',
+      data: {
+        labels: top.map((e) => e.name || e.email || "—"),
+        datasets: [{
+          label: 'Total hours',
+          data: top.map((e) => (e.totalSeconds || 0) / 3600),
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: 'rgb(34, 197, 94)',
+          borderWidth: 1,
+          borderRadius: 8,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const h = ctx.parsed.x || 0;
+                const hours = Math.floor(h);
+                const minutes = Math.round((h - hours) * 60);
+                return `${hours}h ${minutes}m`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { display: false },
+            ticks: {
+              callback: (v) => `${v}h`,
+            },
+          },
+          y: { grid: { display: false } },
+        },
+      },
     });
   }
 }
