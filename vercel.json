@@ -14,6 +14,24 @@
     ],
     "headers": [
         {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "index, follow"
+                }
+            ]
+        },
+        {
+            "source": "/(admin|admin-dashboard|crm|crm-dashboard|crm-meetings|crm-sales|crm-reports|crm-chat|crm-employees|crm-applicants|crm-invoices|crm-users|crm-attendance)\\.html",
+            "headers": [
+                {
+                    "key": "X-Robots-Tag",
+                    "value": "noindex, nofollow"
+                }
+            ]
+        },
+        {
             "source": "/images/(.*)",
             "headers": [
                 {

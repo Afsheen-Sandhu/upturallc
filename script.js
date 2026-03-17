@@ -1643,7 +1643,7 @@ document.addEventListener("DOMContentLoaded", function () {
                                         </div>
                                         
                                         <p style="text-align: center; color: #888; font-size: 13px; margin-top: 30px; margin-bottom: 0;">
-                                            Manage your appointments in the <a href="https://uptura.com/admin.html" style="color: #FF3C00; text-decoration: none; font-weight: 600;">Admin Dashboard</a>.
+                                            Manage your appointments in the <a href="https://uptura.net/admin.html" style="color: #FF3C00; text-decoration: none; font-weight: 600;">Admin Dashboard</a>.
                                         </p>
                                     </div>
                                 </div>
