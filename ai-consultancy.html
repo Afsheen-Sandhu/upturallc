@@ -13,14 +13,33 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "AI Consultancy Services | Automate & Scale Your Business - Uptura",
-      "url": "https://uptura.net/ai-consultancy.html",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Uptura",
-        "url": "https://uptura.net"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/ai-consultancy.html#webpage",
+          "url": "https://uptura.net/ai-consultancy.html",
+          "name": "AI Consultancy Services | Automate & Scale Your Business - Uptura",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
+      ]
     }
     </script>
     <meta name="robots" content="index,follow">
@@ -234,7 +253,7 @@
                 z-index: 1;
             }
 
-            .top-cta-section h1 {
+            .top-cta-section h2 {
                 font-size: 56px;
                 font-weight: 700;
                 line-height: 1.2;
@@ -281,7 +300,7 @@
                     padding: 60px 30px;
                 }
 
-                .top-cta-section h1 {
+                .top-cta-section h2 {
                     font-size: 36px;
                 }
 
@@ -306,7 +325,7 @@
             }
 
             @media (max-width: 480px) {
-                .top-cta-section h1 {
+                .top-cta-section h2 {
                     font-size: 28px;
                 }
 
@@ -320,7 +339,7 @@
             <div class="top-cta-container">
                 <div class="top-cta-section">
                     <div class="top-cta-content">
-                        <h1>AI Solutions That Scale With Your Business</h1>
+                        <h2>AI Solutions That Scale With Your Business</h2>
                         <p>
                             Whether you're a startup or a global enterprise, our AI services help
                             you save time, reduce costs, and automate repetitive processes — all

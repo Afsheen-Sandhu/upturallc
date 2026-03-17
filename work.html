@@ -14,14 +14,33 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Featured Work & Case Studies | Uptura Digital Agency",
-      "url": "https://uptura.net/work.html",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Uptura",
-        "url": "https://uptura.net"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/work.html#webpage",
+          "url": "https://uptura.net/work.html",
+          "name": "Featured Work & Case Studies | Uptura Digital Agency",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
+      ]
     }
     </script>
 

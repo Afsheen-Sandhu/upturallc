@@ -14,14 +14,33 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebPage",
-      "name": "Digital Solutions | Web, App, & SEO Expertise - Uptura",
-      "url": "https://uptura.net/digital-solutions.html",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Uptura",
-        "url": "https://uptura.net"
-      }
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/digital-solutions.html#webpage",
+          "url": "https://uptura.net/digital-solutions.html",
+          "name": "Digital Solutions | Web, App, & SEO Expertise - Uptura",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
+      ]
     }
     </script>
 
@@ -330,7 +349,7 @@
         <!-- Services Pricing Section -->
         <section class="pricing-wrapper" id="pricing-details">
             <div class="pricing-intro">
-                <h1>Built Around Your Business Needs</h1>
+                <h2>Built Around Your Business Needs</h2>
                 <p>Flexible pricing models designed to match your goals, timeline, and scope.</p>
                 <div class="trust-badge">"Most projects recover their investment within months."</div>
             </div>

@@ -15,45 +15,49 @@
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "Uptura",
-      "url": "https://uptura.net",
-      "logo": "https://uptura.net/images/logo-main.png",
-      "description": "Uptura is a premier digital agency specializing in custom web development, SEO data-driven strategies, and cutting-edge AI consultancy.",
-      "address": {
-        "@type": "PostalAddress",
-        "addressCountry": "US"
-      },
-      "sameAs": [
-        "https://www.facebook.com/uptura",
-        "https://www.instagram.com/uptura",
-        "https://www.linkedin.com/company/uptura"
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          },
+          "sameAs": [
+            "https://www.facebook.com/uptura",
+            "https://www.instagram.com/uptura",
+            "https://www.linkedin.com/company/uptura"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/index.html#webpage",
+          "url": "https://uptura.net/index.html",
+          "name": "Uptura | Expert Web Development, SEO & AI Solutions for Business",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
       ]
-    }
-    </script>
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Uptura",
-      "url": "https://uptura.net",
-      "publisher": {
-        "@type": "Organization",
-        "name": "Uptura",
-        "url": "https://uptura.net"
-      }
     }
     </script>
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="https://uptura.net/">
+    <meta property="og:url" content="https://uptura.net/index.html">
     <meta property="og:title" content="Uptura | Web Development, SEO & AI Solutions">
     <meta property="og:description"
         content="Uptura delivers high-performance digital experiences and strategic AI consultancy.">
     <meta property="og:image" content="https://uptura.net/images/logo-main.png">
-    <link rel="canonical" href="https://uptura.net/">
+    <link rel="canonical" href="https://uptura.net/index.html">
     <link rel="icon" type="image/png" href="images/favicon.png">
 
     <!-- Fonts & GSAP for Navbar -->
