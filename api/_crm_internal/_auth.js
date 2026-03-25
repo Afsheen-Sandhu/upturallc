@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 
-const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+const TOKEN_TTL_SECONDS = 60 * 60 * 24 * 30; // 30 days (employees often stay logged in on one device)
 
 export function getCrmAuthSecret() {
   const secret = process.env.CRM_AUTH_SECRET;
@@ -49,6 +49,9 @@ export function requireCrmAuth(req) {
     }
     return { ok: true, userId, role, email };
   } catch (e) {
+    if (e?.name === "TokenExpiredError") {
+      return { ok: false, status: 401, message: "Session expired — please sign in again" };
+    }
     return { ok: false, status: 401, message: "Invalid or expired token" };
   }
 }

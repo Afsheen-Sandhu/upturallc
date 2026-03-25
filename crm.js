@@ -653,6 +653,42 @@ function showLoggedOutUI() {
   });
 }
 
+/** Parse API JSON; if the edge returns HTML (500 page), avoid throwing. */
+async function readCrmJson(resp) {
+  try {
+    const text = await resp.text();
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, message: "Unexpected response from server" };
+    }
+  } catch {
+    return { success: false, message: "Network error" };
+  }
+}
+
+/** Returns true if session was cleared (caller should stop). */
+function crmHandleAuthFailure(status, data) {
+  const msg = String(data?.message || "");
+  if (
+    status === 401 ||
+    /session expired|invalid or expired token|missing authorization|invalid authorization header|invalid token payload/i.test(
+      msg
+    )
+  ) {
+    clearCheckinState();
+    clearSession();
+    showLoggedOutUI();
+    window.showToast?.("Your session expired. Please sign in again.", "error");
+    try {
+      document.documentElement.removeAttribute("data-crm-role");
+    } catch (_) {}
+    return true;
+  }
+  return false;
+}
+
 async function crmLogin(email, password) {
   const resp = await fetch("/api/crm-auth", {
     method: "POST",
@@ -1026,8 +1062,9 @@ async function fetchAttendanceSummary() {
       fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
       fetch("/api/crm/employees", { headers: authHeader() }),
     ]);
-    const attData = attResp.ok ? await attResp.json() : {};
-    const empData = empResp.ok ? await empResp.json() : {};
+    const attData = await readCrmJson(attResp);
+    const empData = await readCrmJson(empResp);
+    if (crmHandleAuthFailure(attResp.status, attData)) throw new Error("Session expired");
     if (!attResp.ok || !attData.success) throw new Error(attData.message || "Failed to load attendance");
     const sessions = attData.sessions || [];
     const employees = empData.employees || [];
@@ -2275,7 +2312,11 @@ function setupDashboard() {
           segments: segmentsForApi,
         }),
       });
-      const data = await resp.json();
+      const data = await readCrmJson(resp);
+      if (crmHandleAuthFailure(resp.status, data)) {
+        setMsg("Session expired — please sign in again.", "error");
+        return;
+      }
       if (resp.ok && data.success) {
         setMsg("Session saved.", "ok");
         loadAttendance();
@@ -2341,7 +2382,13 @@ function setupDashboard() {
     tbody.innerHTML = "";
     try {
       const resp = await fetch("/api/crm/attendance", { headers: authHeader() });
-      const data = await resp.json();
+      const data = await readCrmJson(resp);
+      if (crmHandleAuthFailure(resp.status, data)) {
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.textContent = "Please sign in again to view attendance.";
+        return;
+      }
       if (!resp.ok || !data.success) throw new Error(data.message || "Failed to load");
       const sessions = data.sessions || [];
       loadingEl.style.display = "none";
@@ -2376,7 +2423,8 @@ function setupDashboard() {
               headers: { "Content-Type": "application/json", ...authHeader() },
               body: JSON.stringify({ remark: remarkInput.value.trim() }),
             });
-            const d = await r.json();
+            const d = await readCrmJson(r);
+            if (crmHandleAuthFailure(r.status, d)) return;
             if (r.ok && d.success) saveRemarkBtn.textContent = "Saved";
             else throw new Error(d.message);
           } catch (e) {
@@ -2442,8 +2490,14 @@ function setupAttendance() {
         fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
         fetch("/api/crm/employees", { headers: authHeader() }),
       ]);
-      const attData = attResp.ok ? await attResp.json() : {};
-      const empData = empResp.ok ? await empResp.json() : {};
+      const attData = await readCrmJson(attResp);
+      const empData = await readCrmJson(empResp);
+      if (crmHandleAuthFailure(attResp.status, attData)) {
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.textContent = "Please sign in again to view attendance.";
+        return;
+      }
       if (!attResp.ok || !attData.success) throw new Error(attData.message || "Failed to load attendance");
       const sessions = attData.sessions || [];
       const employees = empData.employees || [];

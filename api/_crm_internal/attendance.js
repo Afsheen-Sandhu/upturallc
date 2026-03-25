@@ -42,8 +42,11 @@ export default async function handler(req, res) {
         });
       return json(res, 200, { success: true, sessions });
     } catch (err) {
-      console.error("[crm attendance GET] error", err);
-      return json(res, 500, { success: false, message: "Internal Server Error" });
+      console.error("[crm attendance GET] error", err?.message || err, err?.code);
+      const hint = err?.message?.includes("index")
+        ? "Database index required — deploy Firestore indexes or check Firebase console."
+        : "Internal Server Error";
+      return json(res, 500, { success: false, message: hint });
     }
   }
 
@@ -65,7 +68,7 @@ export default async function handler(req, res) {
       });
       return json(res, 200, { success: true });
     } catch (err) {
-      console.error("[crm attendance PATCH] error", err);
+      console.error("[crm attendance PATCH] error", err?.message || err, err?.code);
       return json(res, 500, { success: false, message: "Internal Server Error" });
     }
   }
@@ -105,7 +108,7 @@ export default async function handler(req, res) {
       });
       return json(res, 201, { success: true, id: docRef.id });
     } catch (err) {
-      console.error("[crm attendance POST] error", err);
+      console.error("[crm attendance POST] error", err?.message || err, err?.code);
       return json(res, 500, { success: false, message: "Internal Server Error" });
     }
   }
