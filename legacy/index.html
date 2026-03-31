@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="index,follow">
+    <title>Uptura | Expert Web Development, SEO & AI Solutions for Business</title>
+    <meta name="description"
+        content="Uptura is a premier digital agency specializing in custom web development, SEO strategies, and AI consultancy to scale your business.">
+    <meta name="keywords"
+        content="web development, SEO services, AI consultancy, digital agency, Uptura, custom software, digital marketing">
+
+    <!-- Structured Data (Schema.org) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          },
+          "sameAs": [
+            "https://www.facebook.com/uptura",
+            "https://www.instagram.com/uptura",
+            "https://www.linkedin.com/company/uptura"
+          ]
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/index.html#webpage",
+          "url": "https://uptura.net/index.html",
+          "name": "Uptura | Expert Web Development, SEO & AI Solutions for Business",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
+      ]
+    }
+    </script>
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://uptura.net/index.html">
+    <meta property="og:title" content="Uptura | Web Development, SEO & AI Solutions">
+    <meta property="og:description"
+        content="Uptura delivers high-performance digital experiences and strategic AI consultancy.">
+    <meta property="og:image" content="https://uptura.net/images/logo-main.png">
+    <link rel="canonical" href="https://uptura.net/index.html">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <!-- Fonts & GSAP for Navbar -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js" defer></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js" defer></script>
+    <script src="https://unpkg.com/@lottiefiles/lottie-player@latest/dist/lottie-player.js" defer></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="icon" type="image/png" href="images/favicon.png">
+    <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js" defer></script>
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e); t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '919718663794319');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=919718663794319&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+</head>
+
+<body>
+    <!-- Navbar -->
+    <!-- Hardcoded Navbar for SEO with Placeholder ID for JS/CSS -->
+    <nav id="navbar-placeholder" class="custom-navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">
+                <img src="images/logo-main.png" class="logo-img" alt="Uptura Logo">
+            </a>
+
+            <ul class="nav-links">
+                <li class="nav-item"><a href="about.html" class="nav-link"><span>About</span></a></li>
+                <li class="nav-item"><a href="digital-solutions.html" class="nav-link"><span>Digital
+                            Solutions</span></a></li>
+                <li class="nav-item"><a href="ai-consultancy.html" class="nav-link"><span>AI Consulting</span></a></li>
+                <li class="nav-item"><a href="work.html" class="nav-link"><span>Works</span></a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link"><span>Contact</span></a></li>
+            </ul>
+
+            <a href="contact.html" class="cta-button"><span>Get Started</span></a>
+
+            <button class="hamburger" id="nav-toggle">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+        </div>
+    </nav>
+
+    <div class="mobile-dropdown" id="mobile-menu">
+        <ul class="mobile-links">
+            <li class="mobile-item"><a href="about.html" class="mobile-link">About</a></li>
+            <li class="mobile-item"><a href="digital-solutions.html" class="mobile-link">Digital Solutions</a></li>
+            <li class="mobile-item"><a href="ai-consultancy.html" class="mobile-link">AI Consulting</a></li>
+            <li class="mobile-item"><a href="work.html" class="mobile-link">Works</a></li>
+            <li class="mobile-item"><a href="contact.html" class="mobile-link">Contact</a></li>
+        </ul>
+    </div>
+
+    <main>
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="container">
+                <div class="hero-inner">
+                    <div class="hero-left">
+                        <div class="hero-lottie-wrapper">
+                            <lottie-player
+                                src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69628d883ed4ef480cb3fd43_4300bca15f764e3a87f9e839a8829c6f.json"
+                                background="transparent" speed="1" loop autoplay class="hero-accent-lottie">
+                            </lottie-player>
+                        </div>
+                        <a href="contact.html" class="book-call">
+                            <span class="book-call-text">
+                                <span>BOOK A CALL</span>
+                                <span>BOOK A CALL</span>
+                            </span>
+                            <span class="book-call-arrow">
+                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#ff5722" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </a>
+                    </div>
+
+                    <div class="hero-right">
+                        <h1 class="hero-title"
+                            aria-label="Expert Web Development and SEO Services that Drive Business Growth">
+                            <span class="word-wrapper">EXPERT</span>
+                            <span class="inline-image-wrapper"><img
+                                    src="images/20260121_2323_image-20generation_remix_01kfgwksbyf6wvky6jrt05bs4c.png"
+                                    alt="Expert Tech Tool"></span>
+                            <span class="word-wrapper">WEB</span><br>
+                            <span class="word-wrapper">DEVELOPMENT</span> <span class="word-wrapper">&</span>
+                            <span class="word-wrapper">SEO</span> <span class="word-wrapper">SERVICES</span><br>
+                            <span class="word-wrapper">THAT</span> <span class="word-wrapper">DRIVE</span>
+                            <span class="inline-image-wrapper"><img
+                                    src="images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png"
+                                    alt="Growth Icon"></span>
+                            <span class="word-wrapper">BUSINESS</span>
+                            <span class="word-wrapper">GROWTH</span><span class="dot">.</span>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section Divider -->
+        <div class="section-divider"></div>
+
+        <!-- Marquee Section -->
+        <section class="marquee-section">
+            <div class="marquee-wrapper">
+                <!-- First set of items -->
+                <div class="marquee-content">
+                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
+                    </div>
+                </div>
+                <!-- Duplicated set for seamless loop -->
+                <div class="marquee-content">
+                    <div class="marquee-item">Web Development <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Digital Experiences <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">SEO Optimization <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">AI Solutions <div class="marquee-dot"></div>
+                    </div>
+                    <div class="marquee-item">Strategic Design <div class="marquee-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- About Section -->
+        <section class="about-section" id="about">
+            <div class="container">
+                <div class="about-grid">
+                    <div class="about-left">
+                        <div class="about-badge">
+                            <span class="badge-dot"></span> ABOUT US
+                        </div>
+                        <h2 class="headline-container" id="uptura-headline">
+                            Uptura delivers for
+                            <span class="orange-pop-wrap" id="loop-target">
+                                <span id="count-number" data-target="790">790</span>+
+                            </span>
+                            clients<br>
+                            worldwide.
+                        </h2>
+                    </div>
+                    <div class="about-right">
+                        <div class="swiper testimonialSwiper">
+                            <div class="swiper-wrapper">
+                                <div class="swiper-slide">
+                                    <video src="videos/vid1.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video autoplay loop muted playsinline>
+                                        <source src="videos/vid2.mp4" type="video/mp4">
+
+                                    </video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video src="videos/vid3.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                                <div class="swiper-slide">
+                                    <video src="videos/vid4.mp4" autoplay loop muted playsinline></video>
+                                    <button class="video-mute-btn" title="Toggle Mute">
+                                        <i class="fa-solid fa-volume-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- Tricker Section -->
+        <section class="section tricker home">
+            <div class="tricker-wrapper">
+                <!-- First set of logos -->
+                <div class="tricker-single-wrap">
+                    <img src="images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                </div>
+                <!-- Duplicated set for seamless loop -->
+                <div class="tricker-single-wrap">
+                    <img src="images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                    <img src="images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07"
+                        class="tricker-single-image" />
+                    <div class="tricker-divider"></div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- Services & Accordion Section -->
+        <section class="services-section" id="solutions">
+            <div class="container">
+                <div class="services-grid">
+                    <div class="services-left">
+                        <lottie-player
+                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696a770dd3cf2e9e995b6916_955c4b7cf6534e0cb560a1e8e52bbb34.json"
+                            background="transparent" speed="1" style="width: 100%; max-width: 550px; height: auto;" loop
+                            autoplay>
+                        </lottie-player>
+                    </div>
+                    <div class="services-right">
+                        <div class="about-badge">
+                            <span class="badge-dot"></span> OUR DIGITAL SOLUTIONS
+                        </div>
+                        <div class="accordion">
+                            <div class="accordion-item active">
+                                <div class="accordion-header">
+                                    <h3 class="accordion-title">Custom Web Development</h3>
+                                </div>
+                                <div class="accordion-content" style="height: auto; opacity: 1;">
+                                    <p class="accordion-text">Tailored web development that meets your
+                                        business goals,
+                                        ensuring your website is responsive, scalable, and user-friendly.
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3 class="accordion-title">Web Design</h3>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="accordion-text">Creating visually stunning and intuitive
+                                        interfaces that
+                                        engage users and elevate your brand's digital identity through
+                                        research-backed
+                                        design.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3 class="accordion-title">SEO Services</h3>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="accordion-text">Strategic optimization to increase your search
+                                        engine
+                                        visibility, drive organic traffic, and ensure your business reaches
+                                        its target
+                                        audience effectively.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3 class="accordion-title">Mobile App Development</h3>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="accordion-text">Building high-performance native and
+                                        cross-platform mobile
+                                        applications that provide seamless user experiences across all
+                                        devices and
+                                        platforms.</p>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <div class="accordion-header">
+                                    <h3 class="accordion-title">AI Consultancy</h3>
+                                </div>
+                                <div class="accordion-content">
+                                    <p class="accordion-text">Leveraging cutting-edge artificial
+                                        intelligence to
+                                        optimize
+                                        your business processes, automate workflows, and provide data-driven
+                                        insights
+                                        for
+                                        growth.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="digital-solutions.html" class="explore-services">
+                            <span class="book-call-text">
+                                <span>EXPLORE OUR SERVICES</span>
+                                <span>EXPLORE OUR SERVICES</span>
+                            </span>
+                            <span class="book-call-arrow">
+                                <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#FF3C00" stroke-width="2"
+                                        stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- Growth Ticker Section -->
+        <section class="growth-ticker">
+            <div class="growth-wrapper">
+                <!-- Set 1 -->
+                <div class="marquee-content">
+                    <div class="growth-item">Work Smarter <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Stronger <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Build Faster <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Scale Beyond <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Grow Together <div class="growth-dot"></div>
+                    </div>
+                </div>
+                <!-- Set 2 -->
+                <div class="marquee-content">
+                    <div class="growth-item">Work Smarter <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Stronger <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Build Faster <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Scale Beyond <div class="growth-dot"></div>
+                    </div>
+                    <div class="growth-item">Grow Together <div class="growth-dot"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+        <!-- Testimonials Section -->
+        <section class="ai-testimonials">
+            <div class="container">
+                <h2 class="ai-title">Client Testimonials</h2>
+
+                <div class="testimonial-carousel">
+                    <div class="testimonial-viewport">
+                        <div class="testimonial-track">
+                            <!-- Slide 1 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">🌐 Web Development</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>The website feels faster and more professional.</h3>
+                                <p>We needed a custom website that actually represented our brand. The final
+                                    result was
+                                    clean, fast, and easy to manage. Our customers noticed the difference
+                                    immediately.
+                                </p>
+                                <span class="testimonial-author">— Founder, Service-Based Business</span>
+                                <button class="testimonial-audio-btn" data-audio="a1">▶ Play Audio</button>
+                                <audio id="a1"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27dcdb5319aee232c2d_Test%201%20on%20hompage.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 2 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">🌐 Web Development</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>Exactly what we needed, without overcomplicating things.</h3>
+                                <p>They understood our requirements clearly and built a site that works
+                                    perfectly
+                                    across devices. The process was smooth from start to finish.</p>
+                                <span class="testimonial-author">— Operations Manager, SME</span>
+                                <button class="testimonial-audio-btn" data-audio="a2">▶ Play Audio</button>
+                                <audio id="a2"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d5c5f7359cf2910bd_test%202%20on%20homepage.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 3 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">🔍 SEO Services</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>Organic traffic started growing steadily.</h3>
+                                <p>SEO takes time, but their approach was realistic and transparent. Within
+                                    a few
+                                    months, we saw consistent growth in rankings and inbound inquiries.</p>
+                                <span class="testimonial-author">— Business Owner, Local Company</span>
+                                <button class="testimonial-audio-btn" data-audio="a3">▶ Play Audio</button>
+                                <audio id="a3"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d2a368dd983dad350_test%203%20on%20homepage.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 4 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">🔍 SEO Services</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>We finally understand where our leads come from.</h3>
+                                <p>Their SEO work helped us rank for keywords that actually convert.
+                                    Reporting was
+                                    clear, and the results spoke for themselves.</p>
+                                <span class="testimonial-author">— Marketing Lead, B2B Firm</span>
+                                <button class="testimonial-audio-btn" data-audio="a4">▶ Play Audio</button>
+                                <audio id="a4"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d2744704a3919131d_test%20homepage%20seo%20(1).mp3"></audio>
+                            </div>
+
+                            <!-- Slide 5 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">📱 App Development</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>They turned our idea into a working app.</h3>
+                                <p>We came in with a concept and left with a fully functional app on both
+                                    Android and
+                                    iOS. Communication was clear, and delivery was on time.</p>
+                                <span class="testimonial-author">— Startup Founder</span>
+                                <button class="testimonial-audio-btn" data-audio="a5">▶ Play Audio</button>
+                                <audio id="a5"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27da4ece1d9ba9d99ae_test%204%20on%20homepage.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 6 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">📱 App Development</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>Smooth performance and great user experience.</h3>
+                                <p>The app runs smoothly and users find it easy to navigate. Bugs were
+                                    handled
+                                    quickly, and updates were implemented without hassle.</p>
+                                <span class="testimonial-author">— Product Manager, Tech Startup</span>
+                                <button class="testimonial-audio-btn" data-audio="a6">▶ Play Audio</button>
+                                <audio id="a6"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd8793489ad8363f912c0_Testimonial%20smooth%20hompage.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 7 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">📣 Social Media Marketing</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>Our engagement improved noticeably.</h3>
+                                <p>They helped us bring consistency to our social media and improved our
+                                    content
+                                    strategy. Engagement and reach increased within the first month.</p>
+                                <span class="testimonial-author">— Brand Manager, E-commerce Store</span>
+                                <button class="testimonial-audio-btn" data-audio="a7">▶ Play Audio</button>
+                                <audio id="a7"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27d9f312987e6a22b21_test%20engagement.mp3"></audio>
+                            </div>
+
+                            <!-- Slide 8 -->
+                            <div class="testimonial-slide">
+                                <div class="testimonial-category">📣 Social Media Marketing</div>
+                                <div class="testimonial-stars">⭐⭐⭐⭐⭐</div>
+                                <h3>We started getting real inquiries from social media.</h3>
+                                <p>Before this, social media felt like a waste of time. Now it's actually
+                                    generating
+                                    leads and brand awareness.</p>
+                                <span class="testimonial-author">— Owner, Service-Based Business</span>
+                                <button class="testimonial-audio-btn" data-audio="a8">▶ Play Audio</button>
+                                <audio id="a8"
+                                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd27dbf7853907bb64a04_test%20last.mp3"></audio>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="testimonial-dots"></div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+
+
+        <!-- Stacked Advantages Section -->
+        <section class="stack-section">
+            <div class="container" style="display: flex; flex-direction: column; align-items: center;">
+                <div class="stack-intro" style="text-align: center; margin-bottom: 60px;">
+                    <div class="badge-dot"
+                        style="margin: 0 auto 25px; width: 12px; height: 12px; background-color: #FF3C00; border-radius: 50%;">
+                    </div>
+                    <h2 class="ai-title" style="margin-bottom: 30px;">Ready to unlock<br>powerful digital
+                        advantages?
+                    </h2>
+
+                    <lottie-player
+                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695ff1d69348ca85ecc8557a_bouncy_ball.json"
+                        background="transparent" speed="1"
+                        style="width: 250px; height: 250px; margin: 0 auto; transform: rotate(90deg);" loop autoplay>
+                    </lottie-player>
+                </div>
+
+                <div class="card-container">
+                    <div class="card-item">
+                        <p>Synchronize your team in real-time with shared workspaces that eliminate friction
+                            and keep
+                            everyone
+                            on the same page.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5s-3 1.34-3 3 1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5z" />
+                            </svg></div>
+                        <h2>Effortless Collaboration</h2>
+                    </div>
+
+                    <div class="card-item">
+                        <p>Move from concept to completion with automated workflows designed to handle the
+                            heavy lifting
+                            while you focus on the vision.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z" />
+                            </svg></div>
+                        <h2>Streamlined Execution</h2>
+                    </div>
+
+                    <div class="card-item">
+                        <p>Gain access to a hand-picked group of top-tier designers and strategists
+                            dedicated to
+                            bringing
+                            your brand to life.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                            </svg></div>
+                        <h2>Elite Creative Squad</h2>
+                    </div>
+
+                    <div class="card-item">
+                        <p>Why wait months? Our high-velocity production model delivers premium results in
+                            record time
+                            without cutting corners.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path d="M13 3l-4 7h3v8l4-7h-3l4-7z" />
+                            </svg></div>
+                        <h2>Rapid Delivery Cycles</h2>
+                    </div>
+
+                    <div class="card-item">
+                        <p>Scalable pricing that aligns with your goals. No hidden fees, just transparent
+                            value that
+                            grows
+                            alongside your business.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z" />
+                            </svg></div>
+                        <h2>Adaptive Pricing Models</h2>
+                    </div>
+
+                    <div class="card-item">
+                        <p>Stay ahead of the curve with scalable, future-proof technologies that grow with your brand's
+                            ambitions.</p>
+                        <div class="icon-box"><svg viewBox="0 0 24 24">
+                                <path
+                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                            </svg></div>
+                        <h2>Future-Proof Solutions</h2>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- Centered Lottie Divider -->
+        <section class="lottie-cta"
+            style="padding: 80px 0; background-color: #EEE9E3; display: flex; justify-content: center; align-items: center; border-top: 1px solid rgba(0,0,0,0.05);">
+            <div class="container" style="display: flex; justify-content: center;">
+                <lottie-player
+                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697646a4e64a222537358e7d_5e348676431a4786a8feb19eb1ef90fb.json"
+                    background="transparent" speed="1" style="width: 350px; height: 350px;" loop autoplay>
+                </lottie-player>
+            </div>
+        </section>
+
+        <!-- Featured Works Section -->
+        <section class="works-section" id="work">
+            <div class="container">
+                <div class="works-grid">
+                    <!-- Column 1 -->
+                    <div class="works-col works-left">
+                        <div class="works-image-wrap">
+                            <img src="images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png"
+                                alt="Skincare E-commerce Platform">
+                        </div>
+                        <div class="works-text-part">
+                            <h2>- tangible results that help our clients reach their goals.</h2>
+                        </div>
+                    </div>
+
+                    <!-- Column 2 -->
+                    <div class="works-col works-right">
+                        <div class="works-text-part">
+                            <div class="works-badge"><span class="badge-dot"></span> FEATURED WORKS</div>
+                            <h2>We strive to deliver measurable -</h2>
+                        </div>
+                        <div class="works-image-wrap">
+                            <img src="images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png"
+                                alt="Luxury Architecture Showcase">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="section-divider"></div>
+
+        <!-- CTA Section -->
+        <section class="cta-section">
+            <div class="cta-container-wrap">
+                <div class="container cta-content">
+                    <lottie-player
+                        src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6976461cc4f6f1932be43d69_5146020a7bf240ee8ce7bcf890c843dd.json"
+                        background="transparent" speed="1" style="width: 200px; height: 200px; margin: 0 auto;" loop
+                        autoplay>
+                    </lottie-player>
+                    <h2 class="cta-title">Just one more step to make<br>your perfect choice</h2>
+                    <h3 class="cta-subtitle">Click either button below to get started.</h3>
+                    <div class="cta-actions">
+                        <a href="digital-solutions.html#ds-services" class="cta-button primary"><span>Digital
+                                Solutions</span></a>
+                        <a href="ai-consultancy.html#ai-helps" class="cta-button secondary"><span>AI
+                                Consulting</span></a>
+                    </div>
+                </div>
+                <div class="floating-btn">Contact Us</div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Hardcoded Footer for SEO with Placeholder ID -->
+    <!-- Footer v1.1 -->
+    <footer id="footer-placeholder" class="footer-wrapper">
+        <!-- Footer loaded from footer.html -->
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.js"></script>
+    <script src="script.js" defer></script>
+</body>
+
+</html>
