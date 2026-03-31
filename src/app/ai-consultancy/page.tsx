@@ -238,37 +238,99 @@ export default function AIConsultancy() {
       <Navbar />
       <main>
         {/* Hero Section */}
-        <section className="hero ai-consultancy-hero">
+        <section className="ai-hero">
           <div className="container">
-            <div className="hero-inner">
-              <div className="hero-left">
-                <div className="about-badge">
-                  <span className="badge-dot"></span> AI CONSULTANCY
-                </div>
-                <h1 className="hero-title">
-                  Efficiency Redefined<br />
-                  with AI-Driven<br />
-                  Workflows
-                </h1>
-                <Link href="/contact" className="book-call" style={{ marginTop: "60px", gap: "12px" }}>
-                  <span className="book-call-text">
-                    <span>BOOK A CALL</span>
-                    <span>BOOK A CALL</span>
-                  </span>
-                  <span className="book-call-arrow">
-                    <svg viewBox="0 0 16 16" fill="none">
-                      <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#ff5722" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  </span>
+            <div className="ai-hero-content">
+              <div className="about-badge centered">
+                <span className="badge-dot"></span> AI CONSULTANCY
+              </div>
+              <h1 className="ai-hero-title">
+                Cut Costs by 60%,<br />
+                Save 20+ Hours Weekly,<br />
+                Scale Without Hiring
+              </h1>
+              <p className="ai-hero-subtext">
+                We help businesses use AI to automate repetitive work, reduce operational costs, and free up
+                human teams to focus on what actually matters.
+              </p>
+              <div className="ai-hero-cta">
+                <Link href="/contact" className="cta-btn primary">Book a Call</Link>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Lottie Accent */}
+        <div className="lottie-divider" style={{ background: "#EEE9E3", paddingBottom: "60px" }}>
+          <LottiePlayer
+            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6962574eee3e6e37d12adae3_ca0eb53e0c1c4c0781764794d191db0b.json"
+            style={{ width: "300px", height: "auto", margin: "0 auto" }}
+          />
+        </div>
+
+        {/* Orange CTA Banner */}
+        <div style={{ background: "#EEE9E3", padding: "40px 20px", fontFamily: "inherit" }}>
+          <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
+            <div style={{
+              textAlign: "center",
+              padding: "100px 40px",
+              background: "linear-gradient(135deg, #FF3C00 0%, #ff5722 100%)",
+              borderRadius: "24px",
+              color: "#fff",
+              position: "relative",
+              overflow: "hidden",
+            }}>
+              <div style={{ position: "relative", zIndex: 1 }}>
+                <h2 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700, lineHeight: 1.2, marginBottom: "24px", letterSpacing: "-0.02em" }}>
+                  AI Solutions That Scale With Your Business
+                </h2>
+                <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.25rem)", maxWidth: "900px", margin: "0 auto 40px", lineHeight: 1.6, opacity: 0.95 }}>
+                  Whether you&apos;re a startup or a global enterprise, our AI services help
+                  you save time, reduce costs, and automate repetitive processes — all
+                  while increasing efficiency.
+                </p>
+                <Link href="#pricing-details" style={{
+                  display: "inline-block",
+                  padding: "20px 60px",
+                  background: "#fff",
+                  color: "#FF3C00",
+                  borderRadius: "50px",
+                  fontSize: "1.125rem",
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  transition: "all 0.4s ease",
+                  boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
+                }}>
+                  View Pricing Plans 👇
                 </Link>
               </div>
+            </div>
+          </div>
+        </div>
 
-              <div className="hero-right">
-                <LottiePlayer
-                  src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696c66d11e51381e05d04847_368bc0e9987f4c01bf0015570bbd60fc.json"
-                  className="ai-hero-lottie"
-                />
-              </div>
+        {/* The Problem Section */}
+        <section className="problem-impact">
+          <div className="ai-consultancy-container">
+            <div className="problem-header">
+              <h2>The Problem (Relatable Pain)</h2>
+              <p>Most businesses today are stuck with:</p>
+            </div>
+            <div className="problem-cards">
+              {[
+                { icon: "💰", text: "High customer support costs" },
+                { icon: "⚡", text: "Teams wasting hours on repetitive tasks" },
+                { icon: "📉", text: "Declining productivity metrics" },
+                { icon: "🔄", text: "Disconnected tools and inefficient workflows" },
+                { icon: "🕳️", text: "Lack of visibility into performance and data" },
+                { icon: "⏱️", text: "Burnout and inefficiency" },
+                { icon: "📋", text: "Manual data handling" },
+                { icon: "👥", text: "Slow response times which results in time waste" },
+              ].map((card) => (
+                <div key={card.text} className="problem-card">
+                  <div className="icon">{card.icon}</div>
+                  <h3>{card.text}</h3>
+                </div>
+              ))}
             </div>
           </div>
         </section>

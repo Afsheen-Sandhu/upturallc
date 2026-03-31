@@ -167,6 +167,14 @@ export default function Home() {
                       <div className="tricker-divider"></div>
                       <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
                   </div>
                   <div className="tricker-single-wrap">
                       <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
@@ -175,6 +183,64 @@ export default function Home() {
                       <div className="tricker-divider"></div>
                       <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                      <img src="/images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07" className="tricker-single-image" />
+                      <div className="tricker-divider"></div>
+                  </div>
+              </div>
+          </section>
+
+          <div className="section-divider"></div>
+
+          {/* Services & Accordion Section */}
+          <section className="services-section" id="solutions">
+              <div className="container">
+                  <div className="services-grid">
+                      <div className="services-left">
+                          <LottiePlayer
+                            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696a770dd3cf2e9e995b6916_955c4b7cf6534e0cb560a1e8e52bbb34.json"
+                            style={{ width: "100%", maxWidth: "550px", height: "auto" }}
+                          />
+                      </div>
+                      <div className="services-right">
+                          <div className="about-badge">
+                              <span className="badge-dot"></span> OUR DIGITAL SOLUTIONS
+                          </div>
+                          <div className="accordion">
+                              {[
+                                  { title: "Custom Web Development", text: "Tailored web development that meets your business goals, ensuring your website is responsive, scalable, and user-friendly." },
+                                  { title: "Web Design", text: "Creating visually stunning and intuitive interfaces that engage users and elevate your brand's digital identity through research-backed design." },
+                                  { title: "SEO Services", text: "Strategic optimization to increase your search engine visibility, drive organic traffic, and ensure your business reaches its target audience effectively." },
+                                  { title: "Mobile App Development", text: "Building high-performance native and cross-platform mobile applications that provide seamless user experiences across all devices and platforms." },
+                                  { title: "AI Consultancy", text: "Leveraging cutting-edge artificial intelligence to optimize your business processes, automate workflows, and provide data-driven insights for growth." }
+                              ].map((item, i) => (
+                                  <div key={i} className={`accordion-item${activeAccordion === i ? ' active' : ''}`} onClick={() => setActiveAccordion(i)}>
+                                      <div className="accordion-header">
+                                          <h3 className="accordion-title">{item.title}</h3>
+                                      </div>
+                                      <div className="accordion-content" style={activeAccordion === i ? { height: 'auto', opacity: 1 } : {}}>
+                                          <p className="accordion-text">{item.text}</p>
+                                      </div>
+                                  </div>
+                              ))}
+                          </div>
+                          <a href="/digital-solutions" className="explore-services">
+                              <span className="book-call-text">
+                                  <span>EXPLORE OUR SERVICES</span>
+                                  <span>EXPLORE OUR SERVICES</span>
+                              </span>
+                              <span className="book-call-arrow">
+                                  <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                      <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#FF3C00" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                                  </svg>
+                              </span>
+                          </a>
+                      </div>
                   </div>
               </div>
           </section>
