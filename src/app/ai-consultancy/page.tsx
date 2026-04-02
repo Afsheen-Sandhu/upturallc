@@ -193,28 +193,19 @@ export default function AIConsultancy() {
       });
     }
 
-    gsap.from(".ai-benefits-item", {
-      opacity: 0,
-      y: 50,
-      scale: 0.9,
-      stagger: 0.15,
-      duration: 0.8,
-      scrollTrigger: {
-        trigger: ".ai-benefits-grid",
-        start: "top 85%",
+    gsap.fromTo(".ai-benefits-item",
+      { opacity: 0, y: 50, scale: 0.9 },
+      { opacity: 1, y: 0, scale: 1, stagger: 0.15, duration: 0.8,
+        scrollTrigger: { trigger: ".ai-benefits-grid", start: "top 95%", toggleActions: "play none none none" }
       }
-    });
+    );
 
-    gsap.from(".results-card", {
-      opacity: 0,
-      y: 30,
-      stagger: 0.1,
-      duration: 0.6,
-      scrollTrigger: {
-        trigger: ".results-cards",
-        start: "top 80%",
+    gsap.fromTo(".results-card",
+      { opacity: 0, y: 30 },
+      { opacity: 1, y: 0, stagger: 0.1, duration: 0.6,
+        scrollTrigger: { trigger: ".results-cards", start: "top 95%", toggleActions: "play none none none" }
       }
-    });
+    );
   }, { scope: containerRef });
 
   useEffect(() => {
