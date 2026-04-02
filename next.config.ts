@@ -9,6 +9,12 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/admin.html", destination: "/admin", permanent: false },
+      { source: "/admin-dashboard.html", destination: "/admin/dashboard", permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

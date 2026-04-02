@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LottiePlayer from "@/components/LottiePlayer";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import FloatingContactBtn from "@/components/FloatingContactBtn";
 
 if (typeof window !== "undefined") {
@@ -91,30 +90,39 @@ const SERVICE_NAME_MAP: Record<ServiceKey, string> = {
   app: "App Development",
 };
 
+const SERVICE_CARDS: Array<{ icon: string; title: string; text: string }> = [
+  {
+    icon: "fa-code",
+    title: "Custom Website Development",
+    text: "Fast, secure, conversion-focused websites built around your goals.",
+  },
+  {
+    icon: "fa-rotate",
+    title: "Website Redesign & Revamp",
+    text: "Modern UX, better performance, and a clearer path to conversion.",
+  },
+  {
+    icon: "fa-mobile-screen-button",
+    title: "Mobile App Development",
+    text: "From MVP to scalable product with smooth, reliable user flows.",
+  },
+  {
+    icon: "fa-magnifying-glass-chart",
+    title: "Search Engine Optimization",
+    text: "Technical + content improvements that drive compounding organic growth.",
+  },
+  {
+    icon: "fa-bullhorn",
+    title: "Social Media Marketing",
+    text: "Strategy, content, and campaigns designed for measurable results.",
+  },
+];
+
 export default function DigitalSolutions() {
   const [activeService, setActiveService] = useState<ServiceKey>("web");
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
-
-  const solutionStackRef = useRef<HTMLDivElement>(null);
-
-  useGSAP(() => {
-    const cards = gsap.utils.toArray(".digital-solution-card") as HTMLElement[];
-    cards.forEach((card, index) => {
-      if (index === cards.length - 1) return;
-      ScrollTrigger.create({
-        trigger: card,
-        start: "top 120",
-        pin: true,
-        pinSpacing: false,
-        endTrigger: solutionStackRef.current,
-        end: "bottom bottom",
-        scrub: true,
-      });
-    });
-    return () => ScrollTrigger.getAll().forEach((t) => t.kill());
-  }, { scope: solutionStackRef });
 
   const handlePlaceOrder = () => {
     if (!selectedTier) {
@@ -182,120 +190,26 @@ export default function DigitalSolutions() {
           </div>
         </section>
 
-        {/* STACKED SERVICE CARDS */}
-        <section className="digital-solutions-stack" ref={solutionStackRef}>
-          <div className="digital-solutions-container">
-
-            <div className="digital-solution-card" id="web-dev">
-              <div className="card-top">
-                <div className="icon-box">
-                  <svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 14H4v-4h11v4zm0-5H4V9h11v4zm5 5h-4V9h4v9z" /></svg>
+        {/* SERVICE CARDS (Simplified — matches AI card style) */}
+        <section className="ds-service-cards">
+          <div className="ds-service-cards-inner">
+            <div className="ai-benefits-grid ds-ai-card-grid">
+              {SERVICE_CARDS.map((service) => (
+                <div key={service.title} className="ai-benefits-item ds-ai-card-item">
+                  <div className="ai-benefits-card">
+                    <div className="ai-benefits-icon-box">
+                      <div className="ai-benefits-icon">
+                        <i className={`fa-solid ${service.icon}`}></i>
+                      </div>
+                      <div className="ai-benefits-icon-shadow"></div>
+                    </div>
+                    <h3 className="ai-benefits-card-title">{service.title}</h3>
+                    <p className="ai-benefits-card-text">{service.text}</p>
+                    <div className="ai-benefits-line"></div>
+                  </div>
                 </div>
-                <h2>Custom Website Development</h2>
-                <p className="intro">Your website is your digital headquarters — it needs to work flawlessly.</p>
-                <div className="bullet-wrapper">
-                  <ul className="bullet-list">
-                    <li>Custom websites tailored to your business goals</li>
-                    <li>Fast, secure, and scalable architectures</li>
-                    <li>Conversion-focused layouts</li>
-                    <li>Mobile-responsive experiences</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="result-tag">Result</div>
-                <div className="result-text">Websites that don&apos;t just look good — they convert.</div>
-              </div>
+              ))}
             </div>
-
-            <div className="digital-solution-card" id="web-redesign">
-              <div className="card-top">
-                <div className="icon-box">
-                  <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z" /></svg>
-                </div>
-                <h2>Website Redesign &amp; Revamp</h2>
-                <p className="intro">Already have a website but it&apos;s underperforming?</p>
-                <div className="bullet-wrapper">
-                  <ul className="bullet-list">
-                    <li>Modernize outdated designs</li>
-                    <li>Improve speed and performance</li>
-                    <li>Fix UX and conversion issues</li>
-                    <li>Optimize for SEO and mobile</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="result-tag">Result</div>
-                <div className="result-text">Higher engagement, lower bounce rates, better conversions.</div>
-              </div>
-            </div>
-
-            <div className="digital-solution-card" id="app-dev">
-              <div className="card-top">
-                <div className="icon-box">
-                  <svg viewBox="0 0 24 24"><path d="M17 1.01L7 1c-1.1 0-2 .9-2 2v18c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM17 19H7V5h10v14z" /></svg>
-                </div>
-                <h2>Mobile App Development</h2>
-                <p className="intro">Turn your idea into a powerful mobile experience.</p>
-                <div className="bullet-wrapper">
-                  <ul className="bullet-list">
-                    <li>Native &amp; cross-platform apps</li>
-                    <li>Android &amp; iOS applications</li>
-                    <li>Secure, scalable backends</li>
-                    <li>Smooth UI/UX flows</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="result-tag">Result</div>
-                <div className="result-text">Apps users love and businesses can scale with.</div>
-              </div>
-            </div>
-
-            <div className="digital-solution-card" id="seo-services">
-              <div className="card-top">
-                <div className="icon-box">
-                  <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" /></svg>
-                </div>
-                <h2>Search Engine Optimization</h2>
-                <p className="intro">Visibility = growth. If customers can&apos;t find you, you don&apos;t exist.</p>
-                <div className="bullet-wrapper">
-                  <ul className="bullet-list">
-                    <li>On-page &amp; technical SEO</li>
-                    <li>Keyword research &amp; strategy</li>
-                    <li>Content optimization</li>
-                    <li>Local &amp; global SEO</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="result-tag">Result</div>
-                <div className="result-text">Higher rankings, consistent traffic, long-term ROI.</div>
-              </div>
-            </div>
-
-            <div className="digital-solution-card" id="social-marketing">
-              <div className="card-top">
-                <div className="icon-box">
-                  <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V9h2v7zm4 0h-2V7h2v9z" /></svg>
-                </div>
-                <h2>Social Media Marketing</h2>
-                <p className="intro">We help brands turn attention into revenue.</p>
-                <div className="bullet-wrapper">
-                  <ul className="bullet-list">
-                    <li>Content strategy &amp; planning</li>
-                    <li>Paid ad campaigns</li>
-                    <li>Audience targeting &amp; growth</li>
-                    <li>Performance tracking</li>
-                  </ul>
-                </div>
-              </div>
-              <div>
-                <div className="result-tag">Result</div>
-                <div className="result-text">Strong brand presence + measurable results.</div>
-              </div>
-            </div>
-
           </div>
         </section>
 
@@ -303,7 +217,7 @@ export default function DigitalSolutions() {
         <div className="lottie-divider">
           <LottiePlayer
             src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6976466d5e233407f3083840_50f930ad0b53434aa3a02b871ba85f7e.json"
-            style={{ width: "300px", height: "auto" }}
+            style={{ width: "clamp(320px, 40vw, 560px)", height: "auto" }}
           />
         </div>
 
@@ -463,14 +377,16 @@ export default function DigitalSolutions() {
                 <h2>How Our Pricing Works</h2>
                 <div className="steps-grid">
                   {[
-                    { n: 1, title: "Free Discovery Call", text: "We understand your goals and requirements." },
-                    { n: 2, title: "Custom Proposal", text: "You receive a tailored pricing plan." },
-                    { n: 3, title: "Clear Deliverables", text: "Milestones, timelines, and scope defined." },
-                    { n: 4, title: "Execution & Reporting", text: "Transparent updates at every stage." },
-                    { n: 5, title: "Scale Anytime", text: "Upgrade, pause, or expand services easily." },
+                    { n: 1, icon: "fa-solid fa-phone", title: "Free Discovery Call", text: "We understand your goals and requirements." },
+                    { n: 2, icon: "fa-solid fa-file-signature", title: "Custom Proposal", text: "You receive a tailored pricing plan." },
+                    { n: 3, icon: "fa-solid fa-list-check", title: "Clear Deliverables", text: "Milestones, timelines, and scope defined." },
+                    { n: 4, icon: "fa-solid fa-chart-line", title: "Execution & Reporting", text: "Transparent updates at every stage." },
+                    { n: 5, icon: "fa-solid fa-up-right-and-down-left-from-center", title: "Scale Anytime", text: "Upgrade, pause, or expand services easily." },
                   ].map((step) => (
                     <div key={step.n} className="step-item">
-                      <div className="step-number">{step.n}</div>
+                      <div className="step-icon" aria-hidden="true">
+                        <i className={step.icon}></i>
+                      </div>
                       <div className="step-content">
                         <h4>{step.title}</h4>
                         <p>{step.text}</p>
