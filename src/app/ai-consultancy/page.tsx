@@ -441,7 +441,7 @@ export default function AIConsultancy() {
                 ))}
               </div>
 
-              <Link href={`/contact?category=ai&tier=${currentTier}`} className="cta-btn text-center block" style={{ textDecoration: "none" }}>
+              <Link href={`/checkout?category=ai&tier=${currentTier}`} className="cta-btn text-center block" style={{ textDecoration: "none" }}>
                 Proceed to Checkout
               </Link>
             </div>
@@ -458,7 +458,7 @@ export default function AIConsultancy() {
                 <div className="ds-order-plan">{currentTierData.badge.replace(' TIER', '')} – {currentTierData.title}  ·  {currentTierData.price}</div>
               </div>
             </div>
-            <Link href={`/contact?category=ai&tier=${currentTier}`} className="ds-order-btn" style={{ textDecoration: "none" }}>
+            <Link href={`/checkout?category=ai&tier=${currentTier}`} className="ds-order-btn" style={{ textDecoration: "none" }}>
               <i className="fa-solid fa-arrow-right"></i>
               Place Order
             </Link>
