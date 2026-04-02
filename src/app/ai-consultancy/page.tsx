@@ -121,6 +121,10 @@ const TIER_DATA = {
       {
         name: 'Full AI Process Automation',
         subs: ['Automates complex workflows', 'Integrates with ERP, CRM']
+      },
+      {
+        name: 'Custom AI Integrations',
+        subs: ['Integrate AI into proprietary software or complex infrastructure', 'Enterprise-grade security & compliance']
       }
     ],
     howWorks: ['Onboarding: 4–8 weeks', 'Dedicated account manager', '24/7 support']
@@ -148,6 +152,13 @@ const TESTIMONIALS = [
     quote: "We no longer worry about missed messages or delayed responses. AI handles inquiries instantly, even outside business hours.",
     author: "Director, Service-Based Company",
     audio: "https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd953d6206a1f99f44fa0_ai%203.mp3"
+  },
+  {
+    stars: "⭐⭐⭐⭐⭐",
+    title: "Best decision we made this year.",
+    quote: "Automation replaced repetitive processes and reduced our dependency on hiring more staff.",
+    author: "COO, Logistics Company",
+    audio: "https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696cd953f171ada79a549799_ai%204.mp3"
   }
 ];
 
@@ -269,38 +280,17 @@ export default function AIConsultancy() {
         </div>
 
         {/* Orange CTA Banner */}
-        <div style={{ background: "#EEE9E3", padding: "40px 20px", fontFamily: "inherit" }}>
-          <div style={{ maxWidth: "1400px", margin: "0 auto" }}>
-            <div style={{
-              textAlign: "center",
-              padding: "100px 40px",
-              background: "linear-gradient(135deg, #FF3C00 0%, #ff5722 100%)",
-              borderRadius: "24px",
-              color: "#fff",
-              position: "relative",
-              overflow: "hidden",
-            }}>
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <h2 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 700, lineHeight: 1.2, marginBottom: "24px", letterSpacing: "-0.02em" }}>
-                  AI Solutions That Scale With Your Business
-                </h2>
-                <p style={{ fontSize: "clamp(1rem, 2.5vw, 1.25rem)", maxWidth: "900px", margin: "0 auto 40px", lineHeight: 1.6, opacity: 0.95 }}>
+        <div className="top-cta-wrapper">
+          <div className="top-cta-container">
+            <div className="top-cta-section">
+              <div className="top-cta-content">
+                <h2>AI Solutions That Scale With Your Business</h2>
+                <p>
                   Whether you&apos;re a startup or a global enterprise, our AI services help
                   you save time, reduce costs, and automate repetitive processes — all
                   while increasing efficiency.
                 </p>
-                <Link href="#pricing-details" style={{
-                  display: "inline-block",
-                  padding: "20px 60px",
-                  background: "#fff",
-                  color: "#FF3C00",
-                  borderRadius: "50px",
-                  fontSize: "1.125rem",
-                  fontWeight: 700,
-                  textDecoration: "none",
-                  transition: "all 0.4s ease",
-                  boxShadow: "0 8px 30px rgba(0,0,0,0.2)",
-                }}>
+                <Link href="#pricing-details" className="top-cta-button">
                   View Pricing Plans 👇
                 </Link>
               </div>
@@ -341,23 +331,22 @@ export default function AIConsultancy() {
         <div className="about-badge centered" style={{ marginTop: "100px" }}>
           <span className="badge-dot"></span> HOW AI HELPS BUSINESSES
         </div>
-        <section className="ai-solution-section" style={{ padding: "60px 20px 100px" }}>
-          <div className="ai-solutions-container max-w-4xl mx-auto space-y-20">
+        <section className="ai-solutions-stack">
+          <div className="ai-solutions-container">
             {AI_SOLUTIONS.map((solution, i) => (
-              <div key={i} className="ai-solution-card sticky top-24 bg-white rounded-3xl p-10 shadow-lg mb-20" style={{ minHeight: "450px" }}>
-                <div className="ai-card-content">
-                  <div className="badge mb-4">UPTURA AI</div>
-                  <h2 className="text-4xl font-extrabold mb-4">{solution.title}</h2>
-                  <p className="text-gray-600 mb-6">{solution.description}</p>
-                  <ul className="bullet-list space-y-3 mb-10">
+              <div key={i} className="ai-solution-card">
+                <div>
+                  <h2>{solution.title}</h2>
+                  <p style={{ color: "#444", marginBottom: "24px", fontSize: "1.1rem" }}>{solution.description}</p>
+                  <ul className="bullet-list">
                     {solution.bullets.map((bullet, j) => (
-                      <li key={j} className="pl-5 relative before:content-['✓'] before:absolute before:left-0 before:text-[#FF3C00]">{bullet}</li>
+                      <li key={j}>{bullet}</li>
                     ))}
                   </ul>
-                  <div className="mt-auto">
-                    <div className="result-tag bg-[#FF3C00] text-white px-3 py-1 rounded-full text-xs font-bold mb-2 inline-block">OUTCOME</div>
-                    <div className="result-text font-bold text-xl">{solution.outcome}</div>
-                  </div>
+                </div>
+                <div>
+                  <div className="result-tag">OUTCOME</div>
+                  <div className="result-text">{solution.outcome}</div>
                 </div>
               </div>
             ))}
@@ -419,9 +408,9 @@ export default function AIConsultancy() {
         <div className="section-divider"></div>
 
         {/* Pricing Section */}
-        <section id="pricing-details" style={{ padding: "100px 20px" }}>
-          <div className="pricing-container" style={{ maxWidth: "800px", margin: "0 auto" }}>
-            <div className="tier-selector" style={{ display: "flex", gap: "12px", marginBottom: "40px", justifyContent: "center" }}>
+        <section id="pricing-details">
+          <div className="pricing-container">
+            <div className="tier-selector">
               {(Object.keys(TIER_DATA) as Array<keyof typeof TIER_DATA>).map((tier) => (
                 <button
                   key={tier}
@@ -486,6 +475,14 @@ export default function AIConsultancy() {
         </div>
 
         <div className="section-divider"></div>
+
+        {/* Lottie Accent Before Testimonials */}
+        <div className="lottie-divider" style={{ background: "#EEE9E3", paddingBottom: "60px" }}>
+          <LottiePlayer
+            src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/696a789a41550f357bafa5f8_68d4b69ab6cd48dd95b8987b53b3edff.json"
+            style={{ width: "300px", height: "auto", margin: "0 auto" }}
+          />
+        </div>
 
         {/* Testimonials Carousel */}
         <section className="ai-testimonials">

@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LottiePlayer from "@/components/LottiePlayer";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
 import FloatingContactBtn from "@/components/FloatingContactBtn";
 
@@ -98,14 +99,16 @@ function PortfolioCard({ project }: { project: any }) {
   };
 
   return (
-    <div 
+    <div
       ref={cardRef}
-      className="portfolio-card" 
+      className="portfolio-card"
       style={{ width: "100%", height: "600px", position: "relative", overflow: "hidden", cursor: "pointer", borderRadius: "24px" }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      <div className="card-image" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", backgroundImage: `url('${project.image}')`, backgroundSize: "cover", backgroundPosition: "center", transition: "transform 0.5s ease" }}></div>
+      <div className="card-image" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", transition: "transform 0.5s ease" }}>
+        <Image src={project.image} alt={project.title} fill sizes="(max-width: 768px) 100vw, 600px" style={{ objectFit: "cover" }} priority={false} quality={75} />
+      </div>
       <div className="card-overlay" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#000", opacity: 0, transition: "opacity 0.5s ease" }}></div>
       <div className="card-content" style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px", zIndex: 2 }}>
         <div className="card-tags" style={{ display: "flex", gap: "10px", opacity: 0, transform: "translateY(-20px)" }}>
@@ -207,8 +210,8 @@ export default function Work() {
                   onClick={() => setCurrentTestimonial(i)}
                   style={{ cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: "10px" }}
                 >
-                  <div className="t-image-wrapper" style={{ width: "80px", height: "80px", borderRadius: "50%", overflow: "hidden", border: currentTestimonial === i ? "4px solid #FF3C00" : "4px solid transparent", transition: "all 0.3s ease" }}>
-                    <img src={t.image} alt={t.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                  <div className="t-image-wrapper" style={{ width: "80px", height: "80px", borderRadius: "50%", overflow: "hidden", border: currentTestimonial === i ? "4px solid #FF3C00" : "4px solid transparent", transition: "all 0.3s ease", position: "relative" }}>
+                    <Image src={`/${t.image}`} alt={t.name} width={80} height={80} style={{ objectFit: "cover" }} quality={75} />
                   </div>
                   <p style={{ fontWeight: 700, fontSize: "0.9rem", margin: 0 }}>{t.name}</p>
                 </div>

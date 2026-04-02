@@ -538,6 +538,47 @@ export default function DigitalSolutions() {
           </div>
         </section>
 
+        {/* How We Work Section */}
+        <section className="ai-process">
+          <div className="container">
+            <div className="process-header">
+              <h2>🧩 How We Work</h2>
+              <p>Simple. Strategic. Effective.</p>
+            </div>
+            <div className="process-steps">
+              <div className="process-line"></div>
+              <div className="step">
+                <div className="step-icon"><i className="fa-solid fa-magnifying-glass"></i></div>
+                <div className="step-content">
+                  <h3>Discover &amp; Plan</h3>
+                  <p>We understand your business, goals, and audience.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-icon"><i className="fa-solid fa-lightbulb"></i></div>
+                <div className="step-content">
+                  <h3>Design &amp; Build</h3>
+                  <p>We craft digital products that are functional and scalable.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-icon"><i className="fa-solid fa-cogs"></i></div>
+                <div className="step-content">
+                  <h3>Launch &amp; Optimize</h3>
+                  <p>We deploy, test, refine, and improve continuously.</p>
+                </div>
+              </div>
+              <div className="step">
+                <div className="step-icon"><i className="fa-solid fa-chart-line"></i></div>
+                <div className="step-content">
+                  <h3>Grow &amp; Scale</h3>
+                  <p>Marketing, SEO, automation — we help you expand.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <div className="section-divider"></div>
 
         {/* CTA */}
@@ -548,7 +589,7 @@ export default function DigitalSolutions() {
                 src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6976461cc4f6f1932be43d69_5146020a7bf240ee8ce7bcf890c843dd.json"
                 style={{ width: "200px", height: "200px", margin: "0 auto" }}
               />
-              <h2 className="cta-title">Just one more step to make<br />your perfect choice</h2>
+              <h2 className="cta-title">Start Your Project &amp;<br />Book a Consultation</h2>
               <h3 className="cta-subtitle">Click either button below to get started.</h3>
               <div className="cta-actions">
                 <Link href="/contact" className="cta-button primary"><span>Book a Call</span></Link>
