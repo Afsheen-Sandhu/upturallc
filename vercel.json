@@ -10,6 +10,11 @@
             ],
             "destination": "https://uptura.net/:path*",
             "permanent": true
+        },
+        {
+            "source": "/index.html",
+            "destination": "/",
+            "permanent": true
         }
     ],
     "headers": [
