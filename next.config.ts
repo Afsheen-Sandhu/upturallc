@@ -16,8 +16,19 @@ const nextConfig: NextConfig = {
   },
   async redirects() {
     return [
-      { source: "/admin.html", destination: "/admin", permanent: false },
-      { source: "/admin-dashboard.html", destination: "/admin/dashboard", permanent: false },
+      // Legacy .html → clean URLs (permanent 301 so Google transfers PageRank)
+      { source: "/index.html",             destination: "/",                  permanent: true },
+      { source: "/about.html",             destination: "/about",             permanent: true },
+      { source: "/work.html",              destination: "/work",              permanent: true },
+      { source: "/contact.html",           destination: "/contact",           permanent: true },
+      { source: "/digital-solutions.html", destination: "/digital-solutions", permanent: true },
+      { source: "/ai-consultancy.html",    destination: "/ai-consultancy",    permanent: true },
+      { source: "/checkout.html",          destination: "/checkout",          permanent: true },
+      { source: "/admin.html",             destination: "/admin",             permanent: true },
+      { source: "/admin-dashboard.html",   destination: "/admin/dashboard",   permanent: true },
+      // CRM — legacy tool, not in Next.js app yet; redirect to admin
+      { source: "/crm.html",               destination: "/admin",             permanent: false },
+      { source: "/crm-:page.html",         destination: "/admin",             permanent: false },
     ];
   },
 };
