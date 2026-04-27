@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
+import path from "node:path";
 
 const nextConfig: NextConfig = {
+  turbopack: {
+    // In this repo we use git worktrees; pin root so .env.local is loaded from this folder.
+    root: path.join(__dirname),
+  },
   images: {
     remotePatterns: [
       {

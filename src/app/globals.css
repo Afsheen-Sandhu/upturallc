@@ -7502,4 +7502,108 @@ html.lenis body {
         font-size: 2.1rem;
     }
 }
+/* ===== CHECKOUT — PAYMENT METHODS ===== */
+
+.checkout-trust {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+}
+
+.checkout-trust span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #6B6763;
+    background: #F8F5F2;
+    border: 1px solid rgba(0,0,0,0.07);
+    border-radius: 999px;
+    padding: 6px 14px;
+}
+
+.checkout-trust i {
+    font-size: 0.9rem;
+    color: #1a1a1a;
+}
+
+.payment-methods-section {
+    margin-top: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.payment-methods-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6B6763;
+}
+
+.payment-methods-line {
+    flex: 1;
+    height: 1px;
+    background: rgba(0,0,0,0.1);
+}
+
+.stripe-pay-btn {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.stripe-pay-btn:hover:not(:disabled) {
+    background: linear-gradient(135deg, #FF3C00, #FF5722);
+    box-shadow: 0 12px 30px rgba(255,60,0,0.3);
+    transform: translateY(-2px);
+}
+
+.stripe-pay-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.stripe-badge {
+    margin-left: auto;
+    font-size: 0.72rem;
+    font-weight: 600;
+    opacity: 0.55;
+    letter-spacing: 0.04em;
+}
+
+.payment-or {
+    text-align: center;
+    font-size: 0.82rem;
+    color: #6B6763;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+#paypal-button-container {
+    border-radius: 999px;
+    overflow: hidden;
+}
+
 /* ===== END CHECKOUT PAGE STYLES ===== */
