@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import TuraBot from "@/components/TuraBot";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +38,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <TuraBot />
       </body>
     </html>
   );
