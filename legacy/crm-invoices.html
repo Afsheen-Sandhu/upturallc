@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CRM – Invoices | Uptura</title>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "CRM – Invoices | Uptura",
+      "url": "https://uptura.net/crm-invoices.html",
+      "publisher": {
+        "@type": "Organization",
+        "name": "Uptura",
+        "url": "https://uptura.net"
+      }
+    }
+    </script>
+    <link rel="icon" type="image/png" href="images/favicon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="crm.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+</head>
+
+<body data-crm-page="invoices">
+    <div class="background-blobs" aria-hidden="true">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-top">
+            <div class="brand">
+                <img class="brand-logo"
+                    src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                    alt="Uptura" />
+            </div>
+            <button class="icon-btn" id="sidebarToggle" title="Toggle sidebar">
+                <i class="fa-solid fa-chevron-left" id="toggleIcon"></i>
+            </button>
+        </div>
+
+        <nav class="nav">
+            <a class="nav-link" href="crm-dashboard.html" id="dashboardNav" style="display:none;">
+                <i class="fa-solid fa-house"></i><span class="nav-text">Dashboard</span>
+            </a>
+            <a class="nav-link" href="crm.html" id="clientsNav">
+                <i class="fa-solid fa-users"></i><span class="nav-text">Clients</span>
+                <span class="nav-badge" id="clientsNavCount" style="display:none;">0</span>
+            </a>
+            <a class="nav-link" href="crm-meetings.html" id="meetingsNav">
+                <i class="fa-solid fa-calendar-check"></i><span class="nav-text">Meetings</span>
+                <span class="nav-badge" id="meetingsNavCount" style="display:none;">0</span>
+            </a>
+            <a class="nav-link" href="crm-employees.html">
+                <i class="fa-solid fa-user-group"></i><span class="nav-text">Employees</span>
+            </a>
+            <a class="nav-link" href="crm-applicants.html">
+                <i class="fa-solid fa-briefcase"></i><span class="nav-text">Applicants</span>
+            </a>
+            <a class="nav-link" href="crm-sales.html" id="salesNav">
+                <i class="fa-solid fa-chart-line"></i><span class="nav-text">Sales</span>
+                <span class="nav-badge" id="salesNavCount" style="display:none;">0</span>
+            </a>
+            <a class="nav-link active" href="crm-invoices.html" id="invoicesNav">
+                <i class="fa-solid fa-file-invoice-dollar"></i><span class="nav-text">Invoices</span>
+                <span class="nav-badge" id="invoicesNavCount" style="display:none;">0</span>
+            </a>
+            <a class="nav-link" href="crm-reports.html">
+                <i class="fa-solid fa-chart-pie"></i><span class="nav-text">Reports</span>
+            </a>
+            <a class="nav-link" href="crm-chat.html">
+                <i class="fa-solid fa-comments"></i><span class="nav-text">Chat</span>
+                <span class="nav-badge" id="chatNavCount" style="display:none;">0</span>
+            </a>
+            <a class="nav-link" href="crm-attendance.html" id="attendanceNav" style="display:none;">
+                <i class="fa-solid fa-clock"></i><span class="nav-text">Attendance</span>
+            </a>
+            <a class="nav-link" href="crm-users.html" id="usersNav">
+                <i class="fa-solid fa-user-plus"></i><span class="nav-text">User Management</span>
+            </a>
+            <button class="nav-link" id="logoutBtn">
+                <i class="fa-solid fa-right-from-bracket"></i><span class="nav-text">Logout</span>
+            </button>
+        </nav>
+
+        <div class="sidebar-foot">
+            <div class="pill" id="rolePill">Role: —</div>
+        </div>
+    </aside>
+
+    <main class="main">
+        <header class="topbar">
+            <button class="icon-btn mobile-only" id="mobileMenuBtn" title="Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div>
+                <div class="title" id="pageTitle">Invoices</div>
+                <div class="subtitle" id="pageSubtitle">Create + track status</div>
+            </div>
+            <div class="topbar-actions">
+                <div class="notification-bell" id="notificationBell">
+                    <i class="fa-solid fa-bell"></i>
+                    <div class="notification-badge" id="notificationBadge">0</div>
+                </div>
+                <div class="notifications-dropdown" id="notificationsDropdown">
+                    <div class="notifications-head">
+                        <span>Notifications</span>
+                        <button class="btn" id="clearNotifications" style="padding: 4px 8px; font-size: 11px;">Clear</button>
+                    </div>
+                    <div class="notifications-list" id="notificationsList">
+                        <div class="muted" style="padding: 20px; text-align: center;">No new notifications</div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="content">
+            <!-- Login -->
+            <div class="card login-card" id="loginCard">
+                <div class="logo">
+                    <img src="https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/695861fb4062b42c0bd5c2cd_Logo%20Main.png"
+                        alt="Uptura">
+                </div>
+                <h2 class="login-title">CRM Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input id="loginEmail" type="email" class="form-input" placeholder="Enter your email"
+                            required />
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="password-input-wrap">
+                            <input id="loginPassword" type="password" class="form-input" placeholder="••••••••" required />
+                            <button type="button" class="password-toggle" id="loginPasswordToggle" title="Show password" aria-label="Show password">
+                                <i class="fa-solid fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <button class="login-btn" type="submit" id="loginBtn">
+                        <span>Login</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                    <div class="error-msg" id="loginError"></div>
+                    <div class="login-help">Use your CRM credentials. Admin credentials also work (super_admin).</div>
+                </form>
+            </div>
+
+            <div class="tab active" id="tab-invoices">
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Create Invoice</h2>
+                            <div class="muted">Link to client (optional).</div>
+                        </div>
+                    </div>
+                    <form id="createInvoiceForm" class="grid4">
+                        <div class="field">
+                            <label>Client ID</label>
+                            <input id="invClientId" placeholder="client doc id" />
+                        </div>
+                        <div class="field">
+                            <label>Amount</label>
+                            <input id="invAmount" type="number" step="0.01" placeholder="1000" />
+                        </div>
+                        <div class="field">
+                            <label>Status</label>
+                            <select id="invStatus">
+                                <option value="draft">Draft</option>
+                                <option value="sent">Sent</option>
+                                <option value="paid">Paid</option>
+                                <option value="void">Void</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Due Date</label>
+                            <input id="invDue" type="date" />
+                        </div>
+                        <div class="field" style="grid-column: span 2;">
+                            <label>Notes</label>
+                            <input id="invNotes" placeholder="Notes..." />
+                        </div>
+                        <div class="field">
+                            <label>&nbsp;</label>
+                            <button class="btn primary" type="submit">Create</button>
+                        </div>
+                        <div class="msg" id="invMsg"></div>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Invoices</h2>
+                            <div class="muted">Latest first.</div>
+                        </div>
+                        <div class="table-controls">
+                            <div class="search-box">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                                <input id="invSearch" class="table-search"
+                                    placeholder="Search by amount, client, or notes..." />
+                            </div>
+                            <select class="table-filter" id="filterInvStatus">
+                                <option value="all">All Statuses</option>
+                                <option value="draft">Draft</option>
+                                <option value="sent">Sent</option>
+                                <option value="paid">Paid</option>
+                                <option value="void">Void</option>
+                            </select>
+                            <button class="btn" id="refreshInvoicesBtn"><i class="fa-solid fa-rotate"></i></button>
+                        </div>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Client ID</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Due</th>
+                                    <th>Created by</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="invTbody"></tbody>
+                        </table>
+                        <div class="inline-loader" id="invLoading">
+                            <div class="loader"></div>
+                        </div>
+                        <div class="empty muted" id="invEmpty">No invoices yet.</div>
+                    </div>
+                </div>
+
+                <!-- INVOICE GENERATOR CAARD -->
+                <div class="card" style="margin-top: 24px;">
+                    <div class="card-head">
+                        <div>
+                            <h2 class="h2">Generate Invoice PDF</h2>
+                            <div class="muted">Create and download a professional PDF.</div>
+                        </div>
+                        <button class="btn primary" id="generatePdfBtn"><i class="fa-solid fa-file-pdf"></i> Generate Invoice</button>
+                    </div>
+                    <div class="grid4">
+                        <div class="field">
+                            <label>Client Name</label>
+                            <input id="pdfClientName" placeholder="e.g. John Doe / ACME Corp" />
+                        </div>
+                        <div class="field">
+                            <label>Client Email</label>
+                            <input id="pdfClientEmail" placeholder="client@example.com" />
+                        </div>
+                        <div class="field">
+                            <label>Date of Issue</label>
+                            <input id="pdfDate" type="date" />
+                        </div>
+                        <div class="field">
+                            <label>Time of Issue</label>
+                            <input id="pdfTime" type="time" />
+                        </div>
+                        <div class="field" style="grid-column: span 2;">
+                            <label>Service Type (Main Label)</label>
+                            <select id="pdfService"
+                                style="padding: 12px; border-radius: 8px; border: 1px solid var(--border); font-family: inherit; width: 100%; background: var(--card-bg);">
+                                <option value="Custom Service / Consulting">Custom Service / Consulting</option>
+                                <option value="Custom Website Development">Custom Website Development</option>
+                                <option value="Website Redesign & Revamp">Website Redesign & Revamp</option>
+                                <option value="Mobile App Development">Mobile App Development</option>
+                                <option value="Search Engine Optimization">Search Engine Optimization</option>
+                                <option value="Social Media Marketing">Social Media Marketing</option>
+                                <option value="AI Consultancy & Strategy">AI Consultancy & Strategy</option>
+                                <option value="Custom AI Agent Development">Custom AI Agent Development</option>
+                                <option value="Workflow Automation">Workflow Automation</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label>Main Svc Price ($)</label>
+                            <input id="pdfServicePrice" type="number" step="0.01" placeholder="0.00" />
+                        </div>
+                        <div class="field">
+                            <label>Main Svc Duration</label>
+                            <input id="pdfServiceDuration" placeholder="e.g. 1 Month" value="1" />
+                        </div>
+                        <div class="field" style="grid-column: span 2;">
+                            <label>Additional Details (Optional)</label>
+                            <input id="pdfDescription" placeholder="e.g. March 2026 Deliverables or Phase 1" />
+                        </div>
+                    </div>
+
+                    <!-- LINE ITEMS SECTION -->
+                    <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 24px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                            <h3 class="h2" style="font-size: 1.1rem; margin: 0;">Line Items</h3>
+                            <button class="btn" id="addItemBtn" type="button"><i class="fa-solid fa-plus"></i> Add Item</button>
+                        </div>
+                        <div id="pdfItemsList">
+                            <!-- Items will be added here -->
+                        </div>
+                        <div style="text-align: right; margin-top: 16px; font-weight: 800; font-size: 1.1rem;">
+                            Total Amount: $<span id="pdfTotalDisplay">0.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="crm.js" type="module"></script>
+</body>
+
+</html>

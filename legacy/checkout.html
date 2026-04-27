@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout | Confirm Your Plan - Uptura</title>
+    <meta name="description"
+        content="Confirm your Uptura plan and share your details so our team can review your order and contact you shortly.">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "Organization",
+          "@id": "https://uptura.net/#organization",
+          "name": "Uptura",
+          "url": "https://uptura.net",
+          "logo": {
+            "@type": "ImageObject",
+            "url": "https://uptura.net/images/logo-main.png"
+          }
+        },
+        {
+          "@type": "WebSite",
+          "@id": "https://uptura.net/#website",
+          "url": "https://uptura.net",
+          "name": "Uptura",
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        },
+        {
+          "@type": "WebPage",
+          "@id": "https://uptura.net/checkout.html#webpage",
+          "url": "https://uptura.net/checkout.html",
+          "name": "Checkout | Confirm Your Plan - Uptura",
+          "isPartOf": { "@id": "https://uptura.net/#website" },
+          "publisher": { "@id": "https://uptura.net/#organization" }
+        }
+      ]
+    }
+    </script>
+    <meta name="robots" content="index,follow">
+    <link rel="canonical" href="https://uptura.net/checkout.html">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://uptura.net/checkout.html">
+    <meta property="og:title" content="Checkout | Confirm Your Plan - Uptura">
+    <meta property="og:description"
+        content="Confirm your Uptura plan and share your details so our team can review your order and contact you shortly.">
+    <link rel="icon" type="image/png" href="images/favicon.png">
+
+    <!-- Fonts & Core Styles -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+    <link rel="stylesheet" href="style.css">
+
+    <!-- GSAP / Lenis / Mouse Follower (for global effects) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.1.13/dist/lenis.min.js"></script>
+    <script src="https://unpkg.com/mouse-follower@1/dist/mouse-follower.min.js"></script>
+
+    <!-- Meta Pixel Code -->
+    <script>
+        !function (f, b, e, v, n, t, s) {
+            if (f.fbq) return; n = f.fbq = function () {
+                n.callMethod ?
+                    n.callMethod.apply(n, arguments) : n.queue.push(arguments);
+            };
+            if (!f._fbq) f._fbq = n;
+            n.push = n;
+            n.loaded = !0;
+            n.version = '2.0';
+            n.queue = [];
+            t = b.createElement(e); t.async = !0;
+            t.src = v;
+            s = b.getElementsByTagName(e)[0];
+            s.parentNode.insertBefore(t, s);
+        }(window, document, 'script',
+            'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', '919718663794319');
+        fbq('track', 'PageView');
+    </script>
+    <noscript>
+        <img height="1" width="1" style="display:none"
+            src="https://www.facebook.com/tr?id=919718663794319&amp;ev=PageView&amp;noscript=1" />
+    </noscript>
+    <!-- End Meta Pixel Code -->
+
+    <style>
+        body {
+            background-color: #EEE9E3;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .checkout-wrapper {
+            max-width: 1100px;
+            margin: 140px auto 80px;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 32px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.06);
+            display: grid;
+            grid-template-columns: 1.1fr 1.2fr;
+            gap: 40px;
+        }
+
+        .checkout-summary-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #6B6763;
+            margin-bottom: 12px;
+        }
+
+        .checkout-summary-label .dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #FF3C00;
+        }
+
+        .checkout-title {
+            font-size: 2.6rem;
+            line-height: 1.1;
+            letter-spacing: -0.04em;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+        }
+
+        .checkout-subtitle {
+            font-size: 1rem;
+            color: #6B6763;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+
+        .selected-plan-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 18px;
+            border-radius: 999px;
+            background: #FFF5F2;
+            color: #FF3C00;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .selected-plan-pill i {
+            font-size: 1rem;
+        }
+
+        .selected-plan-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .selected-plan-price {
+            font-size: 0.95rem;
+            color: #6B6763;
+            margin-bottom: 20px;
+        }
+
+        .checkout-notes {
+            font-size: 0.9rem;
+            color: #6B6763;
+            line-height: 1.5;
+        }
+
+        .checkout-notes strong {
+            color: #1a1a1a;
+        }
+
+        .checkout-form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .checkout-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .checkout-label {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: #1a1a1a;
+        }
+
+        .checkout-input,
+        .checkout-textarea {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 2px solid #1a1a1a;
+            background: rgba(255, 255, 255, 0.5);
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .checkout-input:focus,
+        .checkout-textarea:focus {
+            background: #ffffff;
+            border-color: #FF3C00;
+        }
+
+        .checkout-textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .checkout-submit {
+            margin-top: 6px;
+            padding: 14px 32px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #FF3C00, #FF5722);
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(255, 60, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .checkout-submit:hover:not(:disabled) {
+            background: #1a1a1a;
+            transform: translateY(-2px);
+            box-shadow: 0 14px 35px rgba(0, 0, 0, 0.25);
+        }
+
+        .checkout-submit:disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        .checkout-spinner {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.4);
+            border-top-color: #ffffff;
+            animation: checkout-spin 0.9s linear infinite;
+            display: none;
+        }
+
+        @keyframes checkout-spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .checkout-confirmation {
+            margin-top: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            background: #E7F7EC;
+            color: #105126;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: none;
+        }
+
+        .addons-section {
+            margin-top: 24px;
+            padding: 18px 18px 4px;
+            border-radius: 18px;
+            background: #F8F5F2;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .addons-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: #1a1a1a;
+            margin-bottom: 6px;
+        }
+
+        .addons-helper {
+            font-size: 0.8rem;
+            color: #6B6763;
+            margin-bottom: 10px;
+        }
+
+        .addons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 8px;
+        }
+
+        .addon-chip {
+            padding: 9px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            background: #ffffff;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #1a1a1a;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .addon-chip span.addon-check {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            color: transparent;
+            background: #ffffff;
+        }
+
+        .addon-chip.selected {
+            background: #FF3C00;
+            color: #ffffff;
+            border-color: #FF3C00;
+            box-shadow: 0 6px 14px rgba(255, 60, 0, 0.3);
+        }
+
+        .addon-chip.selected span.addon-check {
+            background: #ffffff;
+            color: #FF3C00;
+            border-color: transparent;
+        }
+
+        @media (max-width: 900px) {
+            .addons-section {
+                margin-top: 20px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .checkout-wrapper {
+                grid-template-columns: 1fr;
+                padding: 28px 22px;
+                margin: 120px 16px 60px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .checkout-title {
+                font-size: 2.1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navbar Placeholder -->
+    <div id="navbar-placeholder" class="custom-navbar-wrapper"></div>
+
+    <main>
+        <section class="checkout-wrapper">
+            <div>
+                <div class="checkout-summary-label">
+                    <span class="dot"></span>
+                    <span>Order Summary</span>
+                </div>
+                <h1 class="checkout-title">Confirm your plan<br>and share your details</h1>
+                <p class="checkout-subtitle">
+                    This isn’t a payment — it simply lets us capture the plan you’re interested in so our team can
+                    review,
+                    confirm the scope, and reach out with next steps.
+                </p>
+
+                <div class="selected-plan-pill">
+                    <i class="fa-solid fa-receipt"></i>
+                    <span>Selected Plan</span>
+                </div>
+                <div class="selected-plan-name" id="selectedPlanName">Custom plan (we’ll confirm with you).</div>
+                <div class="selected-plan-price" id="selectedPlanPrice">Pricing will be finalized after our call.</div>
+
+                <p class="checkout-notes">
+                    <strong>What happens next?</strong><br>
+                    Once you place this order, your details and selected plan are securely stored in our system.
+                    Our team will review everything and contact you shortly via email or phone to confirm timelines,
+                    deliverables, and final pricing.
+                </p>
+            </div>
+
+            <div>
+                <form id="checkoutForm" class="checkout-form">
+                    <div class="checkout-form-group">
+                        <label for="name" class="checkout-label">Name *</label>
+                        <input type="text" id="name" class="checkout-input" placeholder="Enter your full name" required>
+                    </div>
+
+                    <div class="checkout-form-group">
+                        <label for="email" class="checkout-label">Email *</label>
+                        <input type="email" id="email" class="checkout-input" placeholder="you@example.com" required>
+                    </div>
+
+                    <div class="checkout-form-group">
+                        <label for="phone" class="checkout-label">Phone</label>
+                        <input type="tel" id="phone" class="checkout-input" placeholder="Optional, but helpful">
+                    </div>
+
+                    <div class="checkout-form-group">
+                        <label for="company" class="checkout-label">Company</label>
+                        <input type="text" id="company" class="checkout-input"
+                            placeholder="Your company name (optional)">
+                    </div>
+
+                    <div class="checkout-form-group">
+                        <label for="notes" class="checkout-label">Anything specific we should know?</label>
+                        <textarea id="notes" class="checkout-textarea"
+                            placeholder="Share any context, links, or goals you have in mind."></textarea>
+                    </div>
+
+                    <div id="addonsContainer"></div>
+
+                    <button type="submit" class="checkout-submit" id="checkoutSubmit">
+                        <div class="checkout-spinner" id="checkoutSpinner"></div>
+                        <span id="checkoutSubmitText">Place Order</span>
+                    </button>
+
+                    <div class="checkout-confirmation" id="checkoutConfirmation">
+                        Order received. Our team will contact you shortly.
+                    </div>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer Placeholder -->
+    <footer id="footer-placeholder" class="footer-wrapper"></footer>
+
+    <script src="script.js"></script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+        import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
+            authDomain: "uptura-leads.firebaseapp.com",
+            projectId: "uptura-leads",
+            storageBucket: "uptura-leads.firebasestorage.app",
+            messagingSenderId: "146306181969",
+            appId: "1:146306181969:web:c91b776edc33f652c2c170",
+            measurementId: "G-ELHWMEHZ9W"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+
+
+        function getQueryParam(name) {
+            const params = new URLSearchParams(window.location.search);
+            return params.get(name) || null;
+        }
+
+        const category = getQueryParam('category') || 'general';
+        const tier = getQueryParam('tier');
+        const type = getQueryParam('type');
+        const service = getQueryParam('service');
+        const plan = getQueryParam('plan');
+        const price = getQueryParam('price');
+
+        const selectedPlanNameEl = document.getElementById('selectedPlanName');
+        const selectedPlanPriceEl = document.getElementById('selectedPlanPrice');
+
+        let planLabel = '';
+
+        if (category === 'ai' && tier) {
+            const tierNames = {
+                startup: 'Startup – AI Chat Support',
+                smb: 'SMB – Growing Business Solutions',
+                enterprise: 'Enterprise – Enterprise-Grade AI'
+            };
+            planLabel = tierNames[tier] || 'AI Consultancy Plan';
+        } else if (category === 'digital') {
+            if (type) {
+                planLabel = `Digital Solutions – ${type.replace(/-/g, ' ')}`;
+            } else if (service) {
+                planLabel = `Digital Solutions – ${service.replace(/-/g, ' ')}`;
+            }
+        }
+
+        if (!planLabel && plan) {
+            planLabel = plan;
+        }
+
+        if (!planLabel) {
+            planLabel = 'Custom plan (we’ll confirm with you).';
+        }
+
+        selectedPlanNameEl.textContent = planLabel;
+        selectedPlanPriceEl.textContent = price
+            ? `Approximate pricing: ${decodeURIComponent(price)} (final quote shared after review).`
+            : 'Pricing will be finalized after our call.';
+
+        const checkoutForm = document.getElementById('checkoutForm');
+        const submitBtn = document.getElementById('checkoutSubmit');
+        const submitText = document.getElementById('checkoutSubmitText');
+        const spinner = document.getElementById('checkoutSpinner');
+        const confirmation = document.getElementById('checkoutConfirmation');
+
+        const fbclid = getQueryParam('fbclid');
+        const utm_source = getQueryParam('utm_source');
+        const utm_medium = getQueryParam('utm_medium');
+        const utm_campaign = getQueryParam('utm_campaign');
+
+        const addonsContainer = document.getElementById('addonsContainer');
+        const selectedAddons = [];
+
+        if (category === 'ai' && addonsContainer) {
+            const addonsData = [
+                { id: 1, title: 'Predictive Analytics', description: 'AI-powered insights for better decision-making' },
+                { id: 2, title: 'Sentiment Analysis', description: 'Understand customer emotions and feedback' },
+                { id: 3, title: 'Multi-Channel AI', description: 'Deploy AI across all your platforms' },
+                { id: 4, title: 'Custom Dashboards', description: 'Track KPIs and performance metrics' },
+                { id: 5, title: 'Staff Training', description: 'Training sessions for your internal team' },
+                { id: 6, title: 'AI Workflow Automation', description: 'Automate repetitive processes and approvals' },
+                { id: 7, title: 'Advanced Analytics', description: 'Deep insights into user behavior and trends' },
+                { id: 8, title: 'Security & Compliance', description: 'Enterprise-grade data protection and standards' },
+                { id: 9, title: 'Custom API Integration', description: 'Connect AI with your existing software stack' }
+            ];
+
+            const chipsHtml = addonsData.map(addon => `
+                <button type="button" class="addon-chip" data-addon-id="${addon.id}" data-addon-title="${addon.title}">
+                    <span class="addon-check">✓</span>
+                    <span>${addon.title}</span>
+                </button>
+            `).join('');
+
+            addonsContainer.innerHTML = `
+                <div class="addons-section">
+                    <div class="addons-title">Optional AI add-ons</div>
+                    <div class="addons-helper">Select any extra features you’d like included with this AI plan.</div>
+                    <div class="addons-grid">
+                        ${chipsHtml}
+                    </div>
+                </div>
+            `;
+
+            addonsContainer.querySelectorAll('.addon-chip').forEach(chip => {
+                chip.addEventListener('click', () => {
+                    const id = chip.getAttribute('data-addon-id');
+                    const title = chip.getAttribute('data-addon-title');
+                    const existingIndex = selectedAddons.findIndex(a => a.id === id);
+
+                    if (existingIndex >= 0) {
+                        selectedAddons.splice(existingIndex, 1);
+                        chip.classList.remove('selected');
+                    } else {
+                        selectedAddons.push({ id, title });
+                        chip.classList.add('selected');
+                    }
+                });
+            });
+        }
+
+        checkoutForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const name = (document.getElementById('name').value || '').trim();
+            const email = (document.getElementById('email').value || '').trim();
+            const phone = (document.getElementById('phone').value || '').trim();
+            const company = (document.getElementById('company').value || '').trim();
+            const notes = (document.getElementById('notes').value || '').trim();
+
+            if (!name || !email) {
+                alert('Please enter at least your name and email so we can contact you.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitText.textContent = 'Placing order...';
+            spinner.style.display = 'inline-block';
+            confirmation.style.display = 'none';
+
+            const order = {
+                name,
+                email,
+                phone,
+                company,
+                notes,
+                category,
+                tier,
+                type,
+                service,
+                planLabel,
+                price: price ? decodeURIComponent(price) : null,
+                pageUrl: window.location.href,
+                userAgent: navigator.userAgent,
+                fbclid,
+                utm_source,
+                utm_medium,
+                utm_campaign,
+                addons: selectedAddons
+            };
+
+            try {
+                try {
+                    if (window.fbq) {
+                        fbq('track', 'Purchase', {
+                            content_name: planLabel,
+                            email: email,
+                            value: null,
+                            currency: 'USD',
+                            fbclid,
+                            utm_source,
+                            utm_medium,
+                            utm_campaign,
+                            addons: selectedAddons.map(a => a.title)
+                        });
+                    }
+                } catch (pixelError) {
+                    console.error('Meta Pixel Purchase tracking error:', pixelError);
+                }
+
+                await addDoc(collection(db, "orders"), {
+                    ...order,
+                    createdAt: serverTimestamp()
+                });
+
+                confirmation.textContent = 'Order received. Our team will contact you shortly.';
+                confirmation.style.display = 'block';
+                checkoutForm.reset();
+            } catch (error) {
+                console.error('Error saving order to Firebase:', error);
+                confirmation.textContent = 'Something went wrong while saving your order. Please try again or contact info@uptura.net.';
+                confirmation.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = 'Place Order';
+                spinner.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+
+</html>

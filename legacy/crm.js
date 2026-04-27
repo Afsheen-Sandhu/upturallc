@@ -1,0 +1,3593 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import { addDoc, collection, doc, getDoc, getDocs, getFirestore, limit, onSnapshot, orderBy, query, serverTimestamp, setDoc, where } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const STORAGE_KEY = "uptura_crm_session_v1";
+const CHECKIN_STORAGE_KEY = "uptura_checkin_v2";
+const CHECKIN_RUNNING_SESSION_KEY = "uptura_checkin_running_v2";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBUPmtsWmM5tvFBDiloryBGgWBX9vIeU4w",
+  authDomain: "uptura-leads.firebaseapp.com",
+  projectId: "uptura-leads",
+  storageBucket: "uptura-leads.firebasestorage.app",
+  messagingSenderId: "146306181969",
+  appId: "1:146306181969:web:c91b776edc33f652c2c170",
+  measurementId: "G-ELHWMEHZ9W",
+};
+
+const firebaseApp = initializeApp(firebaseConfig);
+const db = getFirestore(firebaseApp);
+
+// --- CRM CACHE ---
+let clientsCache = [];
+let employeesCache = [];
+let applicantsCache = [];
+let meetingsCache = [];
+let salesCache = [];
+let invoicesCache = [];
+let usersCache = [];
+let reportsCache = null;
+const reportCharts = {};
+const userEmailById = {};
+
+const PIPELINE_STATUSES = [
+  { id: "lead", label: "Lead" },
+  { id: "contacted", label: "Contacted" },
+  { id: "discovery", label: "Discovery / Requirement Gathering" },
+  { id: "proposal_sent", label: "Proposal Sent" },
+  { id: "negotiation", label: "Negotiation" },
+  { id: "approved", label: "Approved / Deal Won" },
+  { id: "onboarding", label: "Onboarding" },
+  { id: "active", label: "Active Client" },
+  { id: "invoice_sent", label: "Invoice Sent" },
+  { id: "payment_received", label: "Payment Received" },
+  { id: "completed", label: "Completed / Closed" },
+  { id: "lost", label: "Lost / Dropped" },
+];
+
+const EMP_ONBOARDING = [
+  { id: "pending", label: "Pending" },
+  { id: "completed", label: "Completed" },
+];
+
+const APP_STAGES = [
+  { id: "applied", label: "Applied" },
+  { id: "interview", label: "Interview" },
+  { id: "hired", label: "Hired" },
+];
+
+function qs(sel) {
+  return document.querySelector(sel);
+}
+
+function getSession() {
+  try {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function setSession(session) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+}
+
+function clearSession() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+
+function authHeader() {
+  const s = getSession();
+  return s?.token ? { Authorization: `Bearer ${s.token}` } : {};
+}
+
+function setMsg(el, text, kind) {
+  if (!el) return;
+  el.classList.remove("ok", "error");
+  if (kind) el.classList.add(kind);
+  el.textContent = text || "";
+  
+  if (text) {
+    if (kind === "error") window.showToast?.(text, "error");
+    else if (kind === "ok") window.showToast?.(text, "success");
+  }
+}
+
+window.showToast = (text, type = "success") => {
+  if (typeof Toastify !== "undefined") {
+    Toastify({
+      text: text,
+      duration: 4000,
+      close: true,
+      gravity: "top",
+      position: "right",
+      stopOnFocus: true,
+      style: {
+        background: type === "success" ? "linear-gradient(to right, #10b981, #059669)" : "linear-gradient(to right, #ef4444, #dc2626)",
+        borderRadius: "12px",
+        boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+        fontWeight: "600",
+        padding: "12px 24px"
+      }
+    }).showToast();
+  }
+};
+
+function toggleInlineLoader(id, show) {
+  const el = qs(`#${id}`);
+  if (el) el.style.display = show ? "flex" : "none";
+}
+
+window.customConfirm = (text, title = "Are you sure?") => {
+  return new Promise((resolve) => {
+    let overlay = qs(".confirm-overlay");
+    if (!overlay) {
+      overlay = document.createElement("div");
+      overlay.className = "confirm-overlay";
+      overlay.innerHTML = `
+        <div class="confirm-card">
+          <div class="confirm-icon"><i class="fa-solid fa-trash-can"></i></div>
+          <div class="confirm-title"></div>
+          <div class="confirm-text"></div>
+          <div class="confirm-actions">
+            <button class="confirm-btn btn-cancel">Cancel</button>
+            <button class="confirm-btn btn-confirm">Delete</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+
+    const titleEl = overlay.querySelector(".confirm-title");
+    const textEl = overlay.querySelector(".confirm-text");
+    const cancelBtn = overlay.querySelector(".btn-cancel");
+    const confirmBtn = overlay.querySelector(".btn-confirm");
+
+    titleEl.textContent = title;
+    textEl.textContent = text;
+
+    const close = (result) => {
+      overlay.classList.remove("active");
+      // Use a timeout to match CSS transition
+      setTimeout(() => {
+        resolve(result);
+      }, 200);
+    };
+
+    cancelBtn.onclick = (e) => { e.stopPropagation(); close(false); };
+    confirmBtn.onclick = (e) => { e.stopPropagation(); close(true); };
+    overlay.onclick = (e) => { if (e.target === overlay) close(false); };
+
+    // Set initial state
+    overlay.classList.add("active");
+  });
+};
+
+/* --- ACTION MENU & DROPDOWN --- */
+window.toggleDropdown = (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  const btn = e.currentTarget;
+  const menu = btn.nextElementSibling;
+  const tr = btn.closest("tr");
+  const isActive = menu.classList.contains("active");
+  
+  // Close all other menus and reset rows
+  document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("active"));
+  document.querySelectorAll("tr.row-active").forEach(r => r.classList.remove("row-active"));
+  
+  if (!isActive) {
+    menu.classList.add("active");
+    if (tr) tr.classList.add("row-active");
+  }
+};
+
+// Global click to close dropdowns
+document.addEventListener("click", () => {
+    document.querySelectorAll(".dropdown-menu").forEach(m => m.classList.remove("active"));
+    document.querySelectorAll("tr.row-active").forEach(r => r.classList.remove("row-active"));
+});
+
+window.closeCRMModal = () => {
+  qs("#crmModal").classList.remove("active");
+};
+
+const getStatusPill = (id, list) => {
+  const s = (list || []).find(x => x.id === id) || { label: id, id: 'default' };
+  return `<span class="status-pill ${s.id}">${s.label}</span>`;
+};
+
+const createActionMenu = (id, type) => {
+  return `
+    <div class="action-menu">
+      <button class="dot-btn" onclick="toggleDropdown(event)">
+        <i class="fa-solid fa-ellipsis-vertical"></i>
+      </button>
+      <div class="dropdown-menu">
+        <div class="dropdown-item" onclick="openCRMModal('${type}', '${id}', false)">
+          <i class="fa-solid fa-eye"></i> View
+        </div>
+        <div class="dropdown-item" onclick="openCRMModal('${type}', '${id}', true)">
+          <i class="fa-solid fa-pencil"></i> Edit
+        </div>
+        <div class="dropdown-item delete" onclick="handleTableDelete('${type}', '${id}')">
+          <i class="fa-solid fa-trash"></i> Delete
+        </div>
+      </div>
+    </div>
+  `;
+};
+
+window.handleTableDelete = async (type, id) => {
+  const confirmText = `Are you sure you want to delete this ${type}?`;
+  if (!await window.customConfirm(confirmText)) return;
+  
+  try {
+    if (type === 'client') { await deleteClient(id); clientsCache = clientsCache.filter(c => c.id !== id); renderClientsTable(clientsCache); }
+    else if (type === 'employee') { await deleteEmployee(id); employeesCache = employeesCache.filter(e => e.id !== id); renderEmployeesTable(employeesCache); }
+    else if (type === 'applicant') { await deleteApplicant(id); applicantsCache = applicantsCache.filter(a => a.id !== id); renderApplicantsTable(applicantsCache); }
+    else if (type === 'meeting') { await deleteMeeting(id); meetingsCache = meetingsCache.filter(m => m.id !== id); renderMeetingsTable(meetingsCache); }
+    else if (type === 'sale') { await deleteSale(id); salesCache = salesCache.filter(s => s.id !== id); renderSalesTable(salesCache); }
+    else if (type === 'invoice') { await deleteInvoice(id); invoicesCache = invoicesCache.filter(i => i.id !== id); renderInvoicesTable(invoicesCache); }
+    else if (type === 'user') { await deleteUser(id); usersCache = usersCache.filter(u => u.id !== id); renderUsersTable(usersCache); }
+    
+    window.showToast?.("Successfully deleted", "success");
+  } catch (err) {
+    window.showToast?.(err.message || "Delete failed", "error");
+  }
+};
+
+function injectCRMModal() {
+  if (qs("#crmModal")) return;
+  const modalHtml = `
+  <div class="crm-modal-overlay" id="crmModal">
+      <div class="crm-modal-card">
+          <div class="crm-modal-head">
+              <h2 class="crm-modal-title" id="crmModalTitle">Details</h2>
+              <button class="crm-modal-close" onclick="closeCRMModal()">&times;</button>
+          </div>
+          <div class="crm-modal-body">
+              <form id="crmModalForm" class="modal-grid"></form>
+              <div class="modal-field full remarks-section" style="margin-top:24px; border-top:1px solid var(--border); padding-top:24px;">
+                  <label>Internal Remarks / Comments</label>
+                  <textarea id="crmModalRemarks" placeholder="Add remarks for admin..."></textarea>
+              </div>
+          </div>
+          <div class="crm-modal-footer">
+              <button class="btn" onclick="closeCRMModal()">Close</button>
+              <button class="btn primary" id="crmModalSaveBtn">Save Changes</button>
+          </div>
+      </div>
+  </div>`;
+  document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function setupModalSaveBtn() {
+  const btn = qs("#crmModalSaveBtn");
+  if (!btn) return;
+  
+  const newBtn = btn.cloneNode(true);
+  btn.parentNode.replaceChild(newBtn, btn);
+  
+  newBtn.addEventListener("click", async () => {
+    const modal = qs("#crmModal");
+    const type = modal.dataset.type;
+    const id = modal.dataset.id;
+    const form = qs("#crmModalForm");
+    const remarks = qs("#crmModalRemarks").value;
+
+    const formData = new FormData(form);
+    const patch = Object.fromEntries(formData.entries());
+    patch.remarks = remarks;
+
+    if (type === "meeting" && patch.scheduledAt) {
+      patch.scheduledAt = new Date(patch.scheduledAt).toISOString();
+    }
+
+    let cache = [];
+    let renderFn = null;
+    if (type === "client") { cache = clientsCache; renderFn = renderClientsTable; }
+    else if (type === "employee") { cache = employeesCache; renderFn = renderEmployeesTable; }
+    else if (type === "applicant") { cache = applicantsCache; renderFn = renderApplicantsTable; }
+    else if (type === "meeting") { cache = meetingsCache; renderFn = renderMeetingsTable; }
+    else if (type === "sale") { cache = salesCache; renderFn = renderSalesTable; }
+    else if (type === "invoice") { cache = invoicesCache; renderFn = renderInvoicesTable; }
+    else if (type === "user") { cache = usersCache; renderFn = renderUsersTable; }
+
+    const idx = cache.findIndex((item) => item.id === id);
+    if (idx < 0) return;
+
+    const previous = { ...cache[idx] };
+
+    // 1. Optimistic update: show change immediately (don't put password in cache)
+    const patchForCache = type === "user" ? (() => { const p = { ...patch }; delete p.password; return p; })() : patch;
+    cache[idx] = { ...cache[idx], ...patchForCache };
+    if (renderFn) renderFn(cache);
+    closeCRMModal();
+    window.showToast?.("Saved", "success");
+
+    const originalText = newBtn.textContent;
+    newBtn.disabled = true;
+    newBtn.textContent = "Saving...";
+
+    const done = () => {
+      newBtn.disabled = false;
+      newBtn.textContent = originalText;
+    };
+
+    // 2. Persist in background; revert on failure
+    try {
+      if (type === "client") await updateClient(id, patch);
+      else if (type === "employee") await updateEmployee(id, patch);
+      else if (type === "applicant") await updateApplicant(id, patch);
+      else if (type === "meeting") await updateMeeting(id, patch);
+      else if (type === "sale") await updateSale(id, patch);
+      else if (type === "invoice") await updateInvoice(id, patch);
+      else if (type === "user") await updateUser(id, patch);
+    } catch (err) {
+      cache[idx] = previous;
+      if (renderFn) renderFn(cache);
+      window.showToast?.(err.message || "Save failed", "error");
+    } finally {
+      done();
+    }
+  });
+}
+
+  window.openCRMModal = (type, id, edit) => {
+  const modal = qs("#crmModal");
+  const form = qs("#crmModalForm");
+  const title = qs("#crmModalTitle");
+  const remarks = qs("#crmModalRemarks");
+  const saveBtn = qs("#crmModalSaveBtn");
+  
+  modal.dataset.type = type;
+  modal.dataset.id = id;
+  modal.dataset.edit = edit ? "1" : "0";
+  
+  let data = null;
+  if (type === 'client') data = clientsCache.find(c => c.id === id);
+  else if (type === 'employee') data = employeesCache.find(e => e.id === id);
+  else if (type === 'applicant') data = applicantsCache.find(a => a.id === id);
+  else if (type === 'meeting') data = meetingsCache.find(m => m.id === id);
+  else if (type === 'sale') data = salesCache.find(s => s.id === id);
+  else if (type === 'invoice') data = invoicesCache.find(i => i.id === id);
+  else if (type === 'user') data = usersCache.find(u => u.id === id);
+  
+  if (!data) return;
+  
+  title.textContent = `${edit ? 'Edit' : 'View'} ${type.charAt(0).toUpperCase() + type.slice(1)}`;
+  remarks.value = data.remarks || "";
+  remarks.readOnly = !edit;
+  saveBtn.style.display = edit ? "block" : "none";
+  
+  form.innerHTML = "";
+  
+  const addField = (label, value, key, fieldType = "text", options = null, isFull = false) => {
+    const div = document.createElement("div");
+    div.className = "modal-field";
+    
+    // Detect status fields for special styling
+    if (key.toLowerCase().includes("status") || key.toLowerCase().includes("stage")) {
+      div.classList.add("status-field");
+    }
+
+    if (fieldType === 'textarea' || isFull) div.classList.add("full");
+    if (!edit) div.classList.add("view-only");
+    
+    div.innerHTML = `<label>${label}</label>`;
+    let input;
+    if (fieldType === 'select' && options) {
+      input = document.createElement("select");
+      input.disabled = !edit;
+      options.forEach(opt => {
+        const o = document.createElement("option");
+        o.value = opt.id || opt;
+        o.textContent = opt.label || opt;
+        if (o.value === value) o.selected = true;
+        input.appendChild(o);
+      });
+    } else if (fieldType === 'textarea') {
+      input = document.createElement("textarea");
+      input.value = value || "";
+      input.readOnly = !edit;
+    } else {
+      input = document.createElement("input");
+      input.type = fieldType;
+      input.value = value || "";
+      input.readOnly = !edit;
+    }
+    input.name = key;
+    div.appendChild(input);
+    form.appendChild(div);
+  };
+  
+  if (type === 'client') {
+    addField("Name", data.name, "name");
+    addField("Company", data.company, "company");
+    addField("Email", data.email, "email", "email");
+    addField("Phone", data.phone, "phone");
+    addField("Status", data.pipelineStatus, "pipelineStatus", "select", PIPELINE_STATUSES);
+  } else if (type === 'employee') {
+    addField("Name", data.name, "name");
+    addField("Email", data.email, "email", "email");
+    addField("Role", data.role, "role");
+    addField("Daily Hours", data.dailyHours, "dailyHours", "number");
+    addField("Status", data.onboardingStatus, "onboardingStatus", "select", EMP_ONBOARDING);
+  } else if (type === 'applicant') {
+    addField("Name", data.name, "name");
+    addField("Email", data.email, "email", "email");
+    addField("Role", data.role, "role");
+    addField("Source", data.source, "source");
+    addField("Stage", data.stage, "stage", "select", APP_STAGES);
+  } else if (type === 'meeting') {
+      addField("Title", data.title, "title");
+      addField("Date", data.scheduledAt ? data.scheduledAt.slice(0,16) : "", "scheduledAt", "datetime-local");
+      addField("Status", data.status, "status", "select", ["scheduled", "completed", "cancelled"]);
+  } else if (type === 'sale') {
+      addField("Agent", data.agentEmail, "agentEmail");
+      addField("Client", data.clientId, "clientId");
+      addField("Amount", data.amount, "amount", "number");
+      addField("Stage", data.stage, "stage", "select", ["lead", "proposal_sent", "negotiation", "won", "lost"]);
+  } else if (type === 'invoice') {
+      addField("Client", data.clientId, "clientId");
+      addField("Amount", data.amount, "amount", "number");
+      addField("Due Date", data.dueDate, "dueDate", "date");
+      addField("Status", data.status, "status", "select", ["draft", "sent", "paid", "void"]);
+  } else if (type === 'user') {
+      addField("Email", data.email, "email", "email");
+      addField("Name", data.name, "name");
+      addField("Role", data.role, "role", "select", ["super_admin", "admin", "manager", "employee", "hr"]);
+      if (edit) {
+        const div = document.createElement("div");
+        div.className = "modal-field";
+        div.innerHTML = `<label>New password (leave blank to keep current)</label>`;
+        const wrap = document.createElement("div");
+        wrap.className = "password-input-wrap";
+        const input = document.createElement("input");
+        input.type = "password";
+        input.name = "password";
+        input.placeholder = "Min 8 characters";
+        const genBtn = document.createElement("button");
+        genBtn.type = "button";
+        genBtn.className = "btn secondary password-generate-btn";
+        genBtn.textContent = "Generate";
+        genBtn.title = "Generate password";
+        const toggleBtn = document.createElement("button");
+        toggleBtn.type = "button";
+        toggleBtn.className = "password-toggle";
+        toggleBtn.title = "Show password";
+        toggleBtn.setAttribute("aria-label", "Show password");
+        toggleBtn.innerHTML = "<i class=\"fa-solid fa-eye\"></i>";
+        wrap.appendChild(input);
+        wrap.appendChild(genBtn);
+        wrap.appendChild(toggleBtn);
+        div.appendChild(wrap);
+        form.appendChild(div);
+        genBtn.addEventListener("click", () => {
+          input.value = generatePassword(12);
+          input.type = "text";
+          const icon = toggleBtn.querySelector("i");
+          if (icon) icon.classList.replace("fa-eye", "fa-eye-slash");
+          toggleBtn.title = "Hide password";
+          toggleBtn.setAttribute("aria-label", toggleBtn.title);
+        });
+        toggleBtn.addEventListener("click", () => {
+          const isPass = input.type === "password";
+          input.type = isPass ? "text" : "password";
+          const icon = toggleBtn.querySelector("i");
+          if (icon) icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+          toggleBtn.title = isPass ? "Hide password" : "Show password";
+          toggleBtn.setAttribute("aria-label", toggleBtn.title);
+        });
+      }
+  }
+  
+  modal.classList.add("active");
+};
+
+function setupTopbarScroll() {
+  const scroller = qs(".content");
+  const topbar = qs(".topbar");
+  if (!scroller || !topbar) return;
+
+  let lastY = 0;
+  let ticking = false;
+
+  const onScroll = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => {
+      const y = scroller.scrollTop || 0;
+      const goingDown = y > lastY;
+      const past = y > 12;
+
+      topbar.classList.toggle("is-scrolled", past);
+
+      // Hide on scroll down, show on scroll up (after some movement)
+      if (y > 80 && goingDown) topbar.classList.add("is-hidden");
+      else topbar.classList.remove("is-hidden");
+
+      lastY = y;
+      ticking = false;
+    });
+  };
+
+  scroller.addEventListener("scroll", onScroll, { passive: true });
+  // initial state
+  onScroll();
+}
+
+function applyPageTitleFromBody() {
+  const page = document.body.getAttribute("data-crm-page") || "clients";
+  const title = qs("#pageTitle");
+  const subtitle = qs("#pageSubtitle");
+  if (!title || !subtitle) return;
+  if (page === "clients") {
+    title.textContent = "Clients";
+    subtitle.textContent = "Pipeline + profiles";
+  } else if (page === "meetings") {
+    title.textContent = "Meetings";
+    subtitle.textContent = "Follow-ups + scheduling";
+  } else if (page === "employees") {
+    title.textContent = "Employees";
+    subtitle.textContent = "Onboarding + working hours";
+  } else if (page === "applicants") {
+    title.textContent = "Applicants";
+    subtitle.textContent = "Hiring stages";
+  } else if (page === "sales") {
+    title.textContent = "Sales";
+    subtitle.textContent = "Deals + agent tracking";
+  } else if (page === "invoices") {
+    title.textContent = "Invoices";
+    subtitle.textContent = "Create + track status";
+  } else if (page === "reports") {
+    title.textContent = "Reports";
+    subtitle.textContent = "KPIs + snapshots";
+  } else if (page === "chat") {
+    title.textContent = "Chat";
+    subtitle.textContent = "Firestore real-time";
+  } else if (page === "users") {
+    title.textContent = "User Management";
+    subtitle.textContent = "Create CRM logins";
+  } else if (page === "dashboard") {
+    const session = getSession();
+    const displayName = session?.name || session?.email?.split("@")[0] || "there";
+    title.textContent = `Welcome, ${displayName}`;
+    subtitle.textContent = "Check in & track your time";
+  } else if (page === "attendance") {
+    title.textContent = "Attendance";
+    subtitle.textContent = "All employees — date-wise work hours";
+  }
+}
+
+function getCurrentPage() {
+  return document.body.getAttribute("data-crm-page") || "clients";
+}
+
+function applyRoleUI(role) {
+  qs("#rolePill").textContent = `Role: ${role || "—"}`;
+
+  const canManageUsers = role === "super_admin" || role === "admin";
+  const usersNav = qs("#usersNav");
+  if (usersNav) usersNav.style.display = canManageUsers ? "flex" : "none";
+  const attendanceNav = qs("#attendanceNav");
+  if (attendanceNav) attendanceNav.style.display = canManageUsers ? "flex" : "none";
+  if (!canManageUsers) {
+    qs("#tab-users")?.classList.remove("active");
+  }
+
+  // Restrict sidebar tabs for employees; non-employees on dashboard go to clients
+  const page = getCurrentPage();
+  const allPages = ["clients", "meetings", "employees", "applicants", "sales", "invoices", "reports", "chat", "users", "dashboard"];
+  const employeeAllowed = ["dashboard", "clients", "meetings", "sales", "chat"];
+
+  if (page === "dashboard" && role !== "employee") {
+    window.location.href = "crm.html";
+    return;
+  }
+  if (page === "attendance" && !["super_admin", "admin"].includes(role)) {
+    window.location.href = "crm.html";
+    return;
+  }
+
+  const links = document.querySelectorAll(".nav-link[href*='crm']");
+  if (role === "employee") {
+    links.forEach((link) => {
+      const href = link.getAttribute("href") || "";
+      const match = href.match(/crm-?([a-z]+)?/);
+      let target = "clients";
+      if (href === "crm.html") target = "clients";
+      else if (href === "crm-dashboard.html") target = "dashboard";
+      else if (match && match[1]) target = match[1];
+
+      if (!employeeAllowed.includes(target)) {
+        link.style.display = "none";
+      } else {
+        link.style.display = "flex";
+      }
+    });
+
+    if (!employeeAllowed.includes(page)) {
+      window.location.href = "crm-dashboard.html";
+    }
+  } else {
+    links.forEach((link) => {
+      link.style.display = "flex";
+    });
+    // Non-employees never see the Dashboard link
+    document.querySelectorAll('a[href="crm-dashboard.html"]').forEach((el) => {
+      el.style.display = "none";
+    });
+  }
+}
+
+function showLoggedInUI() {
+  const loginCard = qs("#loginCard");
+  const sidebar = qs("#sidebar");
+  const topbar = qs(".topbar");
+
+  document.body.classList.remove("crm-logged-out");
+
+  if (loginCard) loginCard.style.display = "none";
+  if (sidebar) sidebar.style.display = "flex";
+  if (topbar) topbar.style.display = "flex";
+
+  document.querySelectorAll(".tab").forEach((t) => (t.style.display = "block"));
+}
+
+function showLoggedOutUI() {
+  const loginCard = qs("#loginCard");
+  const sidebar = qs("#sidebar");
+  const topbar = qs(".topbar");
+
+  document.body.classList.add("crm-logged-out");
+
+  if (loginCard) loginCard.style.display = "block";
+  if (sidebar) sidebar.style.display = "none";
+  if (topbar) topbar.style.display = "none";
+
+  document.querySelectorAll(".tab").forEach((t) => {
+    t.style.display = "none";
+    t.classList.remove("active");
+  });
+}
+
+/** Parse API JSON; if the edge returns HTML (500 page), avoid throwing. */
+async function readCrmJson(resp) {
+  try {
+    const text = await resp.text();
+    if (!text) return {};
+    try {
+      return JSON.parse(text);
+    } catch {
+      return { success: false, message: "Unexpected response from server" };
+    }
+  } catch {
+    return { success: false, message: "Network error" };
+  }
+}
+
+/** Returns true if session was cleared (caller should stop). */
+function crmHandleAuthFailure(status, data) {
+  const msg = String(data?.message || "");
+  if (
+    status === 401 ||
+    /session expired|invalid or expired token|missing authorization|invalid authorization header|invalid token payload/i.test(
+      msg
+    )
+  ) {
+    clearCheckinState();
+    clearSession();
+    showLoggedOutUI();
+    window.showToast?.("Your session expired. Please sign in again.", "error");
+    try {
+      document.documentElement.removeAttribute("data-crm-role");
+    } catch (_) {}
+    return true;
+  }
+  return false;
+}
+
+async function crmLogin(email, password) {
+  const resp = await fetch("/api/crm-auth", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) {
+    throw new Error(data.message || "Login failed");
+  }
+  return data;
+}
+
+async function fetchBootstrap() {
+  const resp = await fetch("/api/crm/bootstrap", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Bootstrap failed");
+  return { clients: data.clients || [], users: data.users || [] };
+}
+
+async function fetchClients() {
+  const resp = await fetch("/api/crm/clients", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch clients");
+  return data.clients || [];
+}
+
+async function createClient(payload) {
+  const resp = await fetch("/api/crm/clients", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create client");
+  return data;
+}
+
+async function updateClient(id, patch) {
+  const resp = await fetch(`/api/crm/clients?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update client");
+  return data;
+}
+
+async function deleteClient(id) {
+  const resp = await fetch(`/api/crm/clients?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete client");
+  return true;
+}
+
+async function createUser(payload) {
+  const resp = await fetch("/api/crm/user-management", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create user");
+  return data;
+}
+
+async function fetchUsers() {
+  const resp = await fetch("/api/crm/user-management", {
+    method: "GET",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch users");
+  return data.users || [];
+}
+
+function buildUserEmailMap(list) {
+  for (const u of list || []) {
+    if (u.id && u.email) {
+      userEmailById[String(u.id)] = String(u.email);
+    }
+  }
+}
+
+async function primeUsersForCreatorLabels() {
+  const session = getSession();
+  const role = session?.role || "";
+  if (role !== "super_admin" && role !== "admin") return;
+  if (Object.keys(userEmailById).length) return;
+  try {
+    const users = await fetchUsers();
+    usersCache = users;
+    buildUserEmailMap(users);
+  } catch {
+    // non-fatal: creator labels will just fall back to createdByEmail / —
+  }
+}
+
+function getCreatorEmail(item) {
+  if (!item) return "—";
+  if (item.createdByEmail) return item.createdByEmail;
+  if (item.createdBy && userEmailById[item.createdBy]) return userEmailById[item.createdBy];
+  return "—";
+}
+
+function generatePassword(length = 12) {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+  let out = "";
+  if (typeof crypto !== "undefined" && crypto.getRandomValues) {
+    const arr = new Uint8Array(length);
+    crypto.getRandomValues(arr);
+    for (let i = 0; i < length; i++) out += chars[arr[i] % chars.length];
+  } else {
+    for (let i = 0; i < length; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return out;
+}
+
+function buildWelcomeMessage(email, password) {
+  return `Welcome to Uptura! 
+
+We have onboarded you as a Business Development Agent. Your account details are:
+
+📧 Email: ${email}
+🔑 Password: ${password}
+
+Please login through our app or web portal to start managing collections.`;
+}
+
+function buildEmployeeWelcomeMessage(name, email) {
+  return `Welcome to Uptura! 
+
+We have onboarded you as an employee. Your profile details are:
+
+👤 Name: ${name}
+📧 Email: ${email}
+
+If you do not yet have login credentials, please check with your admin for your CRM username and password.`;
+}
+
+async function fetchEmployees() {
+  const resp = await fetch("/api/crm/employees", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch employees");
+  return data.employees || [];
+}
+
+async function createEmployee(payload) {
+  const resp = await fetch("/api/crm/employees", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to add employee");
+  return data;
+}
+
+async function updateEmployee(id, patch) {
+  const resp = await fetch(`/api/crm/employees?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update employee");
+  return data.employee;
+}
+
+async function deleteEmployee(id) {
+  const resp = await fetch(`/api/crm/employees?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete employee");
+  return true;
+}
+
+async function fetchApplicants() {
+  const resp = await fetch("/api/crm/applicants", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch applicants");
+  return data.applicants || [];
+}
+
+async function createApplicant(payload) {
+  const resp = await fetch("/api/crm/applicants", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to add applicant");
+  return data;
+}
+
+async function updateApplicant(id, patch) {
+  const resp = await fetch(`/api/crm/applicants?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update applicant");
+  return data.applicant;
+}
+
+async function deleteApplicant(id) {
+  const resp = await fetch(`/api/crm/applicants?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete applicant");
+  return true;
+}
+
+async function fetchMeetings() {
+  const resp = await fetch("/api/crm/meetings", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch meetings");
+  return data.meetings || [];
+}
+
+async function createMeeting(payload) {
+  const resp = await fetch("/api/crm/meetings", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create meeting");
+  return data;
+}
+
+async function updateMeeting(id, patch) {
+  const resp = await fetch(`/api/crm/meetings?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update meeting");
+  return data.meeting;
+}
+
+async function deleteMeeting(id) {
+  const resp = await fetch(`/api/crm/meetings?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete meeting");
+  return true;
+}
+
+async function fetchSales() {
+  const resp = await fetch("/api/crm/sales", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch sales");
+  return data.sales || [];
+}
+
+async function createSale(payload) {
+  const resp = await fetch("/api/crm/sales", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create deal");
+  return data;
+}
+
+async function updateSale(id, patch) {
+  const resp = await fetch(`/api/crm/sales?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update deal");
+  return data.sale;
+}
+
+async function deleteSale(id) {
+  const resp = await fetch(`/api/crm/sales?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete deal");
+  return true;
+}
+
+async function fetchInvoices() {
+  const resp = await fetch("/api/crm/invoices", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch invoices");
+  return data.invoices || [];
+}
+
+async function updateUser(id, patch) {
+  const resp = await fetch(`/api/crm/user-management?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update user");
+  return data.user;
+}
+
+async function deleteUser(id) {
+  const resp = await fetch(`/api/crm/user-management?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete user");
+  return true;
+}
+
+async function createInvoice(payload) {
+  const resp = await fetch("/api/crm/invoices", {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(payload),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to create invoice");
+  return data;
+}
+
+async function updateInvoice(id, patch) {
+  const resp = await fetch(`/api/crm/invoices?id=${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...authHeader() },
+    body: JSON.stringify(patch),
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to update invoice");
+  return data.invoice;
+}
+
+async function deleteInvoice(id) {
+  const resp = await fetch(`/api/crm/invoices?id=${encodeURIComponent(id)}`, {
+    method: "DELETE",
+    headers: { ...authHeader() },
+  });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to delete invoice");
+  return true;
+}
+
+async function fetchReports() {
+  const resp = await fetch("/api/crm/reports", { headers: { ...authHeader() } });
+  const data = await resp.json().catch(() => ({}));
+  if (!resp.ok || !data.success) throw new Error(data.message || "Failed to fetch reports");
+  return data.reports;
+}
+
+async function fetchAttendanceSummary() {
+  try {
+    const [attResp, empResp] = await Promise.all([
+      fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
+      fetch("/api/crm/employees", { headers: authHeader() }),
+    ]);
+    const attData = await readCrmJson(attResp);
+    const empData = await readCrmJson(empResp);
+    if (crmHandleAuthFailure(attResp.status, attData)) throw new Error("Session expired");
+    if (!attResp.ok || !attData.success) throw new Error(attData.message || "Failed to load attendance");
+    const sessions = attData.sessions || [];
+    const employees = empData.employees || [];
+    const users = await (async () => {
+      try {
+        const r = await fetch("/api/crm/user-management", { headers: authHeader() });
+        const d = await r.json();
+        return (r.ok && d.users) ? d.users : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    const emailToName = new Map();
+    for (const e of employees) {
+      if (e.email) emailToName.set(e.email.toLowerCase(), e.name || e.email);
+    }
+    for (const u of users) {
+      if (u.email) emailToName.set(u.email.toLowerCase(), u.name || u.email);
+    }
+
+    const byDate = new Map();
+    const byEmployee = new Map();
+
+    for (const s of sessions) {
+      const start = s.startTime ? new Date(s.startTime) : null;
+      const dateKey = start ? start.toISOString().slice(0, 10) : "";
+      const email = (s.userEmail || "").toLowerCase();
+      const seconds = s.totalSeconds || 0;
+      if (dateKey) {
+        byDate.set(dateKey, (byDate.get(dateKey) || 0) + seconds);
+      }
+      if (email) {
+        byEmployee.set(email, (byEmployee.get(email) || 0) + seconds);
+      }
+    }
+
+    const byDateArr = Array.from(byDate.entries())
+      .map(([dateKey, totalSeconds]) => {
+        const date = dateKey ? new Date(dateKey + "T12:00:00") : null;
+        const dateStr = date ? date.toLocaleDateString() : "—";
+        return { dateKey, dateStr, totalSeconds };
+      })
+      .sort((a, b) => (a.dateKey || "").localeCompare(b.dateKey || ""));
+
+    const byEmployeeArr = Array.from(byEmployee.entries())
+      .map(([email, totalSeconds]) => {
+        const name = emailToName.get(email) || email || "—";
+        return { email, name, totalSeconds };
+      })
+      .sort((a, b) => (b.totalSeconds || 0) - (a.totalSeconds || 0));
+
+    return { byDate: byDateArr, byEmployee: byEmployeeArr };
+  } catch {
+    return null;
+  }
+}
+
+function renderClientsTable(clients) {
+  const tbody = qs("#clientsTbody");
+  const empty = qs("#clientsEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#clientSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterClientStatus")?.value || "all";
+
+  const filtered = clients.filter((c) => {
+    const matchesSearch = !search || `${c.name || ""} ${c.email || ""} ${c.company || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || c.pipelineStatus === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const c of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(c.name || "—")}</td>
+      <td>${escapeHtml(c.company || "—")}</td>
+      <td>${escapeHtml(c.email || "—")}</td>
+      <td>${escapeHtml(c.phone || "—")}</td>
+      <td>${getStatusPill(c.pipelineStatus, PIPELINE_STATUSES)}</td>
+      <td>${escapeHtml(getCreatorEmail(c))}</td>
+      <td class="td-action">${createActionMenu(c.id, 'client')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+async function refreshClients(showCacheFirst = true) {
+  const msg = qs("#clientMsg");
+  if (showCacheFirst && clientsCache.length > 0) {
+    renderClientsTable(clientsCache);
+    setMsg(msg, "Refreshing…", "");
+  } else {
+    setMsg(msg, "Loading clients…", "");
+  }
+  try {
+    toggleInlineLoader("clientsLoading", true);
+    clientsCache = await fetchClients();
+    renderClientsTable(clientsCache);
+    setMsg(msg, `Loaded ${clientsCache.length} client(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load clients", "error");
+  } finally {
+    toggleInlineLoader("clientsLoading", false);
+  }
+}
+
+async function refreshEmployees() {
+  const msg = qs("#empMsg");
+  setMsg(msg, "Loading employees…", "");
+  try {
+    toggleInlineLoader("empLoading", true);
+    employeesCache = await fetchEmployees();
+    renderEmployeesTable(employeesCache);
+    setMsg(msg, `Loaded ${employeesCache.length} employee(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load employees", "error");
+  } finally {
+    toggleInlineLoader("empLoading", false);
+  }
+}
+
+function renderEmployeesTable(list) {
+  const tbody = qs("#empTbody");
+  const empty = qs("#empEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#empSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterEmpStatus")?.value || "all";
+
+  const filtered = list.filter((e) => {
+    const matchesSearch = !search || `${e.name || ""} ${e.email || ""} ${e.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || e.onboardingStatus === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const emp of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(emp.name || "—")}</td>
+      <td>${escapeHtml(emp.email || "—")}</td>
+      <td>${escapeHtml(emp.role || "—")}</td>
+      <td>${emp.dailyHours || "—"}</td>
+      <td>${getStatusPill(emp.onboardingStatus, EMP_ONBOARDING)}</td>
+      <td>${emp.startedWorking ? '<span class="status-pill active">Started</span>' : '<span class="status-pill default">Pending</span>'}</td>
+      <td>${escapeHtml(getCreatorEmail(emp))}</td>
+      <td class="td-action">${createActionMenu(emp.id, 'employee')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refreshApplicants() {
+  const msg = qs("#appMsg");
+  setMsg(msg, "Loading applicants…", "");
+  try {
+    toggleInlineLoader("appLoading", true);
+    applicantsCache = await fetchApplicants();
+    renderApplicantsTable(applicantsCache);
+    setMsg(msg, `Loaded ${applicantsCache.length} applicant(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load applicants", "error");
+  } finally {
+    toggleInlineLoader("appLoading", false);
+  }
+}
+
+function renderApplicantsTable(list) {
+  const tbody = qs("#appTbody");
+  const empty = qs("#appEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#appSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterAppStage")?.value || "all";
+
+  const filtered = list.filter((a) => {
+    const matchesSearch = !search || `${a.name || ""} ${a.email || ""} ${a.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || a.stage === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const app of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(app.name || "—")}</td>
+      <td>${escapeHtml(app.email || "—")}</td>
+      <td>${escapeHtml(app.role || "—")}</td>
+      <td>${getStatusPill(app.stage, APP_STAGES)}</td>
+      <td>${escapeHtml(app.source || "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(app))}</td>
+      <td class="td-action">${createActionMenu(app.id, 'applicant')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refreshMeetings() {
+  const msg = qs("#meetMsg");
+  setMsg(msg, "Loading meetings…", "");
+  try {
+    toggleInlineLoader("meetLoading", true);
+    meetingsCache = await fetchMeetings();
+    renderMeetingsTable(meetingsCache);
+    setMsg(msg, `Loaded ${meetingsCache.length} meeting(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load meetings", "error");
+  } finally {
+    toggleInlineLoader("meetLoading", false);
+  }
+}
+
+function renderMeetingsTable(list) {
+  const tbody = qs("#meetTbody");
+  const empty = qs("#meetEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#meetSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterMeetStatus")?.value || "all";
+
+  const filtered = list.filter((m) => {
+    const matchesSearch = !search || `${m.title || ""} ${m.relatedType || ""} ${m.relatedId || ""} ${getCreatorEmail(m)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || m.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const m of filtered) {
+    const tr = document.createElement("tr");
+    const dateStr = m.scheduledAt ? new Date(m.scheduledAt).toLocaleString() : "—";
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(m.title || "—")}</td>
+      <td>${dateStr}</td>
+      <td>${getStatusPill(m.status, [{id:"scheduled", label:"Scheduled"}, {id:"completed", label:"Completed"}, {id:"cancelled", label:"Cancelled"}])}</td>
+      <td>${escapeHtml(m.relatedType && m.relatedId ? `${m.relatedType}:${m.relatedId}` : "—")}</td>
+      <td>${escapeHtml(getCreatorEmail(m))}</td>
+      <td class="td-action">${createActionMenu(m.id, 'meeting')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refreshSales() {
+  const msg = qs("#saleMsg");
+  setMsg(msg, "Loading deals…", "");
+  try {
+    toggleInlineLoader("salesLoading", true);
+    salesCache = await fetchSales();
+    renderSalesTable(salesCache);
+    setMsg(msg, `Loaded ${salesCache.length} deal(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load deals", "error");
+  } finally {
+    toggleInlineLoader("salesLoading", false);
+  }
+}
+
+function renderSalesTable(list) {
+  const tbody = qs("#salesTbody");
+  const empty = qs("#salesEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#saleSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterSaleStage")?.value || "all";
+
+  const filtered = list.filter((s) => {
+    const matchesSearch = !search || `${s.agentEmail || ""} ${s.clientId || ""} ${s.amount || ""} ${getCreatorEmail(s)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || s.stage === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const s of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(s.agentEmail || "—")}</td>
+      <td>${escapeHtml(s.clientId || "—")}</td>
+      <td>$${s.amount != null ? s.amount.toLocaleString() : "0"}</td>
+      <td>${getStatusPill(s.stage, [{id:"lead", label:"Lead"}, {id:"proposal_sent", label:"Proposal Sent"}, {id:"negotiation", label:"Negotiation"}, {id:"won", label:"Won"}, {id:"lost", label:"Lost"}])}</td>
+      <td>${escapeHtml(getCreatorEmail(s))}</td>
+      <td class="td-action">${createActionMenu(s.id, 'sale')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refreshInvoices() {
+  const msg = qs("#invMsg");
+  setMsg(msg, "Loading invoices…", "");
+  try {
+    toggleInlineLoader("invLoading", true);
+    invoicesCache = await fetchInvoices();
+    renderInvoicesTable(invoicesCache);
+    setMsg(msg, `Loaded ${invoicesCache.length} invoice(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load invoices", "error");
+  } finally {
+    toggleInlineLoader("invLoading", false);
+  }
+}
+
+function renderInvoicesTable(list) {
+  const tbody = qs("#invTbody");
+  const empty = qs("#invEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#invSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterInvStatus")?.value || "all";
+
+  const filtered = list.filter((inv) => {
+    const matchesSearch = !search || `${inv.clientId || ""} ${inv.amount || ""} ${inv.notes || ""} ${getCreatorEmail(inv)}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || inv.status === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const inv of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(inv.clientId || "—")}</td>
+      <td>$${inv.amount != null ? inv.amount.toLocaleString() : "0"}</td>
+      <td>${inv.dueDate || "—"}</td>
+      <td>${getStatusPill(inv.status, [{id:"draft", label:"Draft"}, {id:"sent", label:"Sent"}, {id:"paid", label:"Paid"}, {id:"void", label:"Void"}])}</td>
+      <td>${escapeHtml(getCreatorEmail(inv))}</td>
+      <td class="td-action">${createActionMenu(inv.id, 'invoice')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+async function refreshReports() {
+  const msg = qs("#reportsMsg");
+  setMsg(msg, "Loading reports…", "");
+  try {
+    reportsCache = await fetchReports();
+    const attendanceSummary = await fetchAttendanceSummary();
+    renderReports(reportsCache, attendanceSummary);
+    setMsg(msg, "Updated.", "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load reports", "error");
+  } finally {
+    // reports uses cards, not table; no inline spinner
+  }
+}
+
+function statCard(label, value) {
+  const div = document.createElement("div");
+  div.className = "card";
+  div.style.boxShadow = "none";
+  div.style.margin = "0";
+  div.innerHTML = `
+    <div class="muted" style="text-transform:uppercase; letter-spacing:.06em; font-size:11px; font-weight:900;">${escapeHtml(label)}</div>
+    <div style="font-size:28px; font-weight:900; margin-top:8px;">${escapeHtml(value)}</div>
+  `;
+  return div;
+}
+
+function renderReports(reports, attendanceSummary) {
+  const grid = qs("#reportsGrid");
+  if (!grid) return;
+  grid.innerHTML = "";
+
+  const r = reports || {};
+  const pipeline = r.clientPipeline || {};
+  const employees = r.employees || {};
+  const applicants = r.applicants || {};
+  const invoices = r.invoices || {};
+  const sales = r.sales || {};
+  const meetings = r.meetings || {};
+
+  // Stat Cards
+  grid.appendChild(statCard("Clients (total)", Object.values(pipeline).reduce((a, b) => a + (Number(b) || 0), 0)));
+  grid.appendChild(statCard("Employees (total)", employees.total ?? 0));
+  grid.appendChild(statCard("Employees onboarded", employees.onboarded ?? 0));
+  grid.appendChild(statCard("Applicants (total)", applicants.total ?? 0));
+
+  grid.appendChild(statCard("Pipeline: Lead", pipeline.lead ?? 0));
+  grid.appendChild(statCard("Pipeline: Proposal", pipeline.proposal_sent ?? 0));
+  grid.appendChild(statCard("Pipeline: Active", pipeline.active ?? 0));
+  grid.appendChild(statCard("Pipeline: Completed", pipeline.completed ?? 0));
+
+  grid.appendChild(statCard("Meetings", meetings.total ?? 0));
+  grid.appendChild(statCard("Sales (count)", sales.total ?? 0));
+  grid.appendChild(statCard("Invoices (total)", invoices.total ?? 0));
+  grid.appendChild(statCard("Invoices paid", invoices.byStatus?.paid ?? 0));
+
+  if (!window.Chart) return;
+
+  // Destroy old charts
+  Object.values(reportCharts).forEach((c) => {
+    if (c && typeof c.destroy === "function") c.destroy();
+  });
+
+  // 1. Pipeline Distribution (Horizontal Bar)
+  const ctxP = document.getElementById('pipelineChart')?.getContext('2d');
+  if (ctxP) {
+    reportCharts.pipeline = new Chart(ctxP, {
+      type: 'bar',
+      data: {
+        labels: Object.keys(pipeline).map(s => s.replace('_', ' ')),
+        datasets: [{
+          label: 'Clients',
+          data: Object.values(pipeline),
+          backgroundColor: 'rgba(99, 102, 241, 0.6)',
+          borderColor: 'rgb(99, 102, 241)',
+          borderWidth: 1,
+          borderRadius: 8
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, grid: { display: false } }, y: { grid: { display: false } } }
+      }
+    });
+  }
+
+  // 2. Invoice Status (Donut)
+  const ctxI = document.getElementById('invoiceChart')?.getContext('2d');
+  if (ctxI) {
+    const invData = invoices.byStatus || {};
+    reportCharts.invoice = new Chart(ctxI, {
+      type: 'doughnut',
+      data: {
+        labels: Object.keys(invData),
+        datasets: [{
+          data: Object.values(invData),
+          backgroundColor: [
+            'rgba(148, 163, 184, 0.6)', // draft
+            'rgba(59, 130, 246, 0.6)', // sent
+            'rgba(34, 197, 94, 0.6)',  // paid
+            'rgba(239, 68, 68, 0.6)'   // void
+          ],
+          borderWidth: 0
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } }
+        },
+        cutout: '70%'
+      }
+    });
+  }
+
+  // 3. Activity Breakdown (Radar or Polar Area looks premium)
+  const ctxA = document.getElementById('activityChart')?.getContext('2d');
+  if (ctxA) {
+    reportCharts.activity = new Chart(ctxA, {
+      type: 'polarArea',
+      data: {
+        labels: ['Meetings', 'Sales', 'Applicants', 'Employees'],
+        datasets: [{
+          data: [meetings.total || 0, sales.total || 0, applicants.total || 0, employees.total || 0],
+          backgroundColor: [
+            'rgba(245, 158, 11, 0.6)',
+            'rgba(16, 185, 129, 0.6)',
+            'rgba(139, 92, 246, 0.6)',
+            'rgba(236, 72, 153, 0.6)'
+          ]
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { r: { ticks: { display: false } } }
+      }
+    });
+  }
+
+  // 4. Attendance – Daily Total Hours (line chart)
+  const att = attendanceSummary || {};
+  const byDate = Array.isArray(att.byDate) ? att.byDate : [];
+  const byEmployee = Array.isArray(att.byEmployee) ? att.byEmployee : [];
+
+  const ctxAttTrend = document.getElementById('attendanceTrendChart')?.getContext('2d');
+  if (ctxAttTrend && byDate.length) {
+    reportCharts.attendanceTrend = new Chart(ctxAttTrend, {
+      type: 'line',
+      data: {
+        labels: byDate.map((d) => d.dateStr),
+        datasets: [{
+          label: 'Total hours (all employees)',
+          data: byDate.map((d) => (d.totalSeconds || 0) / 3600),
+          borderColor: 'rgb(59, 130, 246)',
+          backgroundColor: 'rgba(59, 130, 246, 0.15)',
+          tension: 0.3,
+          fill: true,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const h = ctx.parsed.y || 0;
+                const hours = Math.floor(h);
+                const minutes = Math.round((h - hours) * 60);
+                return `${hours}h ${minutes}m`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: { grid: { display: false } },
+          y: {
+            beginAtZero: true,
+            grid: { display: true },
+            ticks: {
+              callback: (v) => `${v}h`,
+            },
+          },
+        },
+      },
+    });
+  }
+
+  // 5. Attendance – Hours by Employee (top 10)
+  const ctxAttEmp = document.getElementById('attendanceEmployeeChart')?.getContext('2d');
+  if (ctxAttEmp && byEmployee.length) {
+    const top = byEmployee.slice(0, 10);
+    reportCharts.attendanceEmployees = new Chart(ctxAttEmp, {
+      type: 'bar',
+      data: {
+        labels: top.map((e) => e.name || e.email || "—"),
+        datasets: [{
+          label: 'Total hours',
+          data: top.map((e) => (e.totalSeconds || 0) / 3600),
+          backgroundColor: 'rgba(34, 197, 94, 0.6)',
+          borderColor: 'rgb(34, 197, 94)',
+          borderWidth: 1,
+          borderRadius: 8,
+        }],
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const h = ctx.parsed.x || 0;
+                const hours = Math.floor(h);
+                const minutes = Math.round((h - hours) * 60);
+                return `${hours}h ${minutes}m`;
+              },
+            },
+          },
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            grid: { display: false },
+            ticks: {
+              callback: (v) => `${v}h`,
+            },
+          },
+          y: { grid: { display: false } },
+        },
+      },
+    });
+  }
+}
+
+async function refreshUsers(showCacheFirst = true) {
+  const msg = qs("#userMsg");
+  if (showCacheFirst && usersCache.length > 0) {
+    renderUsersTable(usersCache);
+    setMsg(msg, "Refreshing…", "");
+  } else {
+    setMsg(msg, "", "");
+  }
+  toggleInlineLoader("usersLoading", true);
+  try {
+    usersCache = await fetchUsers();
+    buildUserEmailMap(usersCache);
+    renderUsersTable(usersCache);
+    setMsg(msg, `Loaded ${usersCache.length} user(s).`, "ok");
+  } catch (e) {
+    setMsg(msg, e.message || "Failed to load users", "error");
+  } finally {
+    toggleInlineLoader("usersLoading", false);
+  }
+}
+
+function renderUsersTable(list) {
+  const tbody = qs("#usersTbody");
+  const empty = qs("#usersEmpty");
+  if (!tbody || !empty) return;
+
+  const search = (qs("#userSearch")?.value || "").toLowerCase().trim();
+  const filter = qs("#filterUserRole")?.value || "all";
+
+  const filtered = list.filter((u) => {
+    const matchesSearch = !search || `${u.email || ""} ${u.name || ""} ${u.role || ""}`.toLowerCase().includes(search);
+    const matchesFilter = filter === "all" || u.role === filter;
+    return matchesSearch && matchesFilter;
+  });
+
+  tbody.innerHTML = "";
+  if (!filtered.length) {
+    empty.style.display = "block";
+    return;
+  }
+  empty.style.display = "none";
+
+  for (const u of filtered) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(u.email || "—")}</td>
+      <td style="font-weight:800; color:var(--dark)">${escapeHtml(u.name || "—")}</td>
+      <td>${getStatusPill(u.role, [{id:"super_admin", label:"Super Admin"}, {id:"admin", label:"Admin"}, {id:"manager", label:"Manager"}, {id:"employee", label:"Employee"}, {id:"hr", label:"HR"}])}</td>
+      <td>${escapeHtml(u.employeeId || "—")}</td>
+      <td>${u.disabled ? '<span class="status-pill lost">Disabled</span>' : '<span class="status-pill active">Active</span>'}</td>
+      <td class="td-action">${createActionMenu(u.id, 'user')}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function setupChat() {
+  const form = qs("#chatForm");
+  const input = qs("#chatInput");
+  const list = qs("#chatMessages");
+  const msg = qs("#chatMsg");
+  const threadsEl = qs("#chatThreads");
+  const activeTitle = qs("#chatActiveTitle");
+  const activeMeta = qs("#chatActiveMeta");
+
+  if (!form || !input || !list || !threadsEl) return;
+
+  const session = getSession();
+  const myEmail = (session?.email || "").toLowerCase();
+  if (!myEmail) return;
+
+  let activeChatId = null;
+  let unsubMessages = null;
+  let threadsList = [];
+  const sessionRole = session?.role || "";
+  let superAdminEmail = null;
+  const conversationsLoader = qs("#chatConversationsLoader");
+
+  (async () => {
+    try {
+      const resp = await fetch("/api/crm/super-admin", { headers: authHeader() });
+      const data = await resp.json();
+      const card = qs("#superAdminCard");
+      const contactEl = qs("#superAdminContact");
+      const linkEl = qs("#superAdminEmailLink");
+      if (data.success && data.superAdmin?.email) {
+        superAdminEmail = data.superAdmin.email.toLowerCase();
+        if (card) card.style.display = "block";
+        if (contactEl) contactEl.textContent = data.superAdmin.name ? `${data.superAdmin.name} — ${data.superAdmin.email}` : data.superAdmin.email;
+        if (linkEl) { linkEl.href = `mailto:${data.superAdmin.email}`; linkEl.style.display = "inline-flex"; }
+      }
+      if (sessionRole !== "super_admin" && sessionRole !== "admin") {
+        const wrap = qs("#chatPeopleWrap");
+        const listEl = qs("#chatPeopleList");
+        if (wrap && listEl) {
+          wrap.style.display = "block";
+          listEl.innerHTML = "";
+          const byEmail = new Map();
+          if (superAdminEmail && superAdminEmail !== myEmail) {
+            byEmail.set(superAdminEmail, { name: "Admin", email: superAdminEmail, isAdmin: true });
+          }
+          try {
+            const empResp = await fetch("/api/crm/employees?list=chat", { headers: authHeader() });
+            const empData = empResp.ok ? await empResp.json() : {};
+            const employees = empData.employees || [];
+            for (const emp of employees) {
+              const e = (emp.email || "").toLowerCase();
+              if (e && e !== myEmail && !byEmail.has(e)) {
+                byEmail.set(e, { name: emp.name || emp.email || e, email: e, isAdmin: false });
+              }
+            }
+          } catch (_) {}
+          const people = Array.from(byEmail.values()).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
+          for (const p of people) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "chat-thread chat-people-item";
+            btn.innerHTML = p.isAdmin
+              ? `
+            <div class="chat-thread-avatar" style="background:var(--primary); color:#fff;"><i class="fa-solid fa-user-shield"></i></div>
+            <div class="chat-thread-info">
+              <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+              <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+            </div>
+          `
+              : `
+            <div class="chat-thread-avatar" style="background:var(--bg-light); color:var(--text-dark); border:1px solid var(--border);">${escapeHtml(getInitials(p.name || p.email))}</div>
+            <div class="chat-thread-info">
+              <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+              <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+            </div>
+          `;
+            btn.addEventListener("click", () => openOrCreateChat(p.email, p.name || p.email));
+            listEl.appendChild(btn);
+          }
+        }
+        if (conversationsLoader) conversationsLoader.style.display = "none";
+      }
+    } catch (_) {
+      if (conversationsLoader) conversationsLoader.style.display = "none";
+    }
+  })();
+
+  const chatsRef = collection(db, "chats");
+  const threadsQuery = query(chatsRef, where("participantEmails", "array-contains", myEmail), orderBy("updatedAt", "desc"), limit(50));
+
+  function openOrCreateChat(otherEmail, displayName) {
+    const other = (otherEmail || "").toLowerCase();
+    if (!other) return;
+    const existing = threadsList.find(
+      (t) =>
+        t.type === "direct" &&
+        (t.participantEmails || []).length === 2 &&
+        t.participantEmails.includes(myEmail) &&
+        t.participantEmails.includes(other)
+    );
+    if (existing) {
+      selectThread(existing);
+      return;
+    }
+    setMsg(msg, "Opening chat…", "");
+    const participantEmails = [myEmail, other].sort();
+    addDoc(chatsRef, {
+      type: "direct",
+      name: displayName || other,
+      participantEmails,
+      createdAt: serverTimestamp(),
+      createdBy: myEmail,
+      updatedAt: serverTimestamp(),
+    }).then((chatDoc) => {
+      selectThread({ id: chatDoc.id, name: displayName || other, participantEmails });
+      setMsg(msg, "", "");
+    }).catch((err) => setMsg(msg, err.message || "Failed to start chat", "error"));
+  }
+
+  function getInitials(name) {
+    if (!name) return "?";
+    return name.split(" ").map(n => n[0]).join("").toUpperCase().substring(0, 2);
+  }
+
+  function renderThreads(threads) {
+    threadsList = threads;
+    threadsEl.innerHTML = "";
+    if (!threads.length) {
+      threadsEl.innerHTML = '<div class="muted" style="padding:24px; text-align:center;">No conversations yet.</div>';
+      return;
+    }
+    
+    // Track seen state
+    const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+
+    for (const t of threads) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      
+      const isUnread = t.updatedAt && (!seenState[t.id] || Number(t.updatedAt.seconds) > Number(seenState[t.id]));
+      btn.className = `chat-thread ${activeChatId === t.id ? "active" : ""} ${isUnread ? "unread" : ""}`.trim();
+
+      let title = t.name || (t.type === 'group' ? "Unnamed Group" : "Direct Chat");
+      let sub = "";
+      let initials = "?";
+
+      if (t.type === "direct") {
+        const others = (t.participantEmails || []).filter(e => e !== myEmail);
+        const otherEmail = (others[0] || "").toLowerCase();
+        const isSuperAdminThread = superAdminEmail && otherEmail === superAdminEmail.toLowerCase();
+        title = isSuperAdminThread ? "Admin" : (others[0] || title);
+        sub = "One-on-one";
+        initials = isSuperAdminThread ? "A" : getInitials(title);
+      } else {
+        sub = `${(t.participantEmails || []).length} participants`;
+        initials = getInitials(t.name);
+      }
+
+      btn.innerHTML = `
+        <div class="chat-thread-avatar">${escapeHtml(initials)}</div>
+        <div class="chat-thread-info">
+          <div class="chat-thread-title">
+            ${escapeHtml(title)}
+            <span class="chat-type-tag ${t.type}">${t.type}</span>
+          </div>
+          <div class="chat-thread-sub">${escapeHtml(sub)}</div>
+        </div>
+        <div class="chat-thread-dot"></div>
+      `;
+      btn.addEventListener("click", () => selectThread(t));
+      threadsEl.appendChild(btn);
+    }
+  }
+
+  function renderMessages(items) {
+    list.innerHTML = "";
+    for (const m of items) {
+      const row = document.createElement("div");
+      const isOwn = (m.senderEmail || "").toLowerCase() === myEmail;
+      row.className = "chat-row" + (isOwn ? " own" : "");
+      
+      const when = m.createdAt?.seconds ? new Date(m.createdAt.seconds * 1000) : null;
+      const timeStr = when ? when.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "";
+      
+      row.innerHTML = `
+        <div class="chat-meta">
+          ${isOwn ? "" : `<strong>${escapeHtml(m.senderEmail)}</strong>`}
+          <span>${timeStr}</span>
+        </div>
+        <div class="chat-bubble">
+          ${escapeHtml(m.text || "")}
+        </div>
+      `;
+      list.appendChild(row);
+    }
+    list.scrollTop = list.scrollHeight;
+  }
+
+  function selectThread(thread) {
+    activeChatId = thread.id;
+    window.activeChatId = thread.id;
+
+    // Mark as seen
+    const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+    seenState[thread.id] = Math.floor(Date.now() / 1000);
+    localStorage.setItem(`uptura_chat_seen_${myEmail}`, JSON.stringify(seenState));
+
+    if (thread.type === "group") {
+      activeTitle.textContent = thread.name || "Group Chat";
+      activeMeta.textContent = (thread.participantEmails || []).length + " members";
+    } else {
+      const others = (thread.participantEmails || []).filter((e) => e !== myEmail);
+      const otherEmail = (others[0] || "").toLowerCase();
+      const isSuperAdmin = superAdminEmail && otherEmail === superAdminEmail.toLowerCase();
+      activeTitle.textContent = isSuperAdmin ? "Admin" : (thread.name || otherEmail || "Conversation");
+      activeMeta.textContent = "Direct Message";
+    }
+    setMsg(msg, "", "");
+
+    // Immediate re-render threads to clear unread dot
+    if (typeof renderThreads === 'function') {
+      renderThreads(threadsList);
+    }
+
+    if (unsubMessages) {
+      try { unsubMessages(); } catch (_) { }
+      unsubMessages = null;
+    }
+
+    const msgsRef = collection(db, "chats", activeChatId, "messages");
+    const qMsgs = query(msgsRef, orderBy("createdAt", "asc"), limit(200));
+    unsubMessages = onSnapshot(
+      qMsgs,
+      (snap) => {
+        const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+        renderMessages(items);
+      },
+      (err) => setMsg(msg, err.message || "Failed to load messages", "error")
+    );
+  }
+
+  // group chat UI
+  const groupBtn = qs("#createGroupChatBtn");
+  const groupModal = qs("#groupChatModal");
+  const groupListEl = qs("#groupUsersList");
+  const groupClose = qs("#closeGroupChatModal");
+  const groupSubmit = qs("#submitGroupChat");
+  const groupNameInput = qs("#groupName");
+  const groupError = qs("#groupChatError");
+
+  if (sessionRole === "admin" || sessionRole === "super_admin") {
+    if (groupBtn) groupBtn.style.display = "inline-flex";
+  }
+
+  groupBtn?.addEventListener("click", () => {
+    if (groupModal) groupModal.style.display = "flex";
+  });
+  groupClose?.addEventListener("click", () => {
+    if (groupModal) groupModal.style.display = "none";
+  });
+
+  groupSubmit?.addEventListener("click", async () => {
+    const name = (groupNameInput.value || "").trim();
+    if (!name) return setMsg(groupError, "Group name required", "error");
+
+    const checked = groupListEl.querySelectorAll('input:checked');
+    const selectedEmails = Array.from(checked).map(i => i.value);
+    if (!selectedEmails.length) return setMsg(groupError, "Select at least one user", "error");
+
+    const participantEmails = Array.from(new Set([myEmail, ...selectedEmails])).sort();
+
+    groupSubmit.disabled = true;
+    groupSubmit.textContent = "Creating…";
+    setMsg(groupError, "Creating group…", "");
+
+    try {
+      const docRef = await addDoc(chatsRef, {
+        type: "group",
+        name,
+        participantEmails,
+        createdAt: serverTimestamp(),
+        createdBy: myEmail,
+        updatedAt: serverTimestamp(),
+      });
+      groupModal.style.display = "none";
+      groupNameInput.value = "";
+      checked.forEach(i => i.checked = false);
+      selectThread({ id: docRef.id, name, type: "group", participantEmails });
+    } catch (err) {
+      setMsg(groupError, err.message || "Failed to create group", "error");
+    } finally {
+      groupSubmit.disabled = false;
+      groupSubmit.textContent = "Create Group Chat";
+    }
+  });
+
+  // live threads list
+  onSnapshot(
+    threadsQuery,
+    (snap) => {
+      const threads = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
+      renderThreads(threads);
+    },
+    (err) => setMsg(msg, err.message || "Failed to load conversations", "error")
+  );
+
+  if (sessionRole === "super_admin" || sessionRole === "admin") {
+    (async () => {
+      try {
+        const [empResp, usersResp] = await Promise.all([
+          fetch("/api/crm/employees", { headers: authHeader() }),
+          fetch("/api/crm/user-management", { headers: authHeader() }),
+        ]);
+        const empData = empResp.ok ? await empResp.json() : {};
+        const usersData = usersResp.ok ? await usersResp.json() : {};
+        const employees = empData.employees || [];
+        const users = usersData.users || [];
+        const byEmail = new Map();
+        for (const u of users) {
+          const e = (u.email || "").toLowerCase();
+          if (e && e !== myEmail) byEmail.set(e, { name: u.name || u.email || e, email: e });
+        }
+        for (const emp of employees) {
+          const e = (emp.email || "").toLowerCase();
+          if (e && e !== myEmail) byEmail.set(e, { name: emp.name || emp.email || e, email: e });
+        }
+        const people = Array.from(byEmail.values()).sort((a, b) => (a.name || a.email).localeCompare(b.name || b.email));
+        const wrap = qs("#chatPeopleWrap");
+        const listEl = qs("#chatPeopleList");
+        if (wrap && listEl) {
+          wrap.style.display = "block";
+          listEl.innerHTML = "";
+          if (groupListEl) groupListEl.innerHTML = "";
+          for (const p of people) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "chat-thread chat-people-item";
+            const initials = getInitials(p.name || p.email);
+            btn.innerHTML = `
+              <div class="chat-thread-avatar" style="background:var(--bg-light); color:var(--text-dark); border:1px solid var(--border);">${escapeHtml(initials)}</div>
+              <div class="chat-thread-info">
+                <div class="chat-thread-title">${escapeHtml(p.name || p.email)}</div>
+                <div class="chat-thread-sub">${escapeHtml(p.email)}</div>
+              </div>
+            `;
+            btn.addEventListener("click", () => openOrCreateChat(p.email, p.name || p.email));
+            listEl.appendChild(btn);
+
+            if (groupListEl) {
+              const lbl = document.createElement("label");
+              lbl.style.display = "flex";
+              lbl.style.alignItems = "center";
+              lbl.style.gap = "8px";
+              lbl.style.padding = "6px 4px";
+              lbl.style.cursor = "pointer";
+              lbl.innerHTML = `<input type="checkbox" value="${p.email}" /> <span style="font-size:13px; font-weight:600;">${escapeHtml(p.name || p.email)} <small style="color:var(--text-muted)">(${p.email})</small></span>`;
+              groupListEl.appendChild(lbl);
+            }
+          }
+        }
+      } catch (_) { }
+      if (conversationsLoader) conversationsLoader.style.display = "none";
+    })();
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    setMsg(msg, "", "");
+    const text = String(input.value || "").trim();
+    if (!text) return;
+    if (!activeChatId) return setMsg(msg, "Select a conversation first.", "error");
+
+    // Clear immediately for snappier UX
+    input.value = "";
+
+    try {
+      await addDoc(collection(db, "chats", activeChatId, "messages"), {
+        text,
+        senderEmail: myEmail,
+        createdAt: serverTimestamp(),
+      });
+      await setDoc(doc(db, "chats", activeChatId), { updatedAt: serverTimestamp() }, { merge: true });
+    } catch (err) {
+      // If it fails, we won't restore the text for now; user can retype
+      setMsg(msg, err.message || "Failed to send", "error");
+    }
+  });
+}
+
+function setupSidebar() {
+  const sidebar = qs("#sidebar");
+  const toggleBtn = qs("#sidebarToggle");
+  const toggleIcon = qs("#toggleIcon");
+  const mobileMenuBtn = qs("#mobileMenuBtn");
+
+  if (localStorage.getItem("uptura_sidebar_collapsed") === "true") {
+    sidebar.classList.add("collapsed");
+    toggleIcon?.classList.replace("fa-chevron-left", "fa-chevron-right");
+  }
+
+  toggleBtn?.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed");
+    const isCollapsed = sidebar.classList.contains("collapsed");
+    localStorage.setItem("uptura_sidebar_collapsed", String(isCollapsed));
+    if (isCollapsed) toggleIcon?.classList.replace("fa-chevron-left", "fa-chevron-right");
+    else toggleIcon?.classList.replace("fa-chevron-right", "fa-chevron-left");
+  });
+
+  mobileMenuBtn?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    sidebar.classList.toggle("active");
+  });
+
+  document.addEventListener("click", (e) => {
+    if (window.innerWidth <= 900 && !sidebar.contains(e.target) && !mobileMenuBtn.contains(e.target)) {
+      sidebar.classList.remove("active");
+    }
+  });
+}
+
+function getCheckinState() {
+  try {
+    const raw = localStorage.getItem(CHECKIN_STORAGE_KEY) || "{}";
+    const o = JSON.parse(raw);
+    const segments = Array.isArray(o.segments) ? o.segments : [];
+    return {
+      totalElapsedSeconds: typeof o.totalElapsedSeconds === "number" ? o.totalElapsedSeconds : 0,
+      sessionStartTime: typeof o.sessionStartTime === "number" ? o.sessionStartTime : null,
+      segments,
+    };
+  } catch {
+    return { totalElapsedSeconds: 0, sessionStartTime: null, segments: [] };
+  }
+}
+
+function setCheckinState(state) {
+  const toStore = {
+    totalElapsedSeconds: state.totalElapsedSeconds,
+    sessionStartTime: state.sessionStartTime,
+    segments: state.segments || [],
+  };
+  localStorage.setItem(CHECKIN_STORAGE_KEY, JSON.stringify(toStore));
+}
+
+function clearCheckinState() {
+  localStorage.removeItem(CHECKIN_STORAGE_KEY);
+}
+
+function formatTimer(seconds) {
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = Math.floor(seconds % 60);
+  return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+function setupDashboard() {
+  const timerEl = qs("#dashboardTimer");
+  const checkInBtn = qs("#checkInBtn");
+  const resumeBtn = qs("#resumeBtn");
+  const checkOutBtn = qs("#checkOutBtn");
+  const msgEl = qs("#dashboardMsg");
+  const tab = qs("#tab-dashboard");
+  if (!tab || !timerEl) return;
+
+  tab.style.display = "block";
+
+  let tickInterval = null;
+  let currentSegmentStart = null;
+
+  function setMsg(text, kind) {
+    if (!msgEl) return;
+    msgEl.textContent = text || "";
+    msgEl.className = "msg" + (kind ? " " + kind : "");
+  }
+
+  function currentElapsed() {
+    const state = getCheckinState();
+    let total = state.totalElapsedSeconds;
+    if (currentSegmentStart != null) total += (Date.now() - currentSegmentStart) / 1000;
+    return total;
+  }
+
+  function render() {
+    const sec = currentElapsed();
+    timerEl.textContent = formatTimer(sec);
+  }
+
+  function savePause() {
+    if (currentSegmentStart == null) return;
+    const state = getCheckinState();
+    const end = Date.now();
+    const segmentSeconds = (end - currentSegmentStart) / 1000;
+    state.totalElapsedSeconds += segmentSeconds;
+    state.segments = state.segments || [];
+    state.segments.push({ start: currentSegmentStart, end });
+    currentSegmentStart = null;
+    setRunningStart(null);
+    setCheckinState(state);
+  }
+
+  function applyButtons() {
+    const state = getCheckinState();
+    const running = currentSegmentStart != null;
+    checkInBtn.style.display = !state.sessionStartTime && !running ? "inline-flex" : "none";
+    resumeBtn.style.display = state.sessionStartTime != null && !running ? "inline-flex" : "none";
+    checkOutBtn.style.display = running ? "inline-flex" : "none";
+  }
+
+  function setRunningStart(ts) {
+    try {
+      if (ts != null) sessionStorage.setItem(CHECKIN_RUNNING_SESSION_KEY, String(ts));
+      else sessionStorage.removeItem(CHECKIN_RUNNING_SESSION_KEY);
+    } catch (_) {}
+  }
+
+  checkInBtn?.addEventListener("click", () => {
+    const now = Date.now();
+    setCheckinState({ totalElapsedSeconds: 0, sessionStartTime: now, segments: [] });
+    currentSegmentStart = now;
+    setRunningStart(now);
+    applyButtons();
+    if (!tickInterval) tickInterval = setInterval(render, 1000);
+    render();
+    setMsg("", "");
+  });
+
+  resumeBtn?.addEventListener("click", () => {
+    const now = Date.now();
+    currentSegmentStart = now;
+    setRunningStart(now);
+    applyButtons();
+    if (!tickInterval) tickInterval = setInterval(render, 1000);
+    render();
+    setMsg("", "");
+  });
+
+  checkOutBtn?.addEventListener("click", async () => {
+    savePause();
+    const state = getCheckinState();
+    const sessionStart = state.sessionStartTime || Date.now();
+    const endTime = Date.now();
+    const totalSeconds = state.totalElapsedSeconds;
+    const segmentsForApi = (state.segments || []).map((seg) => ({
+      startTime: new Date(seg.start).toISOString(),
+      endTime: new Date(seg.end).toISOString(),
+    }));
+    setCheckinState({ totalElapsedSeconds: 0, sessionStartTime: null, segments: [] });
+    currentSegmentStart = null;
+    setRunningStart(null);
+    applyButtons();
+    if (tickInterval) {
+      clearInterval(tickInterval);
+      tickInterval = null;
+    }
+    render();
+    setMsg("Saving…", "");
+    try {
+      const resp = await fetch("/api/crm/attendance", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...authHeader() },
+        body: JSON.stringify({
+          startTime: new Date(sessionStart).toISOString(),
+          endTime: new Date(endTime).toISOString(),
+          totalSeconds: Math.round(totalSeconds),
+          segments: segmentsForApi,
+        }),
+      });
+      const data = await readCrmJson(resp);
+      if (crmHandleAuthFailure(resp.status, data)) {
+        setMsg("Session expired — please sign in again.", "error");
+        return;
+      }
+      if (resp.ok && data.success) {
+        setMsg("Session saved.", "ok");
+        loadAttendance();
+      } else {
+        setMsg(data.message || "Failed to save", "error");
+      }
+    } catch (e) {
+      setMsg(e.message || "Failed to save session", "error");
+    }
+  });
+
+  window.addEventListener("beforeunload", () => {
+    if (currentSegmentStart != null) {
+      try {
+        sessionStorage.setItem(CHECKIN_RUNNING_SESSION_KEY, String(currentSegmentStart));
+      } catch (_) {}
+    }
+  });
+
+  const runningStartRaw = sessionStorage.getItem(CHECKIN_RUNNING_SESSION_KEY);
+  if (runningStartRaw != null && runningStartRaw !== "") {
+    const runningStart = Number(runningStartRaw);
+    if (Number.isFinite(runningStart)) {
+      const state = getCheckinState();
+      if (state.sessionStartTime != null) {
+        const now = Date.now();
+        const segmentSeconds = (now - runningStart) / 1000;
+        state.totalElapsedSeconds += segmentSeconds;
+        state.segments = state.segments || [];
+        state.segments.push({ start: runningStart, end: now });
+        setCheckinState(state);
+        currentSegmentStart = now;
+        setRunningStart(now);
+      } else {
+        try {
+          sessionStorage.removeItem(CHECKIN_RUNNING_SESSION_KEY);
+        } catch (_) {}
+      }
+    }
+  }
+
+  applyButtons();
+  render();
+  if (currentSegmentStart != null && !tickInterval) tickInterval = setInterval(render, 1000);
+
+  const tbody = qs("#dashboardAttendanceTbody");
+  const emptyEl = qs("#dashboardAttendanceEmpty");
+  const loadingEl = qs("#dashboardAttendanceLoading");
+  const refreshBtn = qs("#refreshAttendanceBtn");
+
+  function formatHours(seconds) {
+    if (seconds == null) return "—";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+  }
+
+  async function loadAttendance() {
+    if (!tbody || !emptyEl || !loadingEl) return;
+    loadingEl.style.display = "flex";
+    emptyEl.style.display = "none";
+    tbody.innerHTML = "";
+    try {
+      const resp = await fetch("/api/crm/attendance", { headers: authHeader() });
+      const data = await readCrmJson(resp);
+      if (crmHandleAuthFailure(resp.status, data)) {
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.textContent = "Please sign in again to view attendance.";
+        return;
+      }
+      if (!resp.ok || !data.success) throw new Error(data.message || "Failed to load");
+      const sessions = data.sessions || [];
+      loadingEl.style.display = "none";
+      if (!sessions.length) {
+        emptyEl.style.display = "block";
+        return;
+      }
+      for (const s of sessions) {
+        const start = s.startTime ? new Date(s.startTime) : null;
+        const end = s.endTime ? new Date(s.endTime) : null;
+        const dateStr = start ? start.toLocaleDateString() : "—";
+        const checkInStr = start ? start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+        const checkOutStr = end ? end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+        const tr = document.createElement("tr");
+        const remarkCell = document.createElement("td");
+        const remarkInput = document.createElement("input");
+        remarkInput.type = "text";
+        remarkInput.placeholder = "Add remark…";
+        remarkInput.value = s.remark || "";
+        remarkInput.style.width = "100%";
+        remarkInput.style.padding = "6px 8px";
+        const saveRemarkBtn = document.createElement("button");
+        saveRemarkBtn.className = "btn";
+        saveRemarkBtn.textContent = "Save";
+        saveRemarkBtn.style.marginLeft = "6px";
+        saveRemarkBtn.addEventListener("click", async () => {
+          saveRemarkBtn.disabled = true;
+          saveRemarkBtn.textContent = "…";
+          try {
+            const r = await fetch(`/api/crm/attendance?id=${encodeURIComponent(s.id)}`, {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json", ...authHeader() },
+              body: JSON.stringify({ remark: remarkInput.value.trim() }),
+            });
+            const d = await readCrmJson(r);
+            if (crmHandleAuthFailure(r.status, d)) return;
+            if (r.ok && d.success) saveRemarkBtn.textContent = "Saved";
+            else throw new Error(d.message);
+          } catch (e) {
+            saveRemarkBtn.textContent = "Save";
+            window.showToast?.(e.message || "Failed to save remark", "error");
+          } finally {
+            saveRemarkBtn.disabled = false;
+            setTimeout(() => (saveRemarkBtn.textContent = "Save"), 1500);
+          }
+        });
+        remarkCell.style.display = "flex";
+        remarkCell.style.alignItems = "center";
+        remarkCell.style.gap = "8px";
+        remarkCell.appendChild(remarkInput);
+        remarkCell.appendChild(saveRemarkBtn);
+        tr.innerHTML = `
+          <td>${escapeHtml(dateStr)}</td>
+          <td>${escapeHtml(checkInStr)}</td>
+          <td>${escapeHtml(checkOutStr)}</td>
+          <td>${formatHours(s.totalSeconds)}</td>
+        `;
+        tr.appendChild(remarkCell);
+        tbody.appendChild(tr);
+      }
+    } catch (e) {
+      loadingEl.style.display = "none";
+      emptyEl.style.display = "block";
+      emptyEl.textContent = e.message || "Failed to load.";
+    }
+  }
+
+  refreshBtn?.addEventListener("click", loadAttendance);
+  loadAttendance();
+}
+
+function setupAttendance() {
+  const tbody = qs("#attendanceAllTbody");
+  const emptyEl = qs("#attendanceAllEmpty");
+  const loadingEl = qs("#attendanceAllLoading");
+  const dailyTbody = qs("#attendanceDailyTotalsTbody");
+  const dailyEmpty = qs("#attendanceDailyTotalsEmpty");
+  const tab = qs("#tab-attendance");
+  if (!tbody || !emptyEl || !loadingEl || !tab) return;
+
+  tab.style.display = "block";
+
+  function formatHours(seconds) {
+    if (seconds == null) return "—";
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
+  }
+
+  async function load() {
+    loadingEl.style.display = "flex";
+    emptyEl.style.display = "none";
+    tbody.innerHTML = "";
+    if (dailyTbody) dailyTbody.innerHTML = "";
+    if (dailyEmpty) dailyEmpty.style.display = "none";
+    try {
+      const [attResp, empResp] = await Promise.all([
+        fetch("/api/crm/attendance?all=1", { headers: authHeader() }),
+        fetch("/api/crm/employees", { headers: authHeader() }),
+      ]);
+      const attData = await readCrmJson(attResp);
+      const empData = await readCrmJson(empResp);
+      if (crmHandleAuthFailure(attResp.status, attData)) {
+        loadingEl.style.display = "none";
+        emptyEl.style.display = "block";
+        emptyEl.textContent = "Please sign in again to view attendance.";
+        return;
+      }
+      if (!attResp.ok || !attData.success) throw new Error(attData.message || "Failed to load attendance");
+      const sessions = attData.sessions || [];
+      const employees = empData.employees || [];
+      const users = await (async () => {
+        try {
+          const r = await fetch("/api/crm/user-management", { headers: authHeader() });
+          const d = await r.json();
+          return (r.ok && d.users) ? d.users : [];
+        } catch { return []; }
+      })();
+      const emailToName = new Map();
+      for (const e of employees) if (e.email) emailToName.set(e.email.toLowerCase(), e.name || e.email);
+      for (const u of users) if (u.email) emailToName.set(u.email.toLowerCase(), u.name || u.email);
+      loadingEl.style.display = "none";
+
+      const byDayUser = new Map();
+      for (const s of sessions) {
+        const start = s.startTime ? new Date(s.startTime) : null;
+        const dateKey = start ? start.toISOString().slice(0, 10) : "";
+        const email = (s.userEmail || "").toLowerCase();
+        const key = `${dateKey}|${email}`;
+        const prev = byDayUser.get(key) || 0;
+        byDayUser.set(key, prev + (s.totalSeconds || 0));
+      }
+      const dailyRows = Array.from(byDayUser.entries())
+        .map(([key, totalSeconds]) => {
+          const [dateKey, email] = key.split("|");
+          const date = dateKey ? new Date(dateKey + "T12:00:00") : null;
+          const dateStr = date ? date.toLocaleDateString() : "—";
+          const name = emailToName.get(email) || email || "—";
+          return { dateStr, dateKey, name, email, totalSeconds };
+        })
+        .sort((a, b) => {
+          const d = (b.dateKey || "").localeCompare(a.dateKey || "");
+          return d !== 0 ? d : (a.name || "").localeCompare(b.name || "");
+        });
+
+      if (dailyTbody && dailyEmpty) {
+        if (!dailyRows.length) {
+          dailyEmpty.style.display = "block";
+        } else {
+          for (const row of dailyRows) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${escapeHtml(row.dateStr)}</td>
+              <td><div style="font-weight:700">${escapeHtml(row.name)}</div><div class="muted" style="font-size:12px">${escapeHtml(row.email || "—")}</div></td>
+              <td>${formatHours(row.totalSeconds)}</td>
+            `;
+            dailyTbody.appendChild(tr);
+          }
+        }
+      }
+
+      if (!sessions.length) {
+        emptyEl.style.display = "block";
+        return;
+      }
+      for (const s of sessions) {
+        const start = s.startTime ? new Date(s.startTime) : null;
+        const end = s.endTime ? new Date(s.endTime) : null;
+        const dateStr = start ? start.toLocaleDateString() : "—";
+        const checkInStr = start ? start.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+        const checkOutStr = end ? end.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }) : "—";
+        const email = (s.userEmail || "").toLowerCase();
+        const name = emailToName.get(email) || s.userEmail || email || "—";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(dateStr)}</td>
+          <td><div style="font-weight:700">${escapeHtml(name)}</div><div class="muted" style="font-size:12px">${escapeHtml(email || "—")}</div></td>
+          <td>${escapeHtml(checkInStr)}</td>
+          <td>${escapeHtml(checkOutStr)}</td>
+          <td>${formatHours(s.totalSeconds)}</td>
+          <td>${escapeHtml(s.remark || "—")}</td>
+        `;
+        tbody.appendChild(tr);
+      }
+    } catch (e) {
+      loadingEl.style.display = "none";
+      emptyEl.style.display = "block";
+      emptyEl.textContent = e.message || "Failed to load.";
+    }
+  }
+
+  qs("#refreshAttendanceAllBtn")?.addEventListener("click", load);
+  load();
+}
+
+function boot() {
+  injectCRMModal();
+  setupModalSaveBtn();
+  const page = getCurrentPage();
+
+  setupSidebar();
+  applyPageTitleFromBody();
+  setupTopbarScroll();
+  setupNotifications();
+
+  document.addEventListener(
+    "click",
+    (e) => {
+      const a = e.target.closest("a[href]");
+      if (a && a.href && a.href.startsWith(window.location.origin) && /crm/.test(a.getAttribute("href") || "")) {
+        sessionStorage.setItem("uptura_checkin_navigating", "1");
+        if ((a.getAttribute("href") || "").includes("dashboard")) sessionStorage.setItem("uptura_checkin_returning", "1");
+      }
+    },
+    true
+  );
+
+  const logoutBtn = qs("#logoutBtn");
+  logoutBtn?.addEventListener("click", () => {
+    clearCheckinState();
+    clearSession();
+    applyRoleUI("");
+    showLoggedOutUI();
+    // Clear notifications on logout
+    notifications = [];
+    if (qs("#notificationsList")) qs("#notificationsList").innerHTML = '<div class="muted" style="padding: 20px; text-align: center;">No new notifications</div>';
+    if (qs("#notificationBadge")) {
+        qs("#notificationBadge").textContent = "0";
+        qs("#notificationBadge").classList.remove("show");
+    }
+  });
+
+
+  if (page === "clients") {
+    qs("#clientSearch")?.addEventListener("input", () => renderClientsTable(clientsCache));
+    qs("#filterClientStatus")?.addEventListener("change", () => renderClientsTable(clientsCache));
+    qs("#refreshClientsBtn")?.addEventListener("click", refreshClients);
+  }
+
+  if (page === "clients") qs("#createClientForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Creating...";
+
+    const msg = qs("#clientMsg");
+    setMsg(msg, "Creating client…", "");
+    toggleInlineLoader("clientsLoading", true);
+    const payload = {
+      name: qs("#clientName")?.value || "",
+      email: qs("#clientEmail")?.value || "",
+      phone: qs("#clientPhone")?.value || "",
+      company: qs("#clientCompany")?.value || "",
+      pipelineStatus: qs("#clientStatus")?.value || "lead",
+    };
+    try {
+      await createClient(payload);
+      setMsg(msg, "Client created.", "ok");
+      e.target.reset();
+      await refreshClients();
+    } catch (err) {
+      setMsg(msg, err.message || "Failed to create client", "error");
+    } finally {
+      toggleInlineLoader("clientsLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
+    }
+  });
+
+  if (page === "users") qs("#createUserForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Creating...";
+
+    const msg = qs("#userMsg");
+    setMsg(msg, "Creating user…", "");
+    toggleInlineLoader("usersLoading", true);
+    const payload = {
+      email: qs("#userEmail")?.value || "",
+      password: qs("#userPassword")?.value || "",
+      role: qs("#userRole")?.value || "employee",
+      name: qs("#userName")?.value || "",
+      employeeId: qs("#userEmployeeId")?.value || "",
+    };
+    try {
+      const { userId } = await createUser(payload);
+      const email = payload.email;
+      const password = payload.password;
+      const text = buildWelcomeMessage(email, password);
+      msg.classList.add("ok");
+      msg.innerHTML = `User created: ${userId} <button type="button" class="btn" id="copyUserCredsBtn" style="margin-left:8px; padding:6px 10px; font-size:12px;">Copy welcome message</button>`;
+
+      const copyBtn = qs("#copyUserCredsBtn");
+      copyBtn?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          msg.textContent = `User created: ${userId} (welcome message copied)`;
+        } catch {
+          msg.textContent = `User created: ${userId}. Copy failed — please copy manually:\n\n${text}`;
+        }
+      }, { once: true });
+
+      e.target.reset();
+      await refreshUsers();
+    } catch (err) {
+      setMsg(msg, err.message || "Failed to create user", "error");
+    } finally {
+      toggleInlineLoader("usersLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
+    }
+  });
+
+  if (page === "users") {
+    qs("#userSearch")?.addEventListener("input", () => renderUsersTable(usersCache));
+    qs("#filterUserRole")?.addEventListener("change", () => renderUsersTable(usersCache));
+    qs("#refreshUsersBtn")?.addEventListener("click", refreshUsers);
+  }
+
+  if (page === "employees") qs("#createEmployeeForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Adding...";
+
+    const msg = qs("#empMsg");
+    setMsg(msg, "Adding employee…", "");
+    toggleInlineLoader("empLoading", true);
+    const payload = {
+      name: qs("#empName")?.value || "",
+      email: qs("#empEmail")?.value || "",
+      phone: qs("#empPhone")?.value || "",
+      role: qs("#empRole")?.value || "",
+      dailyHours: qs("#empHours")?.value || "",
+      onboardingStatus: qs("#empOnboarding")?.value || "pending",
+    };
+    try {
+      const result = await createEmployee(payload);
+      const text = buildEmployeeWelcomeMessage(payload.name, payload.email);
+      msg.classList.add("ok");
+      msg.innerHTML = `Employee added: ${result.id} <button type="button" class="btn" id="copyEmployeeMsgBtn" style="margin-left:8px; padding:6px 10px; font-size:12px;">Copy welcome message</button>`;
+
+      const copyBtn = qs("#copyEmployeeMsgBtn");
+      copyBtn?.addEventListener("click", async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          msg.textContent = `Employee added: ${result.id} (welcome message copied)`;
+        } catch {
+          msg.textContent = `Employee added: ${result.id}. Copy failed — please copy manually:\n\n${text}`;
+        }
+      }, { once: true });
+
+      e.target.reset();
+      await refreshEmployees();
+    } catch (err) {
+      setMsg(msg, err.message || "Failed to add employee", "error");
+    } finally {
+      toggleInlineLoader("empLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
+    }
+  });
+
+  if (page === "employees") {
+    qs("#empSearch")?.addEventListener("input", () => renderEmployeesTable(employeesCache));
+    qs("#filterEmpStatus")?.addEventListener("change", () => renderEmployeesTable(employeesCache));
+    qs("#refreshEmployeesBtn")?.addEventListener("click", refreshEmployees);
+  }
+
+  if (page === "applicants") qs("#createApplicantForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const subBtn = e.target.querySelector('button[type="submit"]');
+    const originalText = subBtn.textContent;
+    subBtn.disabled = true;
+    subBtn.textContent = "Adding...";
+
+    const msg = qs("#appMsg");
+    setMsg(msg, "Adding applicant…", "");
+    toggleInlineLoader("appLoading", true);
+    const payload = {
+      name: qs("#appName")?.value || "",
+      email: qs("#appEmail")?.value || "",
+      role: qs("#appRole")?.value || "",
+      stage: qs("#appStage")?.value || "applied",
+      source: qs("#appSource")?.value || "",
+    };
+    try {
+      await createApplicant(payload);
+      setMsg(msg, "Applicant added.", "ok");
+      e.target.reset();
+      await refreshApplicants();
+    } catch (err) {
+      setMsg(msg, err.message || "Failed to add applicant", "error");
+    } finally {
+      toggleInlineLoader("appLoading", false);
+      subBtn.disabled = false;
+      subBtn.textContent = originalText;
+    }
+  });
+
+  if (page === "applicants") {
+    qs("#appSearch")?.addEventListener("input", () => renderApplicantsTable(applicantsCache));
+    qs("#filterAppStage")?.addEventListener("change", () => renderApplicantsTable(applicantsCache));
+    qs("#refreshAppBtn")?.addEventListener("click", refreshApplicants);
+  }
+
+  if (page === "meetings") {
+    qs("#meetSearch")?.addEventListener("input", () => renderMeetingsTable(meetingsCache));
+    qs("#filterMeetStatus")?.addEventListener("change", () => renderMeetingsTable(meetingsCache));
+    qs("#refreshMeetingsBtn")?.addEventListener("click", refreshMeetings);
+    qs("#createMeetingForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
+      const msg = qs("#meetMsg");
+      setMsg(msg, "Creating meeting…", "");
+      toggleInlineLoader("meetLoading", true);
+      const relatedType = qs("#meetRelatedType")?.value || "";
+      const relatedId = qs("#meetRelatedId")?.value || "";
+      const payload = {
+        title: qs("#meetTitle")?.value || "",
+        scheduledAt: qs("#meetWhen")?.value ? new Date(qs("#meetWhen").value).toISOString() : null,
+        relatedType,
+        relatedId,
+        status: qs("#meetStatus")?.value || "scheduled",
+        notes: qs("#meetNotes")?.value || "",
+      };
+      try {
+        await createMeeting(payload);
+        setMsg(msg, "Meeting created.", "ok");
+        e.target.reset();
+        await refreshMeetings();
+      } catch (err) {
+        setMsg(msg, err.message || "Failed to create meeting", "error");
+      } finally {
+        toggleInlineLoader("meetLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
+      }
+    });
+  }
+
+  if (page === "sales") {
+    qs("#saleSearch")?.addEventListener("input", () => renderSalesTable(salesCache));
+    qs("#filterSaleStage")?.addEventListener("change", () => renderSalesTable(salesCache));
+    qs("#refreshSalesBtn")?.addEventListener("click", refreshSales);
+    qs("#createSaleForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
+      const msg = qs("#saleMsg");
+      setMsg(msg, "Creating deal…", "");
+      toggleInlineLoader("salesLoading", true);
+      const payload = {
+        clientId: qs("#saleClientId")?.value || "",
+        agentEmail: qs("#saleAgentEmail")?.value || "",
+        amount: qs("#saleAmount")?.value || "",
+        stage: qs("#saleStage")?.value || "lead",
+        notes: qs("#saleNotes")?.value || "",
+      };
+      try {
+        await createSale(payload);
+        setMsg(msg, "Deal created.", "ok");
+        e.target.reset();
+        await refreshSales();
+      } catch (err) {
+        setMsg(msg, err.message || "Failed to create deal", "error");
+      } finally {
+        toggleInlineLoader("salesLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
+      }
+    });
+  }
+
+  if (page === "invoices") {
+    qs("#invSearch")?.addEventListener("input", () => renderInvoicesTable(invoicesCache));
+    qs("#filterInvStatus")?.addEventListener("change", () => renderInvoicesTable(invoicesCache));
+    qs("#refreshInvoicesBtn")?.addEventListener("click", refreshInvoices);
+    qs("#createInvoiceForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const subBtn = e.target.querySelector('button[type="submit"]');
+      const originalText = subBtn.textContent;
+      subBtn.disabled = true;
+      subBtn.textContent = "Creating...";
+
+      const msg = qs("#invMsg");
+      setMsg(msg, "Creating invoice…", "");
+      toggleInlineLoader("invoicesLoading", true);
+      const payload = {
+        clientId: qs("#invClientId")?.value || "",
+        amount: qs("#invAmount")?.value || "",
+        status: qs("#invStatus")?.value || "draft",
+        dueDate: qs("#invDue")?.value || "",
+        notes: qs("#invNotes")?.value || "",
+      };
+      try {
+        await createInvoice(payload);
+        setMsg(msg, "Invoice created.", "ok");
+        e.target.reset();
+        await refreshInvoices();
+      } catch (err) {
+        setMsg(msg, err.message || "Failed to create invoice", "error");
+      } finally {
+        toggleInlineLoader("invoicesLoading", false);
+        subBtn.disabled = false;
+        subBtn.textContent = originalText;
+      }
+    });
+
+    document.getElementById("generatePdfBtn")?.addEventListener("click", () => {
+      if (!window.jspdf) {
+        window.showToast?.("PDF generator not ready. Please check connection.", "error");
+        return;
+      }
+
+      // ── Collect form values ──────────────────────
+      const clientName    = document.getElementById("pdfClientName")?.value.trim()    || "Client Name";
+      const clientEmail   = document.getElementById("pdfClientEmail")?.value.trim()   || "";
+      const dateVal       = document.getElementById("pdfDate")?.value                 || "";
+      const timeVal       = document.getElementById("pdfTime")?.value                 || "";
+      const serviceType   = document.getElementById("pdfService")?.value              || "Service";
+      const servicePrice  = parseFloat(document.getElementById("pdfServicePrice")?.value) || 0;
+      const serviceDur    = document.getElementById("pdfServiceDuration")?.value.trim()|| "1 Month";
+      const description   = document.getElementById("pdfDescription")?.value.trim()   || "";
+
+      // Line items
+      const itemRows = document.querySelectorAll("#pdfItemsList .pdf-item-row");
+      const lineItems = [];
+      itemRows.forEach(row => {
+        const name  = row.querySelector(".item-name")?.value.trim();
+        const price = parseFloat(row.querySelector(".item-price")?.value) || 0;
+        const dur   = row.querySelector(".item-dur")?.value.trim() || "1 Month";
+        if (name) lineItems.push({ name, price, dur });
+      });
+
+      // Build all items including main service
+      const allItems = [{ name: serviceType, price: servicePrice, dur: serviceDur, desc: description }, ...lineItems];
+      const subtotal = allItems.reduce((s, i) => s + i.price, 0);
+
+      // Invoice number & date
+      const invoiceNum = "INV-" + Math.floor(1000 + Math.random() * 9000);
+      const issueDate  = dateVal ? new Date(dateVal).toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" }) : new Date().toLocaleDateString("en-US", { year:"numeric", month:"long", day:"numeric" });
+      const issueTime  = timeVal || new Date().toLocaleTimeString("en-US", { hour:"2-digit", minute:"2-digit" });
+
+      const processPDF = (logoDataUrl, watermarkDataUrl, logoW, logoH) => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+        const PW = doc.internal.pageSize.getWidth();   // 595
+        const PH = doc.internal.pageSize.getHeight();  // 842
+
+        // ── Colours & fonts ──────────────────────────
+        const BRAND_ORANGE = [255, 90, 0]; // Brand orange
+        const LIGHT_GREY = [242, 242, 242];
+        const MUTED = [100, 100, 100];
+        const TEXT = [0, 0, 0];
+        const WHITE = [255, 255, 255];
+
+        let cy = 40;
+
+        // Draw Watermark (center of page)
+        if (watermarkDataUrl) {
+          const wmWidth = 400; // Large width for watermark
+          const wmHeight = Math.floor(wmWidth * logoH / logoW);
+          const wmX = (PW - wmWidth) / 2;
+          const wmY = (PH - wmHeight) / 2; 
+          doc.addImage(watermarkDataUrl, "PNG", wmX, wmY, wmWidth, wmHeight);
+        }
+
+        // Company Logo (Left side)
+        if (logoDataUrl) {
+          doc.addImage(logoDataUrl, "PNG", 40, cy, logoW, logoH);
+        } else {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(36);
+          doc.setTextColor(...BRAND_ORANGE);
+          doc.text("Uptura", 40, cy + 25);
+        }
+
+        // Top Right Info
+        doc.setFontSize(28);
+        doc.setTextColor(...TEXT);
+        doc.text("INVOICE", PW - 40, cy + 15, { align: "right" });
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.text("UPTURA LLC", PW - 40, cy + 35, { align: "right" });
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        doc.text("1001 S. Main Street", PW - 40, cy + 47, { align: "right" });
+        doc.text("Kalispell, MT 59901", PW - 40, cy + 59, { align: "right" });
+        doc.text("United States", PW - 40, cy + 71, { align: "right" });
+        doc.text("info@uptura.net", PW - 40, cy + 83, { align: "right" });
+        
+        cy = Math.max(cy + 105, cy + logoH + 20); // adapt based on logo height
+
+        cy += 15;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(40, cy, PW - 40, cy);
+        cy += 20;
+
+        // BILL TO (Left) & Invoice Meta (Right)
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(8);
+        doc.setTextColor(...MUTED);
+        doc.text("BILL TO", 40, cy);
+
+        doc.setFontSize(10);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...TEXT);
+        doc.text(clientName.toUpperCase(), 40, cy + 12);
+        
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(9);
+        if (clientEmail) doc.text(clientEmail, 40, cy + 40);
+
+        // Meta Right
+        const rightColLabel = PW - 180;
+        const rightColValue = PW - 40;
+        
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(9);
+        doc.setTextColor(...TEXT);
+        doc.text("Invoice Number:", rightColLabel, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(invoiceNum, rightColValue, cy, { align: "right" });
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Invoice Date:", rightColLabel, cy + 14, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(issueDate, rightColValue, cy + 14, { align: "right" });
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Payment Due:", rightColLabel, cy + 28, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text(issueDate, rightColValue, cy + 28, { align: "right" });
+
+        // Amount Due highlighted
+        doc.setFillColor(...LIGHT_GREY);
+        doc.rect(PW - 260, cy + 34, 220, 16, "F");
+        
+        doc.setFont("helvetica", "bold");
+        doc.text("Amount Due (USD):", rightColLabel, cy + 45, { align: "right" });
+        doc.text("$" + subtotal.toFixed(2), rightColValue, cy + 45, { align: "right" });
+
+        cy += 65;
+
+        // TABLE HEADER (Orange band)
+        const COL = { service: 45, fee: 400, amount: PW - 45 };
+        const rowH = 22;
+
+        doc.setFillColor(...BRAND_ORANGE);
+        doc.rect(40, cy, PW - 80, rowH, "F");
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.setTextColor(...WHITE);
+        doc.text("Services", COL.service, cy + 15);
+        doc.text("Fee", COL.fee, cy + 15, { align: "right" });
+        doc.text("Amount", COL.amount, cy + 15, { align: "right" });
+
+        cy += rowH + 10;
+
+        // TABLE ROWS
+        doc.setTextColor(...TEXT);
+        allItems.forEach((item, i) => {
+          doc.setFont("helvetica", "bold");
+          doc.setFontSize(10);
+          doc.text(item.name, COL.service, cy);
+
+          doc.setFont("helvetica", "normal");
+          doc.text("$" + item.price.toFixed(2), COL.fee, cy, { align: "right" });
+          doc.text("$" + item.price.toFixed(2), COL.amount, cy, { align: "right" });
+
+          cy += 12;
+
+          if (item.desc || item.dur) {
+            doc.setFontSize(9);
+            doc.setTextColor(...TEXT);
+            let extra = item.desc ? item.desc : `Duration: ${item.dur}`;
+            doc.text(extra, COL.service, cy);
+            cy += 20;
+          } else {
+            cy += 8;
+          }
+        });
+
+        // Bottom line
+        cy += 5;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(40, cy, PW - 40, cy);
+        cy += 15;
+
+        // TOTALS
+        doc.setFontSize(9);
+        doc.setFont("helvetica", "bold");
+        doc.setTextColor(...TEXT);
+        doc.text("Total:", COL.fee, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text("$" + subtotal.toFixed(2), COL.amount, cy, { align: "right" });
+
+        cy += 14;
+        doc.setFont("helvetica", "bold");
+        doc.text(`Payment on ${issueDate}:`, COL.fee, cy, { align: "right" });
+        doc.setFont("helvetica", "normal");
+        doc.text("$0.00", COL.amount, cy, { align: "right" });
+
+        cy += 10;
+        doc.setDrawColor(230, 230, 230);
+        doc.line(PW - 260, cy, PW - 40, cy);
+        cy += 18;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Amount Due (USD):", COL.fee, cy, { align: "right" });
+        doc.text("$" + subtotal.toFixed(2), COL.amount, cy, { align: "right" });
+
+        cy += 50;
+
+        // NOTES / TERMS
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(10);
+        doc.text("Notes / Terms", 40, cy);
+        doc.setFont("helvetica", "normal");
+        
+        cy += 14;
+        doc.text(`Total Amount: $${subtotal.toFixed(2)}`, 40, cy);
+        cy += 14;
+        doc.text(`Service Fee: $0.00 (Non-refundable)`, 40, cy);
+
+        // FOOTER
+        const footerY = PH - 40;
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(12);
+        doc.setTextColor(...BRAND_ORANGE);
+        doc.text("Powered by Uptura", PW / 2, footerY, { align: "center" });
+
+        // ── SAVE ────────────────────────────────────
+        doc.save(`Uptura-${invoiceNum}-${clientName.replace(/\s+/g, "-")}.pdf`);
+      };
+
+      const img = new Image();
+      img.crossOrigin = "Anonymous";
+      img.src = "images/logo-main.png";
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        canvas.width = img.width;
+        canvas.height = img.height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0);
+        const dataUrl = canvas.toDataURL("image/png");
+
+        // Create dull watermark image
+        const wCanvas = document.createElement("canvas");
+        wCanvas.width = img.width;
+        wCanvas.height = img.height;
+        const wCtx = wCanvas.getContext("2d");
+        wCtx.globalAlpha = 0.08; // Very light/faint 8% opacity
+        wCtx.drawImage(img, 0, 0);
+        const watermarkDataUrl = wCanvas.toDataURL("image/png");
+
+        // Define larger logo size for header
+        let targetW = 150;
+        let targetH = Math.floor(150 * img.height / img.width);
+
+        processPDF(dataUrl, watermarkDataUrl, targetW, targetH);
+      };
+
+      img.onerror = () => {
+        processPDF(null, null, 0, 0);
+      };
+    });
+  }
+
+  if (page === "reports") {
+    qs("#refreshReportsBtn")?.addEventListener("click", refreshReports);
+  }
+
+  qs("#loginForm")?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const errEl = qs("#loginError");
+    setMsg(errEl, "", "");
+    const btn = qs("#loginBtn");
+    btn.disabled = true;
+    btn.innerHTML = `<span>Logging in...</span>`;
+    try {
+      const email = qs("#loginEmail").value;
+      const password = qs("#loginPassword").value;
+      const data = await crmLogin(email, password);
+      setSession({ token: data.token, role: data.role, userId: data.userId, email, name: data.name });
+      applyRoleUI(data.role);
+      showLoggedInUI();
+      if (data.role === "employee") {
+        window.location.href = "crm-dashboard.html";
+        return;
+      }
+      switchTab("clients");
+      await refreshClients();
+    } catch (err) {
+      errEl.style.display = "block";
+      errEl.textContent = err.message || "Login failed";
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = `<span>Login</span><i class="fa-solid fa-arrow-right"></i>`;
+    }
+  });
+
+  // Password: show/hide on login
+  (function () {
+    const loginToggle = qs("#loginPasswordToggle");
+    const loginInput = qs("#loginPassword");
+    if (loginToggle && loginInput) {
+      loginToggle.addEventListener("click", () => {
+        const isPass = loginInput.type === "password";
+        loginInput.type = isPass ? "text" : "password";
+        const icon = loginToggle.querySelector("i");
+        if (icon) {
+          icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+        }
+        loginToggle.title = isPass ? "Hide password" : "Show password";
+        loginToggle.setAttribute("aria-label", loginToggle.title);
+      });
+    }
+  })();
+
+  // Password: generate + show/hide on user management create form
+  (function () {
+    const genBtn = qs("#userPasswordGenerate");
+    const userToggle = qs("#userPasswordToggle");
+    const userInput = qs("#userPassword");
+    if (genBtn && userInput) {
+      genBtn.addEventListener("click", () => {
+        userInput.value = generatePassword(12);
+        userInput.type = "text";
+        const icon = userToggle?.querySelector("i");
+        if (icon) {
+          icon.classList.replace("fa-eye", "fa-eye-slash");
+        }
+        if (userToggle) {
+          userToggle.title = "Hide password";
+          userToggle.setAttribute("aria-label", userToggle.title);
+        }
+      });
+    }
+    if (userToggle && userInput) {
+      userToggle.addEventListener("click", () => {
+        const isPass = userInput.type === "password";
+        userInput.type = isPass ? "text" : "password";
+        const icon = userToggle.querySelector("i");
+        if (icon) {
+          icon.classList.replace(isPass ? "fa-eye" : "fa-eye-slash", isPass ? "fa-eye-slash" : "fa-eye");
+        }
+        userToggle.title = isPass ? "Hide password" : "Show password";
+        userToggle.setAttribute("aria-label", userToggle.title);
+      });
+    }
+  })();
+
+  // Session restore
+  const session = getSession();
+  if (session?.token) {
+    applyRoleUI(session.role);
+    showLoggedInUI();
+    const useBootstrap = page === "clients" || page === "users";
+    if (useBootstrap) {
+      const msg = page === "clients" ? qs("#clientMsg") : qs("#userMsg");
+      const loaderId = page === "clients" ? "clientsLoading" : "usersLoading";
+      setMsg(msg, page === "clients" ? "Loading clients…" : "", "");
+      toggleInlineLoader(loaderId, true);
+      fetchBootstrap()
+        .then(({ clients, users }) => {
+          clientsCache = clients;
+          usersCache = users;
+          buildUserEmailMap(usersCache);
+          if (page === "clients") {
+            renderClientsTable(clientsCache);
+            setMsg(msg, `Loaded ${clientsCache.length} client(s).`, "ok");
+          } else {
+            renderUsersTable(usersCache);
+            setMsg(msg, `Loaded ${usersCache.length} user(s).`, "ok");
+          }
+        })
+        .catch(() => {
+          if (page === "clients") refreshClients(false);
+          else refreshUsers(false);
+        })
+        .finally(() => toggleInlineLoader(loaderId, false));
+    } else {
+      if (page !== "users") primeUsersForCreatorLabels();
+      if (page === "meetings") refreshMeetings();
+      if (page === "employees") refreshEmployees();
+      if (page === "applicants") refreshApplicants();
+      if (page === "sales") refreshSales();
+      if (page === "invoices") {
+        refreshInvoices();
+        setupInvoicePdfGenerator();
+      }
+      if (page === "reports") refreshReports();
+      if (page === "chat") setupChat();
+      if (page === "dashboard") setupDashboard();
+      if (page === "attendance") setupAttendance();
+    }
+  } else {
+    showLoggedOutUI();
+  }
+
+  // Login card entrance animation (like admin.html)
+  if (window.gsap) {
+    window.gsap.to("#loginCard", { opacity: 1, y: 0, duration: 1, ease: "expo.out" });
+  }
+}
+
+function setupInvoicePdfGenerator() {
+  const list = qs("#pdfItemsList");
+  const addBtn = qs("#addItemBtn");
+  const totalDisplay = qs("#pdfTotalDisplay");
+
+  if (!list || !addBtn) return;
+
+  // Initialize date/time
+  const now = new Date();
+  const dateInput = qs("#pdfDate");
+  const timeInput = qs("#pdfTime");
+  if (dateInput) dateInput.value = now.toISOString().split("T")[0];
+  if (timeInput) timeInput.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+
+  const updatePdfTotal = () => {
+    let total = parseFloat(qs("#pdfServicePrice")?.value) || 0;
+    document.querySelectorAll(".pdf-item-price").forEach(inp => {
+      total += parseFloat(inp.value) || 0;
+    });
+    if (totalDisplay) totalDisplay.textContent = total.toFixed(2);
+  };
+
+  qs("#pdfServicePrice")?.addEventListener("input", updatePdfTotal);
+
+  const addRow = (nameText = "", priceVal = 0, durationVal = "1") => {
+    const div = document.createElement("div");
+    div.className = "pdf-item-row grid4";
+    div.style.marginBottom = "8px";
+    div.style.alignItems = "center";
+    div.innerHTML = `
+      <div class="field"><input class="pdf-item-name" placeholder="Item Name" value="${nameText}" /></div>
+      <div class="field"><input class="pdf-item-price" type="number" step="0.01" placeholder="Price" value="${priceVal}" /></div>
+      <div class="field"><input class="pdf-item-duration" placeholder="Duration (e.g. 1 Month)" value="${durationVal}" /></div>
+      <div class="field"><button class="btn remove-item-btn" style="color:red; border-color:red; padding:8px;"><i class="fa-solid fa-trash"></i></button></div>
+    `;
+
+    div.querySelector(".pdf-item-price").addEventListener("input", updatePdfTotal);
+    div.querySelector(".remove-item-btn").addEventListener("click", () => {
+      div.remove();
+      updatePdfTotal();
+    });
+
+    list.appendChild(div);
+    updatePdfTotal();
+  };
+
+  addBtn.addEventListener("click", () => addRow());
+
+  // Add one default row
+  addRow("Standard Package", 0, "1 Month");
+}
+
+
+
+
+// Global notification state
+let notifications = [];
+
+function saveNotifications() {
+  const session = getSession();
+  if (session?.email) {
+    localStorage.setItem(`uptura_notifs_${session.email.toLowerCase()}`, JSON.stringify(notifications));
+  }
+}
+
+function loadNotifications() {
+  const session = getSession();
+  if (session?.email) {
+    try {
+      const saved = JSON.parse(localStorage.getItem(`uptura_notifs_${session.email.toLowerCase()}`) || "[]");
+      notifications = saved.map(n => ({ ...n, time: new Date(n.time) }));
+    } catch (e) {
+      notifications = [];
+    }
+  }
+}
+
+function setupNotifications() {
+  const bell = qs("#notificationBell");
+  const dropdown = qs("#notificationsDropdown");
+  const list = qs("#notificationsList");
+  const badge = qs("#notificationBadge");
+  const clearBtn = qs("#clearNotifications");
+
+  if (!bell || !dropdown || !list || !badge) return;
+
+  bell.addEventListener("click", (e) => {
+    e.stopPropagation();
+    dropdown.classList.toggle("active");
+    if (dropdown.classList.contains("active")) {
+        markAllNotificationsAsRead();
+    }
+  });
+
+  document.addEventListener("click", (e) => {
+    if (!dropdown || !bell) return;
+    if (!dropdown.contains(e.target) && !bell.contains(e.target)) {
+      dropdown.classList.remove("active");
+    }
+  });
+
+  clearBtn?.addEventListener("click", () => {
+    notifications = [];
+    renderNotifications();
+  });
+
+  // Listen for chat updates globally if logged in
+  const session = getSession();
+  if (!session?.email) return;
+
+  const myEmail = session.email.toLowerCase();
+  loadNotifications();
+  renderNotifications();
+
+  const chatsRef = collection(db, "chats");
+  const q = query(chatsRef, where("participantEmails", "array-contains", myEmail));
+
+  onSnapshot(q, (snap) => {
+    const unreadChats = [];
+    snap.docs.forEach((doc) => {
+      const chat = { id: doc.id, ...doc.data() };
+      const seenState = JSON.parse(localStorage.getItem(`uptura_chat_seen_${myEmail}`) || "{}");
+      const isUnread = chat.updatedAt && (!seenState[chat.id] || chat.updatedAt.seconds > seenState[chat.id]);
+      if (isUnread) unreadChats.push(chat);
+    });
+
+    // Update sidebar chat count if it exists
+    const count = unreadChats.length;
+    const chatNavCount = qs("#chatNavCount");
+    if (chatNavCount) {
+      chatNavCount.textContent = count;
+      chatNavCount.style.display = count > 0 ? "flex" : "none";
+    }
+
+    // Handle modified changes for toast-like notifications
+    snap.docChanges().forEach((change) => {
+      if (change.type === "modified") {
+        const chat = { id: change.doc.id, ...change.doc.data() };
+        const isChatPage = document.body.getAttribute("data-crm-page") === "chat";
+        const currentChatId = window.activeChatId;
+        
+        if (isChatPage && currentChatId === chat.id) return;
+
+        const title = chat.type === "group" ? (chat.name || "Group") : "New Message";
+        addNotification({
+          id: `chat_${chat.id}_${chat.updatedAt?.seconds || Date.now()}`,
+          title: title,
+          text: "You have a new message",
+          time: new Date(),
+          link: "crm-chat.html"
+        });
+      }
+    });
+  });
+
+  // Admin global notifications
+  if (session.role === "super_admin" || session.role === "admin") {
+    const adminTargets = [
+      { col: "clients", label: "Client", link: "crm.html", field: "name", navBadgeId: "clientsNavCount" },
+      { col: "meetings", label: "Meeting", link: "crm-meetings.html", field: "title", navBadgeId: "meetingsNavCount" },
+      { col: "sales", label: "Sale", link: "crm-sales.html", field: "amount", navBadgeId: "salesNavCount" },
+      { col: "invoices", label: "Invoice", link: "crm-invoices.html", field: "amount", navBadgeId: "invoicesNavCount" },
+      { col: "jobApplicants", label: "Applicant", link: "crm-applicants.html", field: "name" },
+      { col: "chats", label: "New Chat", link: "crm-chat.html", field: "name" }
+    ];
+
+    // Clear badge for current page
+    const currentPage = getCurrentPage();
+    const currentTarget = adminTargets.find(t => t.link.startsWith("crm-" + currentPage) || (currentPage === "clients" && t.link === "crm.html"));
+    if (currentTarget && currentTarget.navBadgeId) {
+        localStorage.setItem(`uptura_nav_unread_${currentTarget.navBadgeId}`, "0");
+    }
+
+    adminTargets.forEach(target => {
+      const colRef = collection(db, target.col);
+      const qAdmin = query(colRef, orderBy("createdAt", "desc"), limit(5));
+      let initial = true;
+
+      // Initial badge render from storage
+      if (target.navBadgeId) {
+        const badge = qs(`#${target.navBadgeId}`);
+        const count = parseInt(localStorage.getItem(`uptura_nav_unread_${target.navBadgeId}`) || "0");
+        if (badge && count > 0) {
+          badge.textContent = count > 9 ? "9+" : count;
+          badge.style.display = "flex";
+        }
+      }
+
+      onSnapshot(qAdmin, (snap) => {
+        if (initial) {
+          initial = false;
+          return;
+        }
+        snap.docChanges().forEach(change => {
+          if (change.type === "added") {
+            const data = change.doc.data();
+            if (data.createdByEmail?.toLowerCase() === myEmail) return;
+
+            // Notify via Toast
+            let desc = data[target.field] || "New Entry";
+            if (target.col === "sales" || target.col === "invoices") desc = `$${Number(data.amount || 0).toFixed(2)}`;
+            
+            window.showToast?.(`New ${target.label}: ${desc}`, "success");
+
+            // Update badge in storage and UI
+            if (target.navBadgeId) {
+                const isCurrentPage = target.link.startsWith("crm-" + currentPage) || (currentPage === "clients" && target.link === "crm.html");
+                if (!isCurrentPage) {
+                    let count = parseInt(localStorage.getItem(`uptura_nav_unread_${target.navBadgeId}`) || "0");
+                    count++;
+                    localStorage.setItem(`uptura_nav_unread_${target.navBadgeId}`, String(count));
+                    
+                    const badge = qs(`#${target.navBadgeId}`);
+                    if (badge) {
+                        badge.textContent = count > 9 ? "9+" : count;
+                        badge.style.display = "flex";
+                    }
+                }
+            }
+
+            addNotification({
+              id: `admin_${target.col}_${change.doc.id}`,
+              title: `New ${target.label}`,
+              text: `${desc} created by ${data.createdByEmail || "user"}`,
+              time: new Date(),
+              link: target.link
+            });
+          }
+        });
+      }, (err) => {
+        console.error(`[Admin Notification Error - ${target.col}]`, err);
+      });
+    });
+  }
+}
+
+function addNotification(n) {
+  // Avoid duplicates
+  if (notifications.find(existing => existing.id === n.id)) return;
+  
+  notifications.unshift({ ...n, unread: true });
+  if (notifications.length > 50) notifications.pop();
+  saveNotifications();
+  renderNotifications();
+}
+
+function renderNotifications() {
+  const list = qs("#notificationsList");
+  const badge = qs("#notificationBadge");
+  if (!list || !badge) return;
+
+  const unreadCount = notifications.filter(n => n.unread).length;
+  badge.textContent = unreadCount;
+  badge.classList.toggle("show", unreadCount > 0);
+
+  if (!notifications.length) {
+    list.innerHTML = '<div class="muted" style="padding: 20px; text-align: center;">No new notifications</div>';
+    return;
+  }
+
+  list.innerHTML = notifications.map(n => `
+    <div class="notification-item ${n.unread ? 'unread' : ''}" onclick="window.location.href='${n.link}'">
+      <div class="notification-item-title">${escapeHtml(n.title)}</div>
+      <div class="notification-item-text">${escapeHtml(n.text)}</div>
+      <div class="notification-item-time">${n.time.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
+    </div>
+  `).join('');
+}
+
+function markAllNotificationsAsRead() {
+    notifications.forEach(n => n.unread = false);
+    saveNotifications();
+    renderNotifications();
+}
+
+document.addEventListener("DOMContentLoaded", boot);
+
+
