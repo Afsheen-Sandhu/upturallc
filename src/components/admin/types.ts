@@ -12,6 +12,11 @@ export type OrderRecord = {
   addons?: Array<{ title?: string }>;
   appointmentDate?: string;
   appointmentTime?: string;
+  paymentMethod?: string;
+  paymentStatus?: string;
+  stripeSessionId?: string;
+  paypalOrderId?: string;
+  amountTotal?: number;
   status: OrderStatus;
   remarks?: string;
 };

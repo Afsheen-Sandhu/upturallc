@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminShell, { type AdminTab } from "@/components/admin/AdminShell";
-import AdminTableSkeleton from "@/components/admin/AdminTableSkeleton";
 import OrdersView from "@/components/admin/OrdersView";
 import LeadsView from "@/components/admin/LeadsView";
+import SettingsView from "@/components/admin/SettingsView";
 
 type VerifyResponse = { success: true } | { success: false; message?: string };
 
@@ -68,7 +68,7 @@ export default function AdminDashboardPage() {
         ) : tab === "appointments" ? (
           <LeadsView mode="appointments" />
         ) : (
-          <AdminTableSkeleton title="Settings" description="Next: migrate settings card and any credential messaging." />
+          <SettingsView />
         )
       }
     </AdminShell>
