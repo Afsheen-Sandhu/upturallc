@@ -7607,3 +7607,294 @@ html.lenis body {
 }
 
 /* ===== END CHECKOUT PAGE STYLES ===== */
+
+/* ===== CONSULTATION PAGE ===== */
+
+.consult-page {
+    padding-bottom: 80px;
+}
+
+.consult-hero {
+    padding: 160px 24px 60px;
+    text-align: center;
+}
+
+.consult-hero-inner {
+    max-width: 680px;
+    margin: 0 auto;
+}
+
+.consult-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #FF3C00;
+    color: #ffffff;
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 7px 18px;
+    border-radius: 999px;
+    margin-bottom: 24px;
+}
+
+.consult-title {
+    font-size: 3.2rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    line-height: 1.1;
+    letter-spacing: -0.04em;
+    margin-bottom: 18px;
+}
+
+.consult-subtitle {
+    font-size: 1.1rem;
+    color: #6B6763;
+    line-height: 1.65;
+    margin-bottom: 30px;
+}
+
+.consult-price-pill {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 12px;
+    background: #1a1a1a;
+    color: #ffffff;
+    padding: 14px 32px;
+    border-radius: 999px;
+}
+
+.consult-price-amount {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+}
+
+.consult-price-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    opacity: 0.6;
+}
+
+/* Card */
+.consult-card-section {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
+.consult-card {
+    background: #ffffff;
+    border-radius: 32px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.07);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow: hidden;
+}
+
+/* Left column */
+.consult-included {
+    background: #F8F5F2;
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+}
+
+.consult-included-title {
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #6B6763;
+}
+
+.consult-perks {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.consult-perk {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.45;
+}
+
+.consult-perk-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: #FF3C00;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.consult-guarantee {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: #6B6763;
+    line-height: 1.5;
+    padding-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.08);
+}
+
+.consult-guarantee i {
+    color: #FF3C00;
+    font-size: 1rem;
+    margin-top: 1px;
+    flex-shrink: 0;
+}
+
+/* Right column */
+.consult-form-col {
+    padding: 48px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    justify-content: center;
+}
+
+.consult-form-heading {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin-bottom: 4px;
+}
+
+.consult-form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.consult-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #1a1a1a;
+}
+
+.consult-input {
+    width: 100%;
+    padding: 13px 16px;
+    border-radius: 12px;
+    border: 2px solid #1a1a1a;
+    background: rgba(255,255,255,0.5);
+    font-size: 0.95rem;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: all 0.25s ease;
+    box-sizing: border-box;
+}
+
+.consult-input:focus {
+    background: #ffffff;
+    border-color: #FF3C00;
+}
+
+.consult-error {
+    font-size: 0.88rem;
+    color: #c0392b;
+    font-weight: 600;
+}
+
+.consult-pay-btn {
+    width: 100%;
+    padding: 15px 24px;
+    border-radius: 999px;
+    border: none;
+    background: linear-gradient(135deg, #FF3C00, #FF5722);
+    color: #ffffff;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    box-shadow: 0 10px 28px rgba(255,60,0,0.3);
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.consult-pay-btn:hover:not(:disabled) {
+    background: #1a1a1a;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.2);
+    transform: translateY(-2px);
+}
+
+.consult-pay-btn:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.consult-fine-print {
+    font-size: 0.78rem;
+    color: #6B6763;
+    text-align: center;
+}
+
+/* Success state */
+.consult-success {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 0;
+}
+
+.consult-success i {
+    font-size: 3rem;
+    color: #22a35b;
+}
+
+.consult-success h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #1a1a1a;
+}
+
+.consult-success p {
+    font-size: 0.95rem;
+    color: #6B6763;
+    line-height: 1.6;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .consult-title {
+        font-size: 2.2rem;
+    }
+
+    .consult-card {
+        grid-template-columns: 1fr;
+    }
+
+    .consult-hero {
+        padding: 130px 20px 40px;
+    }
+
+    .consult-included,
+    .consult-form-col {
+        padding: 32px 24px;
+    }
+}
+
+/* ===== END CONSULTATION PAGE ===== */

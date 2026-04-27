@@ -38,6 +38,10 @@ export async function POST(req: NextRequest) {
     category?: string;
     tier?: string;
     price?: string;
+    priceCents?: number;          // explicit override — skips string parsing
+    productDescription?: string;  // line item description override
+    successUrl?: string;          // redirect after payment
+    cancelUrl?: string;
     addons?: { id: string; title: string }[];
     utm_source?: string;
     utm_medium?: string;
@@ -45,7 +49,7 @@ export async function POST(req: NextRequest) {
   };
 
   const origin = req.headers.get("origin") || "https://uptura.net";
-  const amountCents = parsePriceCents(body.price ?? null, body.tier ?? null);
+  const amountCents = body.priceCents ?? parsePriceCents(body.price ?? null, body.tier ?? null);
 
   try {
     const session = await stripe.checkout.sessions.create({
@@ -58,7 +62,7 @@ export async function POST(req: NextRequest) {
             unit_amount: amountCents,
             product_data: {
               name: body.planLabel || "Uptura Service Deposit",
-              description: "Retainer deposit — final scope and deliverables confirmed after our review call.",
+              description: body.productDescription || "Retainer deposit — final scope and deliverables confirmed after our review call.",
             },
           },
           quantity: 1,
@@ -75,8 +79,8 @@ export async function POST(req: NextRequest) {
         utm_medium: body.utm_medium ?? "",
         utm_campaign: body.utm_campaign ?? "",
       },
-      success_url: `${origin}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/checkout?payment=cancelled`,
+      success_url: body.successUrl || `${origin}/checkout?payment=success&session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: body.cancelUrl || `${origin}/checkout?payment=cancelled`,
     });
 
     return json(200, { url: session.url });
