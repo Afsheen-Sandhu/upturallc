@@ -14,6 +14,9 @@ export const metadata: Metadata = {
   title: "Uptura | Expert Web Development, SEO & AI Solutions for Business",
   description: "Uptura is a premier digital agency specializing in custom web development, SEO strategies, and AI consultancy to scale your business.",
   keywords: ["web development", "SEO services", "AI consultancy", "digital agency", "Uptura", "custom software", "digital marketing"],
+  icons: {
+    icon: "/images/favicon.png",
+  },
 };
 
 export default function RootLayout({
