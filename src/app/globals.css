@@ -8573,13 +8573,23 @@ html.lenis body {
   }
 }
 
-/* FIX 2: DS/AI order bar — target inner element, not the wrapper */
+/* FIX 2: DS/AI order bar — column layout, stretch children to full width */
 @media (max-width: 768px) {
   .ds-order-bar-inner {
     flex-direction: column !important;
-    align-items: flex-start !important;
+    align-items: stretch !important;
     gap: 12px !important;
     padding: 16px 18px !important;
+    overflow: hidden !important;
+  }
+  .ds-order-summary {
+    width: 100% !important;
+    overflow: hidden !important;
+  }
+  .ds-order-plan {
+    white-space: normal !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
   }
   .ds-order-bar-right { width: 100% !important; }
   .ds-order-btn, #place-order-btn {
