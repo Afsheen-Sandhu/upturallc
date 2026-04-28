@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
+import TuraBot from "@/components/TuraBot";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,6 +14,9 @@ export const metadata: Metadata = {
   title: "Uptura | Expert Web Development, SEO & AI Solutions for Business",
   description: "Uptura is a premier digital agency specializing in custom web development, SEO strategies, and AI consultancy to scale your business.",
   keywords: ["web development", "SEO services", "AI consultancy", "digital agency", "Uptura", "custom software", "digital marketing"],
+  icons: {
+    icon: "/images/favicon.png",
+  },
 };
 
 export default function RootLayout({
@@ -37,6 +41,7 @@ export default function RootLayout({
         <Providers>
           {children}
         </Providers>
+        <TuraBot />
       </body>
     </html>
   );
