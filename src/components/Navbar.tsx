@@ -35,6 +35,9 @@ export default function Navbar() {
               <Link href="/ai-consultancy" className="nav-link"><span>AI Consulting</span></Link>
             </li>
             <li className="nav-item" style={{ opacity: 1, transform: "none" }}>
+              <Link href="/consultation" className="nav-link"><span>Consultation</span></Link>
+            </li>
+            <li className="nav-item" style={{ opacity: 1, transform: "none" }}>
               <Link href="/work" className="nav-link"><span>Works</span></Link>
             </li>
             <li className="nav-item" style={{ opacity: 1, transform: "none" }}>
@@ -73,6 +76,9 @@ export default function Navbar() {
           </li>
           <li className="mobile-item" style={{ opacity: 1, transform: "none" }}>
             <Link href="/ai-consultancy" className="mobile-link" onClick={() => setIsOpen(false)}>AI Consulting</Link>
+          </li>
+          <li className="mobile-item" style={{ opacity: 1, transform: "none" }}>
+            <Link href="/consultation" className="mobile-link" onClick={() => setIsOpen(false)}>Consultation</Link>
           </li>
           <li className="mobile-item" style={{ opacity: 1, transform: "none" }}>
             <Link href="/work" className="mobile-link" onClick={() => setIsOpen(false)}>Works</Link>
