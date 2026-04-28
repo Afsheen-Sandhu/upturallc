@@ -8254,3 +8254,42 @@ html.lenis body {
     .chatbot-input-area { padding: 10px; }
 }
 /* ===== END TURABOT ===== */
+
+/* ===== CONTACT SIDEBAR HOME BTN ===== */
+.back-home-container { margin-top: auto; padding-top: 30px; }
+.sidebar-home-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #1a1a1a;
+    text-transform: uppercase;
+    cursor: pointer;
+    overflow: hidden;
+}
+.sidebar-home-text {
+    display: inline-block;
+    overflow: hidden;
+    height: 1.2em;
+    position: relative;
+}
+.sidebar-home-text span {
+    display: block;
+    transition: transform 0.35s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+.sidebar-home-text span:last-child {
+    position: absolute;
+    top: 100%;
+    left: 0;
+}
+.sidebar-home-btn:hover .sidebar-home-text span:first-child { transform: translateY(-100%); }
+.sidebar-home-btn:hover .sidebar-home-text span:last-child { transform: translateY(-100%); }
+.sidebar-home-arrow {
+    display: inline-flex;
+    align-items: center;
+    transition: transform 0.3s ease;
+}
+.sidebar-home-btn:hover .sidebar-home-arrow { transform: translate(2px, -2px); }
+/* ===== END CONTACT SIDEBAR HOME BTN ===== */
