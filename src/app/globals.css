@@ -8412,10 +8412,10 @@ html.lenis body {
   .service-btn { font-size: 12px !important; padding: 8px 16px !important; }
   .pricing-cards {
     flex-direction: column !important;
-    align-items: center !important;
+    align-items: stretch !important;
     gap: 20px !important;
   }
-  .pricing-card { width: 100% !important; max-width: 420px !important; }
+  .pricing-card { width: 100% !important; }
   .pricing-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .pricing-table { min-width: 560px; }
   .steps-grid {
