@@ -8630,27 +8630,10 @@ html.lenis body {
   }
 }
 
-/* FIX: price card header overflow on mobile — stack title + price vertically */
+/* FIX: price card header — only shrink the price text, keep layout intact */
 @media (max-width: 768px) {
-  .price-card {
-    padding: 24px 20px !important;
-    overflow: hidden;
-  }
-  .card-header {
-    flex-direction: column !important;
-    align-items: flex-start !important;
-    gap: 6px !important;
-  }
-  .card-title {
-    max-width: 100% !important;
-    font-size: 18px !important;
-  }
-  .card-price {
-    font-size: 15px !important;
-    text-align: left !important;
+  .price-card .card-price {
+    font-size: 13px !important;
     white-space: nowrap;
-  }
-  .pricing-cards {
-    padding: 30px 20px 0 !important;
   }
 }
