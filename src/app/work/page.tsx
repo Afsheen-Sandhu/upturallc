@@ -180,7 +180,7 @@ export default function Work() {
 
         {/* PORTFOLIO GRID */}
         <section className="portfolio-grid-container" style={{ background: "#EEE9E3", paddingBottom: "120px" }}>
-           <div className="portfolio-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 600px)", gap: "40px", justifyContent: "center", margin: "0 auto", padding: "0 20px" }}>
+           <div className="portfolio-grid">
               {PROJECTS.map((project, i) => (
                 <PortfolioCard key={i} project={project} />
               ))}
@@ -202,7 +202,7 @@ export default function Work() {
                 <span className="t-role" style={{ display: "block", color: "#6B6763", fontWeight: 600 }}>{TESTIMONIALS[currentTestimonial].role}</span>
               </div>
             </div>
-            <div className="testimonial-selector" style={{ display: "flex", gap: "30px", justifyContent: "center" }}>
+            <div className="testimonial-selector" style={{ display: "flex", gap: "16px", justifyContent: "center", flexWrap: "wrap" }}>
               {TESTIMONIALS.map((t, i) => (
                 <div 
                   key={i} 

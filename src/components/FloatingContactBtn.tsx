@@ -8,6 +8,7 @@ export default function FloatingContactBtn() {
     const btnRef = useRef<HTMLDivElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isVisible, setIsVisible] = useState(false);
+    const isSectionHovered = useRef(false);
 
     useEffect(() => {
         const ctaSection = document.querySelector('.cta-section');
@@ -40,12 +41,14 @@ export default function FloatingContactBtn() {
         };
 
         const onMouseEnter = () => {
+            isSectionHovered.current = true;
             setIsVisible(true);
             gsap.to(floatingBtn, { scale: 1, opacity: 1, duration: 0.6, ease: "power2.out" });
             gsap.ticker.add(checkOverlap);
         };
 
         const onMouseLeave = () => {
+            isSectionHovered.current = false;
             setIsVisible(false);
             gsap.to(floatingBtn, { scale: 0, opacity: 0, duration: 0.3, ease: "power2.in" });
             gsap.ticker.remove(checkOverlap);
@@ -64,6 +67,21 @@ export default function FloatingContactBtn() {
             });
         };
 
+        // Hide floating btn when cursor is directly over a real CTA button
+        const ctaButtons = ctaSection.querySelectorAll<HTMLElement>(".cta-button");
+        const onCtaBtnEnter = () => {
+            gsap.to(floatingBtn, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.in" });
+        };
+        const onCtaBtnLeave = () => {
+            if (isSectionHovered.current) {
+                gsap.to(floatingBtn, { scale: 1, opacity: 1, duration: 0.3, ease: "power2.out" });
+            }
+        };
+        ctaButtons.forEach(btn => {
+            btn.addEventListener("mouseenter", onCtaBtnEnter);
+            btn.addEventListener("mouseleave", onCtaBtnLeave);
+        });
+
         ctaSection.addEventListener("mouseenter", onMouseEnter);
         ctaSection.addEventListener("mouseleave", onMouseLeave);
         ctaSection.addEventListener("mousemove", onMouseMove);
@@ -72,6 +90,10 @@ export default function FloatingContactBtn() {
             ctaSection.removeEventListener("mouseenter", onMouseEnter);
             ctaSection.removeEventListener("mouseleave", onMouseLeave);
             ctaSection.removeEventListener("mousemove", onMouseMove);
+            ctaButtons.forEach(btn => {
+                btn.removeEventListener("mouseenter", onCtaBtnEnter);
+                btn.removeEventListener("mouseleave", onCtaBtnLeave);
+            });
             gsap.ticker.remove(checkOverlap);
         };
     }, []);

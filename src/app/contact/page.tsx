@@ -145,16 +145,8 @@ export default function Contact() {
             </div>
           </div>
           <div className="back-home-container">
-            <Link href="/" className="sidebar-home-btn" style={{ textDecoration: "none" }}>
-              <span className="sidebar-home-text">
-                <span>BACK TO HOME</span>
-                <span>BACK TO HOME</span>
-              </span>
-              <span className="sidebar-home-arrow">
-                <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M1 15L15 1M15 1H5M15 1V11" stroke="#1a1a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-              </span>
+            <Link href="/" className="sidebar-home-btn">
+              ← Back to Home
             </Link>
           </div>
         </div>
