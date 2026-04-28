@@ -8296,7 +8296,11 @@ html.lenis body {
     gap: 30px;
     padding: 100px 20px 40px;
   }
-  .hero-right { display: none; }
+  /* Home page only: title is in hero-right, lottie is in hero-left → hide lottie */
+  .hero:not(.about-hero):not(.digital-hero) .hero-left { display: none; }
+  /* About & DS: title is in hero-left, decoration in hero-right → hide right */
+  .about-hero .hero-right { display: none !important; }
+  .digital-hero .hero-right { display: none !important; }
   .hero-title { font-size: clamp(2.4rem, 10vw, 3.5rem) !important; }
   .hero-subtext { margin-left: 0 !important; font-size: 1rem; }
   .hero-cta { margin-top: 24px; }
@@ -8424,7 +8428,6 @@ html.lenis body {
     gap: 30px;
     padding-top: 100px;
   }
-  .ds-hero-right { display: none; }
   #ds-place-order-bar {
     padding: 14px 16px !important;
     flex-direction: column !important;
@@ -8445,7 +8448,6 @@ html.lenis body {
     gap: 30px;
     padding-top: 100px;
   }
-  .ai-hero-right, .ai-lottie-col { display: none; }
   .problem-cards {
     grid-template-columns: 1fr 1fr !important;
     gap: 16px !important;
@@ -8557,3 +8559,73 @@ html.lenis body {
 /* ============================================================
    END COMPREHENSIVE MOBILE FIXES
    ============================================================ */
+
+/* ============================================================
+   TARGETED FIXES — hero heading, recommended card,
+   order bar, about page gap
+   ============================================================ */
+
+/* FIX 1: Recommended/featured pricing card — remove scale on mobile so it doesn't overflow */
+@media (max-width: 768px) {
+  .price-card.featured {
+    transform: none !important;
+    z-index: 2;
+  }
+}
+
+/* FIX 2: DS/AI order bar — target inner element, not the wrapper */
+@media (max-width: 768px) {
+  .ds-order-bar-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+    padding: 16px 18px !important;
+  }
+  .ds-order-bar-right { width: 100% !important; }
+  .ds-order-btn, #place-order-btn {
+    width: 100% !important;
+    text-align: center !important;
+    justify-content: center !important;
+  }
+}
+
+/* FIX 3: About page — hide lottie columns that create huge gaps on mobile */
+@media (max-width: 768px) {
+  /* what-we-do section: lottie is in .what-we-do-left */
+  .what-we-do-left { display: none !important; }
+  .what-we-do-grid { grid-template-columns: 1fr !important; gap: 0 !important; }
+  .what-we-do-section { padding: 50px 20px !important; }
+
+  /* vision section: collapse lottie, reduce padding */
+  .vision-lottie { display: none !important; }
+  .vision-section { padding: 50px 20px !important; }
+  .vision-title { font-size: clamp(1.4rem, 5.5vw, 2rem) !important; }
+
+  /* services grid section: reduce padding + single col */
+  .services-grid-section { padding: 50px 20px !important; }
+  .services-grid { grid-template-columns: 1fr !important; gap: 20px !important; }
+
+  /* remove duplicate section-divider gap */
+  .section-divider + .section-divider { display: none !important; }
+}
+
+/* ============================================================
+   END TARGETED FIXES
+   ============================================================ */
+
+/* FIX: GSAP opacity:0 elements not triggering on mobile — force visible */
+@media (max-width: 768px) {
+  .service-card,
+  .feature-card,
+  .benefit-card,
+  .process-step,
+  .result-card,
+  .works-col,
+  .ai-solution-item,
+  [data-aos],
+  .gsap-fade {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+  }
+}
