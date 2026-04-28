@@ -8637,3 +8637,12 @@ html.lenis body {
     white-space: nowrap;
   }
 }
+
+/* FIX: AI order bar plan text — allow wrapping on mobile (was white-space:nowrap + max-width:420px) */
+@media (max-width: 768px) {
+  #ai-place-order-bar .ds-order-plan {
+    white-space: normal !important;
+    max-width: 100% !important;
+    font-size: 0.85rem !important;
+  }
+}
