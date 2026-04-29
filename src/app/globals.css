@@ -1338,12 +1338,14 @@ html.lenis body {
     display: flex;
     width: fit-content;
     animation: scroll-tricker 40s linear infinite;
+    will-change: transform;
 }
 .tricker-single-wrap {
     display: flex;
     align-items: center;
     gap: 80px;
     padding-right: 80px;
+    flex-shrink: 0;
 }
 .tricker-single-image {
     height: 55px;

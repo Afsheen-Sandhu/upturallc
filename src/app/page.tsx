@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import TestimonialCarousel from "@/components/TestimonialCarousel";
@@ -97,12 +98,12 @@ export default function Home() {
                       <div className="hero-right">
                           <h1 className="hero-title" aria-label="Expert Web Development and SEO Services that Drive Business Growth">
                               <span className="word-wrapper">EXPERT</span>
-                              <span className="inline-image-wrapper"><img src="/images/20260121_2323_image-20generation_remix_01kfgwksbyf6wvky6jrt05bs4c.png" alt="Expert Tech Tool" /></span>
+                              <span className="inline-image-wrapper"><Image src="/images/20260121_2323_image-20generation_remix_01kfgwksbyf6wvky6jrt05bs4c.png" alt="Expert Tech Tool" width={140} height={90} /></span>
                               <span className="word-wrapper">WEB</span><br/>
                               <span className="word-wrapper">DEVELOPMENT</span> <span className="word-wrapper">&</span>
                               <span className="word-wrapper">SEO</span> <span className="word-wrapper">SERVICES</span><br/>
                               <span className="word-wrapper">THAT</span> <span className="word-wrapper">DRIVE</span>
-                              <span className="inline-image-wrapper"><img src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Growth Icon" /></span>
+                              <span className="inline-image-wrapper"><Image src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Growth Icon" width={140} height={90} /></span>
                               <span className="word-wrapper">BUSINESS</span>
                               <span className="word-wrapper">GROWTH</span><span className="dot">.</span>
                           </h1>
@@ -161,35 +162,35 @@ export default function Home() {
           <section className="section tricker home">
               <div className="tricker-wrapper">
                   <div className="tricker-single-wrap">
-                      <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2003.svg" alt="Logo 03" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2005.svg" alt="Logo 05" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2006.svg" alt="Logo 06" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2007.svg" alt="Logo 07" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
                   </div>
                   <div className="tricker-single-wrap">
-                      <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2003.svg" alt="Logo 03" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2005.svg" loading="lazy" alt="Logo 05" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2005.svg" alt="Logo 05" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2006.svg" loading="lazy" alt="Logo 06" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2006.svg" alt="Logo 06" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
-                      <img src="/images/fictional-20company-20logo-2007.svg" loading="lazy" alt="Logo 07" className="tricker-single-image" />
+                      <img src="/images/fictional-20company-20logo-2007.svg" alt="Logo 07" className="tricker-single-image" />
                       <div className="tricker-divider"></div>
                   </div>
               </div>
@@ -332,7 +333,7 @@ export default function Home() {
                   <div className="works-grid">
                       <div className="works-col works-left">
                           <div className="works-image-wrap">
-                              <img src="/images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png" alt="Skincare E-commerce Platform" />
+                              <Image src="/images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png" alt="Skincare E-commerce Platform" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
                           </div>
                           <div className="works-text-part">
                               <h2>- tangible results that help our clients reach their goals.</h2>
@@ -344,7 +345,7 @@ export default function Home() {
                               <h2>We strive to deliver measurable -</h2>
                           </div>
                           <div className="works-image-wrap">
-                              <img src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Luxury Architecture Showcase" />
+                              <Image src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Luxury Architecture Showcase" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
                           </div>
                       </div>
                   </div>

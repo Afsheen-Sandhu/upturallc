@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Providers from "@/components/Providers";
 import TuraBot from "@/components/TuraBot";
+import NextTopLoader from "nextjs-toploader";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -38,6 +39,7 @@ export default function RootLayout({
         className={`${inter.variable} antialiased min-h-full flex flex-col font-sans`}
         suppressHydrationWarning
       >
+        <NextTopLoader color="#FF3C00" showSpinner={false} height={3} />
         <Providers>
           {children}
         </Providers>

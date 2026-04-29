@@ -21,7 +21,7 @@ export default function Navbar() {
       <nav id="navbar-placeholder" className={`custom-navbar ${isScrolled ? "scrolled" : ""}`}>
         <div className="nav-container">
           <Link href="/" className="nav-logo">
-            <img src="/images/logo-main.png" className="logo-img" alt="Uptura Logo" />
+            <Image src="/images/logo-main.png" className="logo-img" alt="Uptura Logo" width={120} height={56} priority />
           </Link>
 
           <ul className="nav-links">

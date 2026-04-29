@@ -1,12 +1,34 @@
 "use client";
 
+import { useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import LottiePlayer from "@/components/LottiePlayer";
 import Link from "next/link";
 import FloatingContactBtn from "@/components/FloatingContactBtn";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 export default function About() {
+  useEffect(() => {
+    gsap.registerPlugin(ScrollTrigger);
+    gsap.fromTo(
+      ".service-card",
+      { opacity: 0, y: 40 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.8,
+        stagger: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ".services-grid-section",
+          start: "top 80%",
+        },
+      }
+    );
+  }, []);
+
   return (
     <div className="bg-[#EEE9E3]">
       <Navbar />
@@ -93,19 +115,35 @@ export default function About() {
         <section className="section tricker home">
           <div className="tricker-wrapper">
             <div className="tricker-single-wrap">
-              <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2003.svg" alt="Logo 03" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2005.svg" alt="Logo 05" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2006.svg" alt="Logo 06" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2007.svg" alt="Logo 07" className="tricker-single-image" />
               <div className="tricker-divider"></div>
             </div>
             <div className="tricker-single-wrap">
-              <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2003.svg" loading="lazy" alt="Logo 03" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2003.svg" alt="Logo 03" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2005.svg" alt="Logo 05" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2006.svg" alt="Logo 06" className="tricker-single-image" />
+              <div className="tricker-divider"></div>
+              <img src="/images/fictional-20company-20logo-2007.svg" alt="Logo 07" className="tricker-single-image" />
               <div className="tricker-divider"></div>
             </div>
           </div>

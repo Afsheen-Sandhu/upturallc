@@ -160,19 +160,19 @@ export default function Work() {
         <section className="section tricker home" style={{ background: "#EEE9E3", paddingBottom: "100px" }}>
           <div className="tricker-wrapper">
             <div className="tricker-single-wrap">
-              <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
               <div className="tricker-divider"></div>
             </div>
             <div className="tricker-single-wrap">
-              <img src="/images/fictional-20company-20logo-2001.svg" loading="lazy" alt="Logo 01" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2001.svg" alt="Logo 01" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2002.svg" loading="lazy" alt="Logo 02" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2002.svg" alt="Logo 02" className="tricker-single-image" />
               <div className="tricker-divider"></div>
-              <img src="/images/fictional-20company-20logo-2004.svg" loading="lazy" alt="Logo 04" className="tricker-single-image" />
+              <img src="/images/fictional-20company-20logo-2004.svg" alt="Logo 04" className="tricker-single-image" />
               <div className="tricker-divider"></div>
             </div>
           </div>

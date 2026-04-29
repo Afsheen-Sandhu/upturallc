@@ -118,9 +118,13 @@ const SERVICE_CARDS: Array<{ icon: string; title: string; text: string }> = [
   },
 ];
 
+function getRecommendedTier(service: ServiceKey): PricingTier {
+  return PRICING_DATA[service].tiers.find((t) => t.recommended) ?? PRICING_DATA[service].tiers[0];
+}
+
 export default function DigitalSolutions() {
   const [activeService, setActiveService] = useState<ServiceKey>("web");
-  const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
+  const [selectedTier, setSelectedTier] = useState<PricingTier | null>(() => getRecommendedTier("web"));
   const [toastMessage, setToastMessage] = useState("");
   const [showToast, setShowToast] = useState(false);
 
@@ -284,7 +288,7 @@ export default function DigitalSolutions() {
                 <button
                   key={btn.key}
                   className={`service-btn${activeService === btn.key ? " active" : ""}`}
-                  onClick={() => { setActiveService(btn.key); setSelectedTier(null); }}
+                  onClick={() => { setActiveService(btn.key); setSelectedTier(getRecommendedTier(btn.key)); }}
                 >
                   {btn.label}
                 </button>
@@ -311,6 +315,7 @@ export default function DigitalSolutions() {
               </tbody>
             </table>
 
+            <div className="selector-label" style={{ marginBottom: "16px" }}>👆 Select a pricing tier</div>
             <div className="pricing-cards">
               {currentData.tiers.map((t) => (
                 <div

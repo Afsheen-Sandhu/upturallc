@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, Suspense, useEffect, useRef } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { getFirebaseClient } from "@/lib/firebaseClient";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -18,9 +20,9 @@ const AI_ADDONS = [
 ];
 
 const TIER_NAMES: Record<string, string> = {
-  startup: "Startup \u2013 AI Chat Support",
-  smb: "SMB \u2013 Growing Business Solutions",
-  enterprise: "Enterprise \u2013 Enterprise-Grade AI",
+  startup: "Startup – AI Chat Support",
+  smb: "SMB – Growing Business Solutions",
+  enterprise: "Enterprise – Enterprise-Grade AI",
 };
 
 function getLabel(
@@ -32,19 +34,11 @@ function getLabel(
 ) {
   if (category === "ai" && tier) return TIER_NAMES[tier] || "AI Consultancy Plan";
   if (category === "digital") {
-    if (type) return `Digital Solutions \u2013 ${type.replace(/-/g, " ")}`;
-    if (service) return `Digital Solutions \u2013 ${service.replace(/-/g, " ")}`;
+    if (type) return `Digital Solutions – ${type.replace(/-/g, " ")}`;
+    if (service) return `Digital Solutions – ${service.replace(/-/g, " ")}`;
   }
   if (plan) return plan;
-  return "Custom plan (we\u2019ll confirm with you).";
-}
-
-// Declare third-party globals on window
-declare global {
-  interface Window {
-    paypal?: any;
-    fbq?: (...args: unknown[]) => void;
-  }
+  return "Custom plan (we'll confirm with you).";
 }
 
 function CheckoutContent() {
@@ -56,25 +50,14 @@ function CheckoutContent() {
   const service = searchParams.get("service");
   const plan = searchParams.get("plan");
   const price = searchParams.get("price");
-  const paymentStatus = searchParams.get("payment");
-  const fbclid = searchParams.get("fbclid");
-  const utm_source = searchParams.get("utm_source");
-  const utm_medium = searchParams.get("utm_medium");
-  const utm_campaign = searchParams.get("utm_campaign");
 
   const planLabel = getLabel(category, tier, type, service, plan);
 
   const [form, setForm] = useState({ name: "", email: "", phone: "", company: "", notes: "" });
   const [selectedAddons, setSelectedAddons] = useState<{ id: string; title: string }[]>([]);
   const [submitting, setSubmitting] = useState(false);
-  const [confirmation, setConfirmation] = useState<{ type: "success" | "error" | "info"; message: string } | null>(null);
-  const [paypalReady, setPaypalReady] = useState(false);
-
-  // Refs so PayPal callbacks see fresh state without stale closures
-  const formRef = useRef(form);
-  const addonsRef = useRef(selectedAddons);
-  useEffect(() => { formRef.current = form; }, [form]);
-  useEffect(() => { addonsRef.current = selectedAddons; }, [selectedAddons]);
+  const [success, setSuccess] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const toggleAddon = (addon: { id: string; title: string }) => {
     setSelectedAddons((prev) => {
@@ -83,185 +66,73 @@ function CheckoutContent() {
     });
   };
 
-  // Handle return from Stripe hosted checkout
-  useEffect(() => {
-    if (paymentStatus === "success") {
-      setConfirmation({ type: "success", message: "Payment received! Our team will contact you shortly to confirm next steps." });
-      // Fire Meta Pixel
-      if (typeof window !== "undefined" && window.fbq) {
-        window.fbq("track", "Purchase", { content_name: planLabel, currency: "USD", value: 0 });
-      }
-    } else if (paymentStatus === "cancelled") {
-      setConfirmation({ type: "info", message: "Payment was cancelled — no charge was made. You can try again below." });
-    }
-  }, [paymentStatus]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Load PayPal JS SDK and render buttons
-  useEffect(() => {
-    const clientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-    if (!clientId) return; // PayPal not configured — hide button
-
-    const scriptId = "paypal-sdk";
-    if (document.getElementById(scriptId)) {
-      // Script already loaded (hot reload / re-mount)
-      setPaypalReady(true);
-      return;
-    }
-
-    const script = document.createElement("script");
-    script.id = scriptId;
-    script.src = `https://www.paypal.com/sdk/js?client-id=${clientId}&currency=USD&intent=capture`;
-    script.async = true;
-
-    script.onload = () => setPaypalReady(true);
-    script.onerror = () => console.warn("[PayPal SDK] failed to load.");
-
-    document.head.appendChild(script);
-
-    return () => {
-      // Don't remove the script on unmount to avoid re-load on navigation
-    };
-  }, []);
-
-  // Render PayPal buttons once SDK is ready
-  useEffect(() => {
-    if (!paypalReady || !window.paypal) return;
-
-    const container = document.getElementById("paypal-button-container");
-    if (!container) return;
-
-    // Clear previous render
-    container.innerHTML = "";
-
-    window.paypal
-      .Buttons({
-        style: { layout: "horizontal", color: "gold", shape: "pill", label: "pay", height: 48 },
-
-        createOrder: async () => {
-          const f = formRef.current;
-          if (!f.name.trim() || !f.email.trim()) {
-            setConfirmation({ type: "error", message: "Please fill in your name and email before paying." });
-            // Returning undefined aborts the PayPal flow
-            return undefined as any;
-          }
-
-          const res = await fetch("/api/checkout/paypal/create-order", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ planLabel, category, tier, price }),
-          });
-
-          const data = await res.json();
-          if (data.error) {
-            setConfirmation({ type: "error", message: `PayPal error: ${data.error}` });
-            return undefined as any;
-          }
-          return data.orderID;
-        },
-
-        onApprove: async (data: { orderID: string }) => {
-          setSubmitting(true);
-          setConfirmation(null);
-          try {
-            const f = formRef.current;
-            const res = await fetch("/api/checkout/paypal/capture-order", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                orderID: data.orderID,
-                name: f.name,
-                email: f.email,
-                phone: f.phone,
-                company: f.company,
-                notes: f.notes,
-                planLabel,
-                category,
-                tier,
-                price,
-                addons: addonsRef.current,
-                utm_source,
-                utm_medium,
-                utm_campaign,
-              }),
-            });
-            const result = await res.json();
-            if (result.status === "COMPLETED") {
-              setConfirmation({ type: "success", message: "Payment received via PayPal! Our team will contact you shortly." });
-              setForm({ name: "", email: "", phone: "", company: "", notes: "" });
-              setSelectedAddons([]);
-              if (typeof window !== "undefined" && window.fbq) {
-                window.fbq("track", "Purchase", { content_name: planLabel, currency: "USD", payment_method: "paypal" });
-              }
-            } else {
-              setConfirmation({ type: "error", message: "Payment could not be captured. Please try again or use card payment." });
-            }
-          } catch {
-            setConfirmation({ type: "error", message: "An error occurred capturing your PayPal payment. Please try again." });
-          } finally {
-            setSubmitting(false);
-          }
-        },
-
-        onCancel: () => {
-          setConfirmation({ type: "info", message: "PayPal payment cancelled — no charge was made." });
-        },
-
-        onError: (err: unknown) => {
-          console.error("[PayPal]", err);
-          setConfirmation({ type: "error", message: "PayPal encountered an issue. Please try card payment instead." });
-        },
-      })
-      .render("#paypal-button-container");
-  }, [paypalReady]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  // Stripe card payment
-  const handleStripePayment = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!form.name.trim() || !form.email.trim()) {
-      setConfirmation({ type: "error", message: "Please fill in your name and email before paying." });
+      setError("Please fill in your name and email.");
       return;
     }
 
     setSubmitting(true);
-    setConfirmation(null);
+    setError(null);
 
     try {
-      const res = await fetch("/api/checkout/stripe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          planLabel,
-          category,
-          tier,
-          price,
-          addons: selectedAddons,
-          fbclid,
-          utm_source,
-          utm_medium,
-          utm_campaign,
-        }),
+      const { db } = getFirebaseClient();
+      await addDoc(collection(db, "orders"), {
+        name: form.name.trim(),
+        email: form.email.trim(),
+        phone: form.phone.trim() || null,
+        company: form.company.trim() || null,
+        notes: form.notes.trim() || null,
+        category,
+        planLabel,
+        price: price ? decodeURIComponent(price) : null,
+        tier: tier || null,
+        addons: selectedAddons.length > 0 ? selectedAddons : null,
+        status: "pending",
+        createdAt: serverTimestamp(),
       });
-
-      const data = await res.json();
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setConfirmation({ type: "error", message: data.error || "Could not redirect to payment. Please try again." });
-        setSubmitting(false);
-      }
-    } catch {
-      setConfirmation({ type: "error", message: "Something went wrong. Please try again." });
+      setSuccess(true);
+    } catch (err: any) {
+      setError("Something went wrong. Please try again or contact us directly.");
+      console.error("[Checkout] Firestore write error:", err);
+    } finally {
       setSubmitting(false);
     }
   };
 
-  const confirmationBg =
-    confirmation?.type === "success"
-      ? { background: "#E7F7EC", color: "#105126" }
-      : confirmation?.type === "error"
-      ? { background: "#FFF0EE", color: "#8B1A0A" }
-      : { background: "#EEF4FF", color: "#1A3B8B" };
+  if (success) {
+    return (
+      <div className="bg-[#EEE9E3]">
+        <Navbar />
+        <main className="checkout-page">
+          <section className="checkout-wrapper" style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <div style={{ textAlign: "center", maxWidth: 520, margin: "0 auto" }}>
+              <div style={{
+                width: 72, height: 72, borderRadius: "50%", background: "#E7F7EC",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 24px", fontSize: 28
+              }}>
+                <i className="fa-solid fa-circle-check" style={{ color: "#10b981" }} />
+              </div>
+              <h1 className="checkout-title" style={{ fontSize: "clamp(1.6rem,4vw,2.4rem)", marginBottom: 16 }}>
+                Order received!
+              </h1>
+              <p style={{ color: "#555", lineHeight: 1.7, marginBottom: 32 }}>
+                Thanks, <strong>{form.name}</strong>. Your order for <strong>{planLabel}</strong> has been
+                logged. Our team will reach out to <strong>{form.email}</strong> within 1 business day to
+                confirm scope, timeline, and next steps.
+              </p>
+              <a href="/" className="cta-button primary" style={{ display: "inline-block", textDecoration: "none" }}>
+                <span>Back to Home</span>
+              </a>
+            </div>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="bg-[#EEE9E3]">
@@ -278,7 +149,8 @@ function CheckoutContent() {
               Confirm your plan<br />and share your details
             </h1>
             <p className="checkout-subtitle">
-              Pay a deposit to secure your spot and we&apos;ll confirm scope, deliverables, and timelines on a quick call.
+              Fill in your details and place your order. Our team will review it and get back
+              to you within 1 business day to discuss scope, deliverables, and timeline.
             </p>
 
             <div className="selected-plan-pill">
@@ -286,29 +158,27 @@ function CheckoutContent() {
               <span>Selected Plan</span>
             </div>
             <div className="selected-plan-name">{planLabel}</div>
-            <div className="selected-plan-price">
-              {price
-                ? `Deposit based on: ${decodeURIComponent(price)}`
-                : "Deposit amount confirmed after reviewing your plan."}
-            </div>
+            {price && (
+              <div className="selected-plan-price">
+                Estimated range: {decodeURIComponent(price)}
+              </div>
+            )}
 
             <p className="checkout-notes">
               <strong>What happens next?</strong><br />
-              After payment your order is securely recorded. Our team will reach out via email or phone
-              within 1 business day to confirm timelines, deliverables, and any final pricing adjustments.
+              After you place your order it appears in our dashboard instantly. We&apos;ll reach out
+              via email or phone within 1 business day to confirm timelines, deliverables, and pricing.
             </p>
 
-            {/* Trust badges */}
             <div className="checkout-trust">
-              <span><i className="fa-solid fa-lock"></i> Secure checkout</span>
-              <span><i className="fa-brands fa-stripe"></i> Stripe</span>
-              <span><i className="fa-brands fa-paypal"></i> PayPal</span>
+              <span><i className="fa-solid fa-lock"></i> No payment required now</span>
+              <span><i className="fa-solid fa-shield-halved"></i> We&apos;ll confirm everything first</span>
             </div>
           </div>
 
-          {/* ── Right: Form + Payment ── */}
+          {/* ── Right: Form ── */}
           <div>
-            <form className="checkout-form" onSubmit={(e) => e.preventDefault()}>
+            <form className="checkout-form" onSubmit={handleSubmit}>
               <div className="checkout-form-group">
                 <label className="checkout-label">Name *</label>
                 <input
@@ -378,7 +248,7 @@ function CheckoutContent() {
                         className={`addon-chip ${selectedAddons.find((a) => a.id === addon.id) ? "selected" : ""}`}
                         onClick={() => toggleAddon(addon)}
                       >
-                        <span className="addon-check">{"\u2713"}</span>
+                        <span className="addon-check">{"✓"}</span>
                         <span>{addon.title}</span>
                       </button>
                     ))}
@@ -386,48 +256,31 @@ function CheckoutContent() {
                 </div>
               )}
 
-              {/* ── Payment Methods ── */}
-              <div className="payment-methods-section">
-                <div className="payment-methods-label">
-                  <span className="payment-methods-line"></span>
-                  <span>Choose payment method</span>
-                  <span className="payment-methods-line"></span>
-                </div>
-
-                {/* Stripe — Card */}
-                <button
-                  type="button"
-                  className="stripe-pay-btn"
-                  onClick={handleStripePayment}
-                  disabled={submitting}
-                >
-                  {submitting ? (
-                    <div className="checkout-spinner" style={{ display: "inline-block" }}></div>
-                  ) : (
-                    <i className="fa-regular fa-credit-card"></i>
-                  )}
-                  <span>{submitting ? "Redirecting…" : "Pay with Card"}</span>
-                  <span className="stripe-badge">via Stripe</span>
-                </button>
-
-                {/* PayPal */}
-                {process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID && (
-                  <>
-                    <div className="payment-or">or</div>
-                    <div id="paypal-button-container" style={{ minHeight: 50 }}></div>
-                  </>
-                )}
-              </div>
-
-              {/* Confirmation / Error */}
-              {confirmation && (
-                <div
-                  className="checkout-confirmation"
-                  style={{ display: "block", ...confirmationBg }}
-                >
-                  {confirmation.message}
+              {error && (
+                <div className="checkout-confirmation" style={{ display: "block", background: "#FFF0EE", color: "#8B1A0A" }}>
+                  <i className="fa-solid fa-circle-exclamation" style={{ marginRight: 8 }} />
+                  {error}
                 </div>
               )}
+
+              <button
+                type="submit"
+                className="stripe-pay-btn"
+                disabled={submitting}
+                style={{ marginTop: 8 }}
+              >
+                {submitting ? (
+                  <div className="checkout-spinner" style={{ display: "inline-block" }} />
+                ) : (
+                  <i className="fa-solid fa-paper-plane" />
+                )}
+                <span>{submitting ? "Placing order…" : "Place Order"}</span>
+              </button>
+
+              <p className="consult-fine-print" style={{ marginTop: 12 }}>
+                <i className="fa-solid fa-info-circle"></i>
+                &nbsp;No payment is taken now. We&apos;ll confirm everything with you first.
+              </p>
             </form>
           </div>
         </section>

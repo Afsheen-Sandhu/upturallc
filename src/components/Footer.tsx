@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import NeuralFlux from "./NeuralFlux";
 
@@ -170,8 +171,8 @@ export default function Footer() {
 
           <div className="footer-bottom-row">
               <div className="footer-logo-container">
-                  <img src="/images/logo-main.png"
-                      alt="Uptura" className="footer-logo-large" />
+                  <Image src="/images/logo-main.png"
+                      alt="Uptura" className="footer-logo-large" width={220} height={74} />
                   <div className="copyright-text-bottom">&copy;Uptura 2026</div>
               </div>
 
