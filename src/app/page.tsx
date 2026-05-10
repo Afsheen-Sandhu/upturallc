@@ -332,9 +332,16 @@ export default function Home() {
               <div className="container">
                   <div className="works-grid">
                       <div className="works-col works-left">
-                          <div className="works-image-wrap">
-                              <Image src="/images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png" alt="Skincare E-commerce Platform" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
-                          </div>
+                          <a
+                            href="https://lancemore.com.au/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="works-image-wrap"
+                            style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                            aria-label="View Lancemore website (opens in a new tab)"
+                          >
+                              <Image src="/images/20260122_0004_laptop-20website-20mockup_remix_01kfgyzneyffz8etnczt35ghkr-20-1-.png" alt="Lancemore - Professional website design and development project by Uptura digital agency" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
+                          </a>
                           <div className="works-text-part">
                               <h2>- tangible results that help our clients reach their goals.</h2>
                           </div>
@@ -344,9 +351,16 @@ export default function Home() {
                               <div className="works-badge"><span className="badge-dot"></span> FEATURED WORKS</div>
                               <h2>We strive to deliver measurable -</h2>
                           </div>
-                          <div className="works-image-wrap">
-                              <Image src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Luxury Architecture Showcase" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
-                          </div>
+                          <a
+                            href="https://littlerituals.in/"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="works-image-wrap"
+                            style={{ display: "block", textDecoration: "none", color: "inherit" }}
+                            aria-label="View Little Ritual website (opens in a new tab)"
+                          >
+                              <Image src="/images/20260121_2326_image-20generation_remix_01kfgwtjnke6wvnz2gy4tz6az7-20-1-.png" alt="Little Ritual - Professional web development project showcasing brand identity and website design by Uptura Agency" fill style={{ objectFit: "cover" }} sizes="(max-width: 768px) 100vw, 50vw" />
+                          </a>
                       </div>
                   </div>
               </div>

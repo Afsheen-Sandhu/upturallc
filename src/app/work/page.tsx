@@ -9,13 +9,23 @@ import Image from "next/image";
 import gsap from "gsap";
 import FloatingContactBtn from "@/components/FloatingContactBtn";
 
-const PROJECTS = [
+type PortfolioProject = {
+  image: string;
+  title: string;
+  year: string;
+  category: string;
+  link: string;
+  altText: string;
+};
+
+const PROJECTS: PortfolioProject[] = [
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697123870c454ee58f48fdae_20260121_2326_Image%20Generation_remix_01kfgwtjnke6wvnz2gy4tz6az7%20(1).png',
     title: 'Little Ritual',
     year: '2024',
     category: 'Web Development',
     link: 'https://littlerituals.in/',
+    altText: 'Little Ritual - Professional web development project showcasing brand identity and website design by Uptura Agency',
   },
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697123871bb0b6d4190de8a8_20260121_2304_Image%20Generation_remix_01kfgvjndne5d91exwcm0tvwgx.png',
@@ -23,6 +33,7 @@ const PROJECTS = [
     year: '2023',
     category: 'Web Development',
     link: 'https://chatter-bridge.vercel.app/',
+    altText: 'The Chatter Bridge - Web development project featuring modern design and branding by Uptura Agency',
   },
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/697123876b6f9485bc779da3_20260121_2323_Image%20Generation_remix_01kfgwksbyf6wvky6jrt05bs4c.png',
@@ -30,6 +41,7 @@ const PROJECTS = [
     year: '2022',
     category: 'Web Development',
     link: 'https://www.camberco.ca/',
+    altText: 'Camber - Custom web development and branding design portfolio by Uptura Agency',
   },
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69712387cdc93b53afb8642d_20260122_0004_Laptop%20Website%20Mockup_remix_01kfgyzneyffz8etnczt35ghkr%20(1).png',
@@ -37,6 +49,7 @@ const PROJECTS = [
     year: '2021',
     category: 'Web Development',
     link: 'https://lancemore.com.au/',
+    altText: 'Lancemore - Professional website design and development project by Uptura digital agency',
   },
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/6971238787a28e70e87e4f8f_20260121_2319_Image%20Generation_remix_01kfgwcxnxetxv9ak2dp56wb2r.png',
@@ -44,6 +57,7 @@ const PROJECTS = [
     year: '2020',
     category: 'Web Development',
     link: 'https://www.omumsie.com/',
+    altText: 'Omumsie - E-commerce web development and branding project by Uptura Agency',
   },
   {
     image: 'https://cdn.prod.website-files.com/6956bd5acabb30f84175fa1b/69712387c02df8f923e7198b_20260121_2314_Image%20Generation_remix_01kfgw409ye2vsw6590jca912p.png',
@@ -51,6 +65,7 @@ const PROJECTS = [
     year: '2026',
     category: 'Web Development',
     link: 'https://www.peteats.pk/',
+    altText: 'PetEats - Web development and branding design portfolio project by Uptura Agency',
   }
 ];
 
@@ -75,8 +90,8 @@ const TESTIMONIALS = [
   }
 ];
 
-function PortfolioCard({ project }: { project: any }) {
-  const cardRef = useRef<HTMLDivElement>(null);
+function PortfolioCard({ project }: { project: PortfolioProject }) {
+  const cardRef = useRef<HTMLAnchorElement>(null);
 
   const onMouseEnter = () => {
     const el = cardRef.current;
@@ -98,16 +113,32 @@ function PortfolioCard({ project }: { project: any }) {
     gsap.to(el.querySelector('.card-info'), { opacity: 0, y: 20, duration: 0.5, ease: 'power2.in' });
   };
 
+  const cardLabel = `View ${project.title} project (${project.category}) — opens in a new tab`;
+
   return (
-    <div
+    <a
       ref={cardRef}
+      href={project.link}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={cardLabel}
       className="portfolio-card"
-      style={{ width: "100%", height: "600px", position: "relative", overflow: "hidden", cursor: "pointer", borderRadius: "24px" }}
+      style={{
+        width: "100%",
+        height: "600px",
+        position: "relative",
+        overflow: "hidden",
+        cursor: "pointer",
+        borderRadius: "24px",
+        display: "block",
+        textDecoration: "none",
+        color: "inherit",
+      }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
       <div className="card-image" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", transition: "transform 0.5s ease" }}>
-        <Image src={project.image} alt={project.title} fill sizes="(max-width: 768px) 100vw, 600px" style={{ objectFit: "cover" }} priority={false} quality={75} />
+        <Image src={project.image} alt={project.altText} fill sizes="(max-width: 768px) 100vw, 600px" style={{ objectFit: "cover" }} priority={false} quality={75} />
       </div>
       <div className="card-overlay" style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%", background: "#000", opacity: 0, transition: "opacity 0.5s ease" }}></div>
       <div className="card-content" style={{ position: "relative", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "40px", zIndex: 2 }}>
@@ -116,7 +147,7 @@ function PortfolioCard({ project }: { project: any }) {
           <span className="tag" style={{ padding: "8px 20px", border: "1px solid #fff", borderRadius: "30px", color: "#fff", fontSize: "0.9rem" }}>Digital Experience</span>
         </div>
         <div className="card-button-wrapper" style={{ display: "flex", justifyContent: "center", opacity: 0, transform: "scale(0.8)" }}>
-           <button className="show-work-btn" style={{ padding: "18px 50px", background: "#FF3C00", color: "#fff", borderRadius: "50px", fontWeight: "bold", fontSize: "1.1rem" }}>SHOW WORK</button>
+           <span className="show-work-btn" aria-hidden style={{ padding: "18px 50px", background: "#FF3C00", color: "#fff", borderRadius: "50px", fontWeight: "bold", fontSize: "1.1rem" }}>SHOW WORK</span>
         </div>
         <div className="card-info" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", opacity: 0, transform: "translateY(20px)", color: "#fff" }}>
            <h3 style={{ fontSize: "2rem", fontWeight: 800, margin: 0 }}>{project.title}</h3>
@@ -126,7 +157,7 @@ function PortfolioCard({ project }: { project: any }) {
            </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
