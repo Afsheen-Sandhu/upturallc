@@ -5,6 +5,9 @@ import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
+const CONSULTATION_PRICE_CENTS = 5000; // $50
+const CONSULTATION_PRICE_LABEL = "$50";
+
 const PERKS = [
   { icon: "fa-solid fa-clock", text: "30-minute 1-on-1 strategy session" },
   { icon: "fa-solid fa-bullseye", text: "Tailored advice for your specific business" },
@@ -43,7 +46,7 @@ function ConsultationContent() {
           email: form.email,
           planLabel: "30-Min Strategy Consultation",
           category: "consultation",
-          priceCents: 2000, // $20
+          priceCents: CONSULTATION_PRICE_CENTS,
           productDescription: "One-on-one 30-minute strategy call with the Uptura team.",
           successUrl: `${origin}/consultation?payment=success`,
           cancelUrl: `${origin}/consultation?payment=cancelled`,
@@ -82,7 +85,7 @@ function ConsultationContent() {
               action plan — not a sales pitch.
             </p>
             <div className="consult-price-pill">
-              <span className="consult-price-amount">$20</span>
+              <span className="consult-price-amount">{CONSULTATION_PRICE_LABEL}</span>
               <span className="consult-price-label">one-time · no recurring charge</span>
             </div>
           </div>
@@ -156,7 +159,7 @@ function ConsultationContent() {
                     ) : (
                       <i className="fa-regular fa-credit-card"></i>
                     )}
-                    <span>{submitting ? "Redirecting to Stripe…" : "Book Now — $20"}</span>
+                    <span>{submitting ? "Redirecting to Stripe…" : `Book Now — ${CONSULTATION_PRICE_LABEL}`}</span>
                   </button>
 
                   <p className="consult-fine-print">
