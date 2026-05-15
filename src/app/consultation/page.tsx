@@ -1,12 +1,28 @@
 "use client";
 
-import { useState, Suspense, useEffect } from "react";
+import { useState, Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
+import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const CONSULTATION_PRICE_CENTS = 5000; // $50
 const CONSULTATION_PRICE_LABEL = "$50";
+
+function getCheckoutOrigin() {
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
+  if (fromEnv) return fromEnv;
+  if (typeof window === "undefined") return "https://uptura.net";
+  return window.location.origin.replace("://www.", "://");
+}
+
+function isPaymentSuccess(params: URLSearchParams) {
+  return params.get("payment") === "success" || Boolean(params.get("session_id"));
+}
+
+function isPaymentCancelled(params: URLSearchParams) {
+  return params.get("payment") === "cancelled";
+}
 
 const PERKS = [
   { icon: "fa-solid fa-clock", text: "30-minute 1-on-1 strategy session" },
@@ -17,16 +33,22 @@ const PERKS = [
 
 function ConsultationContent() {
   const searchParams = useSearchParams();
-  const paymentStatus = searchParams.get("payment");
+  const paidFromUrl = useMemo(() => isPaymentSuccess(searchParams), [searchParams]);
+  const cancelledFromUrl = useMemo(() => isPaymentCancelled(searchParams), [searchParams]);
 
   const [form, setForm] = useState({ name: "", email: "" });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
+  const [success, setSuccess] = useState(paidFromUrl);
 
   useEffect(() => {
-    if (paymentStatus === "success") setSuccess(true);
-  }, [paymentStatus]);
+    if (paidFromUrl) {
+      setSuccess(true);
+      return;
+    }
+    const params = new URLSearchParams(window.location.search);
+    if (isPaymentSuccess(params)) setSuccess(true);
+  }, [paidFromUrl]);
 
   const handleBook = async () => {
     if (!form.name.trim() || !form.email.trim()) {
@@ -37,7 +59,7 @@ function ConsultationContent() {
     setSubmitting(true);
 
     try {
-      const origin = window.location.origin;
+      const origin = getCheckoutOrigin();
       const res = await fetch("/api/checkout/stripe", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -48,7 +70,7 @@ function ConsultationContent() {
           category: "consultation",
           priceCents: CONSULTATION_PRICE_CENTS,
           productDescription: "One-on-one 30-minute strategy call with the Uptura team.",
-          successUrl: `${origin}/consultation?payment=success`,
+          successUrl: `${origin}/consultation?payment=success&session_id={CHECKOUT_SESSION_ID}`,
           cancelUrl: `${origin}/consultation?payment=cancelled`,
         }),
       });
@@ -66,10 +88,38 @@ function ConsultationContent() {
     }
   };
 
+  if (success || paidFromUrl) {
+    return (
+      <div style={{ background: "#EEE9E3", minHeight: "100vh" }}>
+        <Navbar />
+        <main className="consult-page consult-page--success">
+          <section className="consult-success-screen">
+            <div className="consult-success-screen-icon" aria-hidden>
+              <i className="fa-solid fa-circle-check" />
+            </div>
+            <h1 className="consult-success-screen-title">Payment successful</h1>
+            <p className="consult-success-screen-text">
+              You&apos;re booked! Our team will email you within a few hours with your calendar link.
+            </p>
+            <Link href="/" className="consult-success-screen-btn">
+              Back to Home
+            </Link>
+          </section>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div style={{ background: "#EEE9E3", minHeight: "100vh" }}>
       <Navbar />
       <main className="consult-page">
+        {cancelledFromUrl && (
+          <p className="consult-cancelled-banner" role="status">
+            Payment was cancelled. You can try again below.
+          </p>
+        )}
         {/* ── Hero ── */}
         <section className="consult-hero">
           <div className="consult-hero-inner">

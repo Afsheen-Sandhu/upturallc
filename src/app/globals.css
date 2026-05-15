@@ -7879,6 +7879,80 @@ html.lenis body {
     line-height: 1.6;
 }
 
+.consult-page--success {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 160px);
+    padding: 140px 20px 80px;
+}
+
+.consult-success-screen {
+    text-align: center;
+    max-width: 520px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.consult-success-screen-icon {
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: #e7f7ec;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: #22a35b;
+}
+
+.consult-success-screen-title {
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0;
+    letter-spacing: -0.03em;
+}
+
+.consult-success-screen-text {
+    font-size: 1.05rem;
+    color: #6B6763;
+    line-height: 1.65;
+    margin: 0;
+}
+
+.consult-success-screen-btn {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 16px 36px;
+    background: #ff3c00;
+    color: #fff;
+    font-weight: 700;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.consult-success-screen-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255, 60, 0, 0.35);
+}
+
+.consult-cancelled-banner {
+    max-width: 900px;
+    margin: 0 auto 0;
+    padding: 14px 20px;
+    background: #fff8e6;
+    border: 1px solid #f5d78e;
+    border-radius: 12px;
+    color: #8a5a00;
+    font-weight: 600;
+    text-align: center;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
     .consult-title {
