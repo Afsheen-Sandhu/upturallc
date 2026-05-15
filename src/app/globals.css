@@ -7889,12 +7889,131 @@ html.lenis body {
 
 .consult-success-screen {
     text-align: center;
-    max-width: 520px;
+    max-width: 560px;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 20px;
+    width: 100%;
+}
+
+.consult-success-spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto;
+}
+
+.consult-receipt-card {
+    width: 100%;
+    text-align: left;
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+    border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.consult-receipt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #eee;
+}
+
+.consult-receipt-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #6b6763;
+}
+
+.consult-receipt-status {
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #15803d;
+    background: #e7f7ec;
+    padding: 6px 12px;
+    border-radius: 999px;
+}
+
+.consult-receipt-details {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.consult-receipt-row {
+    display: grid;
+    grid-template-columns: 120px 1fr;
+    gap: 12px;
+    align-items: start;
+}
+
+.consult-receipt-row dt {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b6763;
+}
+
+.consult-receipt-row dd {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #1a1a1a;
+    word-break: break-word;
+}
+
+.consult-receipt-row--id dd {
+    font-size: 0.75rem;
+    font-weight: 500;
+    font-family: ui-monospace, monospace;
+    color: #555;
+}
+
+.consult-receipt-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 20px;
+    padding-top: 18px;
+    border-top: 2px solid #1a1a1a;
+    font-size: 1rem;
+    color: #1a1a1a;
+}
+
+.consult-receipt-total strong {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ff3c00;
+}
+
+.consult-receipt-stripe-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    margin-top: 16px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: #f4f4f5;
+    color: #635bff;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: background 0.2s ease;
+}
+
+.consult-receipt-stripe-link:hover {
+    background: #ebebef;
 }
 
 .consult-success-screen-icon {

@@ -2,9 +2,9 @@
 
 import { useState, Suspense, useEffect, useMemo } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import ConsultationPaymentSuccess from "@/components/ConsultationPaymentSuccess";
 
 const CONSULTATION_PRICE_CENTS = 5000; // $50
 const CONSULTATION_PRICE_LABEL = "$50";
@@ -35,6 +35,7 @@ function ConsultationContent() {
   const searchParams = useSearchParams();
   const paidFromUrl = useMemo(() => isPaymentSuccess(searchParams), [searchParams]);
   const cancelledFromUrl = useMemo(() => isPaymentCancelled(searchParams), [searchParams]);
+  const sessionId = searchParams.get("session_id");
 
   const [form, setForm] = useState({ name: "", email: "" });
   const [submitting, setSubmitting] = useState(false);
@@ -93,18 +94,7 @@ function ConsultationContent() {
       <div style={{ background: "#EEE9E3", minHeight: "100vh" }}>
         <Navbar />
         <main className="consult-page consult-page--success">
-          <section className="consult-success-screen">
-            <div className="consult-success-screen-icon" aria-hidden>
-              <i className="fa-solid fa-circle-check" />
-            </div>
-            <h1 className="consult-success-screen-title">Payment successful</h1>
-            <p className="consult-success-screen-text">
-              You&apos;re booked! Our team will email you within a few hours with your calendar link.
-            </p>
-            <Link href="/" className="consult-success-screen-btn">
-              Back to Home
-            </Link>
-          </section>
+          <ConsultationPaymentSuccess sessionId={sessionId} />
         </main>
         <Footer />
       </div>
