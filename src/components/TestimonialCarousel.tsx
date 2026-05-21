@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
+import type { Swiper as SwiperType } from "swiper";
 import { EffectCards, Autoplay } from "swiper/modules";
 
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/effect-cards";
 
@@ -15,12 +15,38 @@ const TESTIMONIALS = [
   { video: "/videos/vid4.mp4" },
 ];
 
-export default function TestimonialCarousel() {
-  const [muted, setMuted] = useState(true);
+function initialMutedState() {
+  return TESTIMONIALS.map(() => true);
+}
 
-  const toggleMute = (e: React.MouseEvent) => {
+export default function TestimonialCarousel() {
+  const [mutedByIndex, setMutedByIndex] = useState<boolean[]>(initialMutedState);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  const applyMuteToAllVideos = useCallback((mutedFlags: boolean[]) => {
+    videoRefs.current.forEach((video, i) => {
+      if (video) video.muted = mutedFlags[i] ?? true;
+    });
+  }, []);
+
+  const toggleMute = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
-    setMuted(!muted);
+    setMutedByIndex((prev) => {
+      const willUnmute = prev[index];
+      const next = prev.map((_, i) => (i === index ? !willUnmute : true));
+      applyMuteToAllVideos(next);
+      return next;
+    });
+  };
+
+  const handleSlideChange = (swiper: SwiperType) => {
+    const activeIndex = swiper.realIndex;
+    setMutedByIndex((prev) => {
+      if (prev.every(Boolean)) return prev;
+      const next = prev.map((_, i) => i !== activeIndex);
+      applyMuteToAllVideos(next);
+      return next;
+    });
   };
 
   return (
@@ -31,28 +57,39 @@ export default function TestimonialCarousel() {
         modules={[EffectCards, Autoplay]}
         className="testimonialSwiper"
         autoplay={{
-            delay: 4500,
-            disableOnInteraction: false,
+          delay: 4500,
+          disableOnInteraction: false,
         }}
+        onSlideChange={handleSlideChange}
       >
-        {TESTIMONIALS.map((t, index) => (
-          <SwiperSlide key={index}>
-            <video 
-              src={t.video} 
-              autoPlay 
-              loop 
-              muted={muted} 
-              playsInline 
-            />
-            <button 
-              className="video-mute-btn" 
-              title="Toggle Mute"
-              onClick={toggleMute}
-            >
-              <i className={`fa-solid ${muted ? 'fa-volume-xmark' : 'fa-volume-high'}`}></i>
-            </button>
-          </SwiperSlide>
-        ))}
+        {TESTIMONIALS.map((t, index) => {
+          const isMuted = mutedByIndex[index] ?? true;
+          return (
+            <SwiperSlide key={t.video}>
+              <video
+                ref={(el) => {
+                  videoRefs.current[index] = el;
+                }}
+                src={t.video}
+                autoPlay
+                loop
+                muted={isMuted}
+                playsInline
+              />
+              <button
+                type="button"
+                className="video-mute-btn"
+                title={isMuted ? "Unmute" : "Mute"}
+                aria-label={isMuted ? "Unmute video" : "Mute video"}
+                onClick={(e) => toggleMute(index, e)}
+              >
+                <i
+                  className={`fa-solid ${isMuted ? "fa-volume-xmark" : "fa-volume-high"}`}
+                />
+              </button>
+            </SwiperSlide>
+          );
+        })}
       </Swiper>
     </div>
   );
